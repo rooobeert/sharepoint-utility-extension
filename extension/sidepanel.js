@@ -307,10 +307,10 @@ ui.stageList.addEventListener('drop', (e) => {
 });
 
 /** Add stages, asking whether to replace the existing ones. */
-async function addStages(stages, what) {
+async function addStages(stages, what, { append = false } = {}) {
   if (!stages.length) return;
   let replace = false;
-  if (state.stages.length) {
+  if (state.stages.length && !append) {
     replace = await ask({
       title: `Load ${what}`,
       body: `Replace the ${state.stages.length} existing stage(s), or add the ${stages.length} new stage(s) after them?`,
@@ -347,7 +347,7 @@ async function loadBatchFile(file) {
 
 // The Export tab can hand over generated stages directly.
 document.addEventListener('sp-utility:load-stages', async (e) => {
-  await addStages(e.detail.stages, e.detail.label || 'exported batches');
+  await addStages(e.detail.stages, e.detail.label || 'exported batches', { append: e.detail.append });
 });
 
 // ---------------------------------------------------------------- find / replace

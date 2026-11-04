@@ -40,7 +40,7 @@ export function webRelative(serverRelativeUrl, webServerRelativeUrl) {
 /** A value inside ('...') in a request line: quotes doubled, no spaces or #. */
 const inQuotes = (s) => encodeURI(String(s)).replace(/#/g, '%23').replace(/'/g, "''");
 
-const listEndpoint = (rel) => `{{WebUrl}}/_api/web/getList('{{WebServerRelativeUrl}}/${inQuotes(rel)}')`;
+export const listEndpoint = (rel) => `{{WebUrl}}/_api/web/getList('{{WebServerRelativeUrl}}/${inQuotes(rel)}')`;
 
 /** The name a list gets its URL from: the last segment of its web-relative URL. */
 export const urlName = (rel) => rel.split('/').pop();
@@ -49,7 +49,7 @@ export const urlName = (rel) => rel.split('/').pop();
 
 const VERBOSE = 'application/json;odata=verbose';
 
-function op(method, url, body, { merge = false } = {}) {
+export function op(method, url, body, { merge = false } = {}) {
   return { method, url, body: body == null ? '' : JSON.stringify(body), merge };
 }
 
@@ -188,7 +188,7 @@ function listOps(item, ctx) {
 
 // ---------------------------------------------------------------- text
 
-function batchText(ops) {
+export function batchText(ops) {
   const lines = [`--${BATCH}`, `Content-Type: multipart/mixed; boundary=${CHANGESET}`, ''];
   for (const o of ops) {
     lines.push(`--${CHANGESET}`, 'Content-Type: application/http', 'Content-Transfer-Encoding: binary', '');

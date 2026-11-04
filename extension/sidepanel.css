@@ -385,11 +385,9 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .perm-badge.other { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
 
 /* Compare tab */
-.cmp-sites { display: grid; grid-template-columns: max-content 1fr; gap: 6px 8px; align-items: center; margin-top: 6px; }
+.cmp-sites { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 8px; align-items: center; margin-top: 6px; }
 .cmp-sites > label, .cmp-sites > .lbl { font-size: 12px; color: var(--muted); }
 .cmp-sites select { width: 100%; min-width: 0; padding: 5px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font: inherit; }
-.cmp-target { display: flex; flex-direction: column; min-width: 0; }
-.cmp-target.error { color: var(--fail); }
 .cmp-counts { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 8px 0 4px; }
 .cmp-counts label { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; cursor: pointer; }
 .cmp-list > summary { align-items: center; }
@@ -397,6 +395,10 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .cmp-list > summary .t .exp-url { margin-top: 1px; word-break: normal; overflow-wrap: anywhere; }
 .cmp-list .cmp-note { margin: 6px 0 0; }
 .cmp-props { margin: 4px 0 0; padding-left: 16px; font-size: 12px; }
+.cmp-scope-rows { max-height: 220px; overflow-y: auto; margin-top: 6px; }
+.cmp-scope-rows label { display: flex; gap: 6px; align-items: baseline; font-size: 12px; padding: 2px 0; cursor: pointer; }
+.cmp-scope-rows .exp-url { margin-left: auto; }
+.cmp-table td.act, .cmp-table th.act { width: 1%; white-space: nowrap; }
 .cmp-table td.st, .cmp-table th.st { width: 7.6em; }
 .cmp-table td.kind, .cmp-table th.kind { width: 5.6em; color: var(--muted); overflow-wrap: anywhere; }
 .cmp-table .iname { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); word-break: break-all; }

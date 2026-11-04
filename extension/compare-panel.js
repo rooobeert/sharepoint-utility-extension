@@ -1,13 +1,15 @@
 // "Compare" tab: the differences between the lists and columns of two open
-// SharePoint sites. Source: another open SharePoint tab. Target: the site in
-// the active tab. Read only: every request is a GET, run in its own tab.
+// SharePoint sites. Source and target: any open SharePoint tab (the target
+// defaults to the active tab). Read only: every request is a GET, run in its own tab.
 
 import { el, activeTab, tabRequester, siteOfTab } from './shared.js';
 import { isSharePointUrl } from './lib/batch.js';
+import { webRelative } from './lib/provision.js';
 import { createExporter } from './lib/exporter.js';
 import {
   compareSites, countStatuses, columnSummary, listStatus, filterView, diffRows, diffCsv, diffFileName, STATUSES, STATUS_LABELS,
 } from './lib/diff.js';
+import { settingsStage, settingsTransferable, columnStage, columnTransferable, listStages } from './lib/transfer.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -15,6 +17,8 @@ const ui = {
   reload: $('cmp-reload'),
   source: $('cmp-source'),
   target: $('cmp-target'),
+  addSource: $('cmp-add-source'),
+  addTarget: $('cmp-add-target'),
   siteMsg: $('cmp-site-msg'),
   system: $('cmp-system'),
   run: $('cmp-run'),
@@ -28,15 +32,21 @@ const ui = {
   lists: $('cmp-lists'),
   empty: $('cmp-empty'),
   download: $('cmp-download'),
+  scopeSum: $('cmp-scope-sum'),
+  scopeLoad: $('cmp-scope-load'),
+  scopeFilter: $('cmp-scope-filter'),
+  scopeAll: $('cmp-scope-all'),
+  scopeNone: $('cmp-scope-none'),
+  scopeRows: $('cmp-scope-rows'),
 };
 
 const cmp = {
   shown: false, // the Compare tab is the visible tab
   busy: false,
   loading: null, // the running loadSites(), so calls don't overlap
-  target: null, // { tabId, site, title }
-  sources: [], // [{ tabId, site, title }]
+  sites: [], // [{ tabId, site, title, manual }]: open SharePoint sites and the ones added by hand
   result: null, // { lists, source, target }
+  scope: null, // null = all lists; else { lists: [{ key, title, rel, system }], picked: Set of keys } for the chosen source and target
   statuses: new Set(['missing', 'changed', 'only']),
 };
 
@@ -48,12 +58,12 @@ const bare = (url) => url.replace(/^https:\/\//, '');
 
 function setBusy(busy) {
   cmp.busy = busy;
-  for (const n of [ui.reload, ui.source, ui.system]) n.disabled = busy;
+  for (const n of [ui.scopeLoad, ui.reload, ui.source, ui.target, ui.addSource, ui.addTarget, ui.system]) n.disabled = busy;
   updateRunButton();
 }
 
 function updateRunButton() {
-  ui.run.disabled = cmp.busy || !cmp.target || !ui.source.value;
+  ui.run.disabled = cmp.busy || !ui.target.value || !ui.source.value || ui.source.value === ui.target.value;
 }
 
 function setStatus(text) {
@@ -73,61 +83,155 @@ async function webTitle(request, site) {
 
 // ---------------------------------------------------------------- sites
 
+const withTimeout = (promise, ms) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), ms))]);
+
 function loadSites() {
-  if (!cmp.loading) cmp.loading = readSites().finally(() => { cmp.loading = null; });
+  if (!cmp.loading) {
+    cmp.loading = readSites()
+      .catch((e) => {
+        ui.siteMsg.textContent = `Could not read the open tabs: ${e.message}`;
+        ui.siteMsg.hidden = false;
+      })
+      .finally(() => { cmp.loading = null; });
+  }
   return cmp.loading;
 }
 
-async function readSites() {
-  const keep = ui.source.value;
-  ui.siteMsg.hidden = true;
-  cmp.target = null;
-  updateRunButton();
-
-  const tab = await activeTab();
-  if (!tab || !tab.url || !isSharePointUrl(tab.url)) {
-    ui.target.className = 'cmp-target error';
-    ui.target.textContent = 'The active tab is not a SharePoint page. Open any page of the target site in it.';
-    renderSources([]);
-    return;
+/** Read the site of one tab: { tabId, site, title }, or null if it can't be read (discarded, still loading). */
+async function readTab(t) {
+  try {
+    const site = await withTimeout(siteOfTab(t), 5000);
+    if (!site) return null;
+    const title = (await withTimeout(webTitle(tabRequester(t.id, new URL(site).origin), site), 5000).catch(() => null)) || t.title || site;
+    return { tabId: t.id, site, title };
+  } catch {
+    return null;
   }
-  const site = await siteOfTab(tab);
-  const title = (await webTitle(tabRequester(tab.id, new URL(site).origin), site)) || tab.title || site;
-  cmp.target = { tabId: tab.id, site, title };
-  ui.target.className = 'cmp-target';
-  ui.target.replaceChildren(el('strong', { text: title }), el('span', { class: 'exp-url', text: site }));
-
-  // Every other open SharePoint tab, one entry per site, without the target site.
-  const tabs = (await chrome.tabs.query({})).filter((t) => t.id !== tab.id && t.url && isSharePointUrl(t.url));
-  const sources = [];
-  for (const t of tabs) {
-    let s;
-    try {
-      s = await siteOfTab(t);
-    } catch {
-      continue; // the tab can't be read (discarded, still loading)
-    }
-    if (!s || s === site || sources.some((x) => x.site === s)) continue;
-    const name = (await webTitle(tabRequester(t.id, new URL(s).origin), s)) || t.title || s;
-    sources.push({ tabId: t.id, site: s, title: name });
-  }
-  sources.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
-  renderSources(sources, keep);
 }
 
-function renderSources(sources, keep) {
-  cmp.sources = sources;
-  if (!sources.length) {
-    ui.source.replaceChildren(el('option', { value: '', text: 'No other SharePoint tab is open' }));
-    if (cmp.target) {
-      ui.siteMsg.textContent = 'Open the source site (e.g. dev) in another tab, then click Reload tabs.';
-      ui.siteMsg.hidden = false;
-    }
-  } else {
-    ui.source.replaceChildren(...sources.map((s) => el('option', { value: String(s.tabId), text: `${s.title} — ${bare(s.site)}` })));
-    if (keep && sources.some((s) => String(s.tabId) === keep)) ui.source.value = keep;
+const byTitle = (a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+
+/** Add or refresh a site in the lists. Sites added by hand stay when their tab is closed. */
+function remember(entry, manual) {
+  const known = cmp.sites.find((s) => s.site === entry.site);
+  if (known) Object.assign(known, entry, { manual: known.manual || manual });
+  else cmp.sites.push({ ...entry, manual });
+  cmp.sites.sort(byTitle);
+}
+
+/** Every open SharePoint site goes into both dropdowns. Nothing is selected for you. */
+async function readSites() {
+  ui.siteMsg.hidden = true;
+  const tabs = (await chrome.tabs.query({})).filter((t) => t.url && isSharePointUrl(t.url));
+  const found = (await Promise.all(tabs.map(readTab))).filter(Boolean);
+  for (const s of cmp.sites) s.tabId = null; // set again below for the sites still open
+  for (const f of found) remember(f, false);
+  cmp.sites = cmp.sites.filter((s) => s.manual || s.tabId != null);
+  renderSites();
+  if (!cmp.sites.length) {
+    ui.siteMsg.textContent = 'No SharePoint site found. Open a site in the browser, then click "Add active tab".';
+    ui.siteMsg.hidden = false;
+  }
+}
+
+/** The site in the active tab goes into one dropdown and is selected there. */
+async function addActive(select) {
+  ui.siteMsg.hidden = true;
+  const tab = await activeTab();
+  const entry = tab && tab.url && isSharePointUrl(tab.url) ? await readTab(tab) : null;
+  if (!entry) {
+    ui.siteMsg.textContent = "The active tab is not a SharePoint page (or can't be read). Switch to a page of the site in the browser first.";
+    ui.siteMsg.hidden = false;
+    return;
+  }
+  remember(entry, true);
+  renderSites();
+  select.value = entry.site;
+  updateRunButton();
+}
+
+function renderSites() {
+  const keep = { source: ui.source.value, target: ui.target.value };
+  for (const [name, select] of [['source', ui.source], ['target', ui.target]]) {
+    select.replaceChildren(
+      el('option', { value: '', text: `Choose the ${name} site…` }),
+      ...cmp.sites.map((s) => el('option', { value: s.site, text: `${s.title} — ${bare(s.site)}` })));
+    if (cmp.sites.some((s) => s.site === keep[name])) select.value = keep[name];
   }
   updateRunButton();
+}
+
+// ---------------------------------------------------------------- scope
+
+const listKey = (l, web) => webRelative(l.url, web.ServerRelativeUrl).toLowerCase();
+
+/** Back to "all lists" (the chosen sites changed). */
+function clearScope() {
+  cmp.scope = null;
+  ui.scopeRows.replaceChildren();
+  ui.scopeSum.textContent = 'Lists: all';
+}
+
+/** Read the lists of both chosen sites (one request each) for the picker. */
+async function loadScope() {
+  if (cmp.busy) return;
+  await loadSites();
+  const sides = [ui.source.value, ui.target.value].map((v) => cmp.sites.find((s) => s.site === v));
+  if (sides.some((s) => !s || s.tabId == null)) {
+    ui.siteMsg.textContent = 'Choose a source and a target site that are open in tabs, then load the lists.';
+    ui.siteMsg.hidden = false;
+    return;
+  }
+  setBusy(true);
+  ui.scopeSum.textContent = 'Lists: loading…';
+  try {
+    const byKey = new Map();
+    for (const side of sides) {
+      const { web, lists } = await createExporter({ request: tabRequester(side.tabId, new URL(side.site).origin) }).loadLists(side.site);
+      for (const l of lists) {
+        const key = listKey(l, web);
+        const known = byKey.get(key);
+        if (known) known.system = known.system && l.system;
+        else byKey.set(key, { key, title: l.title, rel: webRelative(l.url, web.ServerRelativeUrl), system: !!l.system });
+      }
+    }
+    const lists = [...byKey.values()].sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+    cmp.scope = { lists, picked: new Set(lists.filter((l) => !l.system || ui.system.checked).map((l) => l.key)) };
+    ui.scopeFilter.value = '';
+    renderScope();
+  } catch (e) {
+    clearScope();
+    ui.siteMsg.textContent = `Could not read the lists: ${e.message}`;
+    ui.siteMsg.hidden = false;
+  } finally {
+    setBusy(false);
+  }
+}
+
+const scopeShown = () => {
+  const q = ui.scopeFilter.value.trim().toLowerCase();
+  return cmp.scope.lists.filter((l) => (ui.system.checked || !l.system || cmp.scope.picked.has(l.key)) && (!q || `${l.title} ${l.rel}`.toLowerCase().includes(q)));
+};
+
+function setPicked(on) {
+  if (!cmp.scope) return;
+  for (const l of scopeShown()) (on ? cmp.scope.picked.add(l.key) : cmp.scope.picked.delete(l.key));
+  renderScope();
+}
+
+function renderScope() {
+  if (!cmp.scope) return;
+  ui.scopeRows.replaceChildren(...scopeShown().map((l) => {
+    const box = el('input', { type: 'checkbox' });
+    box.checked = cmp.scope.picked.has(l.key);
+    box.addEventListener('change', () => {
+      if (box.checked) cmp.scope.picked.add(l.key);
+      else cmp.scope.picked.delete(l.key);
+      renderScope();
+    });
+    return el('label', {}, box, l.title, el('span', { class: 'exp-url', text: l.rel }));
+  }));
+  ui.scopeSum.textContent = `Lists: ${cmp.scope.picked.size} of ${cmp.scope.lists.length} chosen`;
 }
 
 // ---------------------------------------------------------------- compare
@@ -151,7 +255,9 @@ async function readSide(side, label, progress) {
   try {
     progress(0, `Reading the lists of the ${label}…`);
     const loaded = await exporter.loadLists(side.site);
-    const ids = loaded.lists.filter((l) => ui.system.checked || !l.system).map((l) => l.id);
+    const ids = loaded.lists
+      .filter((l) => (cmp.scope ? cmp.scope.picked.has(listKey(l, loaded.web)) : ui.system.checked || !l.system))
+      .map((l) => l.id);
     const data = await exporter.collect(side.site, loaded, ids, { permissions: false, views: false, contentTypes: false });
     return { web: loaded.web, allLists: loaded.lists, lists: data.lists };
   } finally {
@@ -161,19 +267,22 @@ async function readSide(side, label, progress) {
 
 async function runCompare() {
   if (cmp.busy) return;
-  const source = cmp.sources.find((s) => String(s.tabId) === ui.source.value);
-  const target = cmp.target;
-  if (!source || !target) return;
   setBusy(true);
   cmp.result = null;
   ui.result.hidden = true;
   ui.bar.value = 0;
   try {
+    await loadSites(); // the tabs may have changed since the sites were picked
+    if (cmp.scope && !cmp.scope.picked.size) throw new Error('No list is chosen. Choose at least one, or reset the choice by picking the sites again.');
+    const source = cmp.sites.find((s) => s.site === ui.source.value);
+    const target = cmp.sites.find((s) => s.site === ui.target.value);
+    if (!source || !target) throw new Error('Choose a source and a target site.');
     if (source.site === target.site) throw new Error('Source and target are the same site.');
+    for (const side of [source, target]) if (side.tabId == null) throw new Error(`${side.title} is not open in a tab. Open it, then run again.`);
     const src = await readSide(source, 'source', (f, text) => { ui.bar.value = f / 2; setStatus(text); });
     const tgt = await readSide(target, 'target', (f, text) => { ui.bar.value = 0.5 + f / 2; setStatus(text); });
     ui.bar.value = 1;
-    cmp.result = { lists: compareSites(src, tgt), source: { ...source, title: src.web.Title || source.title }, target: { ...target, title: tgt.web.Title || target.title } };
+    cmp.result = { lists: compareSites(src, tgt), ctx: { web: src.web, allLists: src.allLists, targetSite: target.site }, source: { ...source, title: src.web.Title || source.title }, target: { ...target, title: tgt.web.Title || target.title } };
     setStatus(`Compared ${plural(src.lists.length, 'list')} from ${cmp.result.source.title} with ${cmp.result.target.title}.`);
     ui.result.hidden = false;
     renderResult();
@@ -230,25 +339,47 @@ function listSubtitle(list) {
   return [settings, cols].filter(Boolean).join(' · ') || 'no differences';
 }
 
+/** A button that hands the stages from `build()` to the Batch Runner (appended to its stages). */
+function sendButton(what, build) {
+  const b = el('button', { type: 'button', class: 'secondary small', text: 'To Batch Runner', title: `Send ${what} to the Batch Runner as a stage. Nothing runs yet.` });
+  b.addEventListener('click', () => {
+    const stages = [build()].flat().filter(Boolean);
+    if (!stages.length) {
+      setStatus(`Nothing to send for ${what}.`);
+      return;
+    }
+    document.getElementById('tab-batch').click();
+    document.dispatchEvent(new CustomEvent('sp-utility:load-stages', {
+      detail: { stages, append: true, label: `${what} from Compare` },
+    }));
+  });
+  return b;
+}
+
 function listBody({ list, columns, showSettings }) {
   const body = [];
-  if (list.status === 'missing') body.push(el('p', { class: 'hint', text: 'The whole list is missing in the target.' }));
+  if (list.status === 'missing') {
+    body.push(el('p', { class: 'hint', text: 'The whole list is missing in the target.' }));
+    if (list.item && list.item.list) body.push(el('div', { class: 'row' }, sendButton(`creating "${list.title}"`, () => listStages(list, cmp.result.ctx))));
+  }
   if (list.status === 'only') body.push(el('p', { class: 'hint', text: 'This list exists only in the target.' }));
   if (list.status === 'error') body.push(el('div', { class: 'msg fail', text: `Not compared: ${list.error}.` }));
   if (list.note) body.push(el('div', { class: 'msg info cmp-note', text: list.note }));
   if (showSettings && list.diffs.length) {
     body.push(el('p', { class: 'summary-text cmp-settings-h', text: 'List settings' }), el('ul', { class: 'cmp-diff cmp-props' }, list.diffs.map(diffItem)));
+    if (settingsTransferable(list)) body.push(el('div', { class: 'row' }, sendButton(`the settings of "${list.title}"`, () => settingsStage(list, cmp.result.ctx.targetSite))));
   }
   if (columns.length) {
     body.push(el('table', { class: 'cmp-table' },
-      el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' }))),
+      el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' }), el('th', { class: 'act' }))),
       el('tbody', {}, columns.map((c) => el('tr', {},
         el('td', {},
           c.title, el('span', { class: 'iname', text: c.name }),
           c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
           c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null),
         el('td', { class: 'kind', text: c.type }),
-        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] })))))));
+        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] })),
+        el('td', { class: 'act' }, columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null))))));
   }
   return el('div', { class: 'check-body' }, body);
 }
@@ -314,7 +445,15 @@ chrome.tabs.onRemoved.addListener(() => {
 });
 
 ui.reload.addEventListener('click', loadSites);
-ui.source.addEventListener('change', updateRunButton);
+ui.source.addEventListener('change', () => (clearScope(), updateRunButton()));
+ui.target.addEventListener('change', () => (clearScope(), updateRunButton()));
+ui.scopeLoad.addEventListener('click', loadScope);
+ui.scopeFilter.addEventListener('input', renderScope);
+ui.system.addEventListener('change', () => cmp.scope && renderScope());
+ui.scopeAll.addEventListener('click', () => setPicked(true));
+ui.scopeNone.addEventListener('click', () => setPicked(false));
+ui.addSource.addEventListener('click', () => addActive(ui.source));
+ui.addTarget.addEventListener('click', () => addActive(ui.target));
 ui.run.addEventListener('click', runCompare);
 ui.filter.addEventListener('input', () => cmp.result && renderLists());
 ui.custom.addEventListener('change', () => cmp.result && (renderCounts(), renderLists()));

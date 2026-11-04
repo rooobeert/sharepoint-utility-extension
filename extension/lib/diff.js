@@ -152,6 +152,7 @@ function compareColumns(src, tgt, s, t) {
       type: f.TypeAsString || '',
       custom: isCustomField(f),
       id: stripBraces(f.Id),
+      field: x ? x.f : null, // the source's field, for transferring the change
     };
     if (x && !y) {
       col.status = 'missing';
@@ -186,7 +187,7 @@ export function compareSites(source, target) {
   for (const key of new Set([...s.byKey.keys(), ...t.byKey.keys()])) {
     const x = s.byKey.get(key);
     const y = t.byKey.get(key);
-    const base = { key, rel: (x || y).rel, title: (x || y).title };
+    const base = { key, rel: (x || y).rel, title: (x || y).title, item: x || null };
 
     // Libraries every site has are only compared when both sides have them.
     if (DEFAULT_LIBRARIES.has(key) && !(x && y)) continue;

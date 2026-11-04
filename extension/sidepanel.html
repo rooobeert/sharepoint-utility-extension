@@ -349,15 +349,30 @@
       <div class="cmp-sites">
         <label for="cmp-source">Source</label>
         <select id="cmp-source"></select>
-        <span class="lbl">Target</span>
-        <span id="cmp-target" class="cmp-target"></span>
+        <button id="cmp-add-source" type="button" class="secondary small">Add active tab</button>
+        <label for="cmp-target">Target</label>
+        <select id="cmp-target"></select>
+        <button id="cmp-add-target" type="button" class="secondary small">Add active tab</button>
       </div>
       <p id="cmp-site-msg" class="hint error" hidden></p>
-      <p class="hint">Source: another open SharePoint tab (e.g. dev). Target: the site in the active tab (e.g. prod). Keep both tabs open while comparing.</p>
+      <p class="hint">Pick the source (e.g. dev) and the target (e.g. prod). Open SharePoint sites are listed; 'Add active tab' adds the site of the tab you are looking at and selects it. Keep both tabs open while comparing.</p>
     </section>
 
     <section class="block">
       <label class="check-label"><input id="cmp-system" type="checkbox"> Include system lists</label>
+      <details class="check" id="cmp-scope">
+        <summary><span id="cmp-scope-sum" class="t">Lists: all</span></summary>
+        <div class="check-body">
+          <p class="hint">Limit the comparison to some lists. Load the lists of both sites, then tick the ones to compare. Without loading, all lists are compared.</p>
+          <div class="row exp-filters">
+            <button id="cmp-scope-load" type="button" class="secondary small">Load lists</button>
+            <input id="cmp-scope-filter" type="search" placeholder="Filter lists" aria-label="Filter lists" spellcheck="false">
+            <button id="cmp-scope-all" type="button" class="secondary small">All</button>
+            <button id="cmp-scope-none" type="button" class="secondary small">None</button>
+          </div>
+          <div id="cmp-scope-rows" class="cmp-scope-rows"></div>
+        </div>
+      </details>
       <div class="actions">
         <button id="cmp-run" type="button" class="primary" disabled>Compare</button>
       </div>
