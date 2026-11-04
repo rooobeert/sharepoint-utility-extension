@@ -46,7 +46,7 @@ const cmp = {
   loading: null, // the running loadSites(), so calls don't overlap
   sites: [], // [{ tabId, site, title, manual }]: open SharePoint sites and the ones added by hand
   result: null, // { lists, source, target }
-  scope: null, // null = all lists; else { lists: [{ key, title, rel, system }], picked: Set of keys } for the chosen source and target
+  scope: null, // null = all lists; else { lists: [{ key, title, rel, system }], picked: Set of keys } of the chosen source
   statuses: new Set(['missing', 'changed', 'only']),
 };
 
@@ -148,6 +148,7 @@ async function addActive(select) {
   renderSites();
   select.value = entry.site;
   updateRunButton();
+  if (select === ui.source) await loadScope();
 }
 
 function renderSites() {
@@ -172,16 +173,16 @@ function clearScope() {
   ui.scopeSum.textContent = 'Lists: all';
 }
 
-/** Read the lists of both chosen sites (one request each) for the picker. */
+/** Read the lists of the chosen source site for the picker (all ticked at first). */
 async function loadScope() {
   if (cmp.busy) return;
   await loadSites();
-  const sides = [ui.source.value, ui.target.value].map((v) => cmp.sites.find((s) => s.site === v));
-  if (sides.some((s) => !s || s.tabId == null)) {
-    ui.siteMsg.textContent = 'Choose a source and a target site that are open in tabs, then load the lists.';
-    ui.siteMsg.hidden = false;
+  const source = cmp.sites.find((s) => s.site === ui.source.value);
+  if (!source || source.tabId == null) {
+    clearScope();
     return;
   }
+  const sides = [source];
   setBusy(true);
   ui.scopeSum.textContent = 'Lists: loading…';
   try {
@@ -273,7 +274,7 @@ async function runCompare() {
   ui.bar.value = 0;
   try {
     await loadSites(); // the tabs may have changed since the sites were picked
-    if (cmp.scope && !cmp.scope.picked.size) throw new Error('No list is chosen. Choose at least one, or reset the choice by picking the sites again.');
+    if (cmp.scope && !cmp.scope.picked.size) throw new Error('No list is chosen. Tick at least one.');
     const source = cmp.sites.find((s) => s.site === ui.source.value);
     const target = cmp.sites.find((s) => s.site === ui.target.value);
     if (!source || !target) throw new Error('Choose a source and a target site.');
@@ -445,8 +446,8 @@ chrome.tabs.onRemoved.addListener(() => {
 });
 
 ui.reload.addEventListener('click', loadSites);
-ui.source.addEventListener('change', () => (clearScope(), updateRunButton()));
-ui.target.addEventListener('change', () => (clearScope(), updateRunButton()));
+ui.source.addEventListener('change', () => (clearScope(), updateRunButton(), loadScope()));
+ui.target.addEventListener('change', updateRunButton);
 ui.scopeLoad.addEventListener('click', loadScope);
 ui.scopeFilter.addEventListener('input', renderScope);
 ui.system.addEventListener('change', () => cmp.scope && renderScope());

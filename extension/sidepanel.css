@@ -395,9 +395,9 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .cmp-list > summary .t .exp-url { margin-top: 1px; word-break: normal; overflow-wrap: anywhere; }
 .cmp-list .cmp-note { margin: 6px 0 0; }
 .cmp-props { margin: 4px 0 0; padding-left: 16px; font-size: 12px; }
-.cmp-scope-rows { max-height: 220px; overflow-y: auto; margin-top: 6px; }
-.cmp-scope-rows label { display: flex; gap: 6px; align-items: baseline; font-size: 12px; padding: 2px 0; cursor: pointer; }
-.cmp-scope-rows .exp-url { margin-left: auto; }
+.cmp-scope-rows { max-height: 220px; overflow-y: auto; margin-top: 6px; padding-right: 14px; }
+.cmp-scope-rows label { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: 12px; padding: 2px 0; cursor: pointer; }
+.cmp-scope-rows .exp-url { margin-left: auto; min-width: 0; text-align: right; overflow-wrap: anywhere; }
 .cmp-table td.act, .cmp-table th.act { width: 1%; white-space: nowrap; }
 .cmp-table td.st, .cmp-table th.st { width: 7.6em; }
 .cmp-table td.kind, .cmp-table th.kind { width: 5.6em; color: var(--muted); overflow-wrap: anywhere; }
