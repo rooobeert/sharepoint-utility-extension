@@ -1,0 +1,8 @@
+dist/
+.DS_Store
+node_modules/
+
+# Local working files, not part of the project
+mockups/
+TODO.md
+STORE-LISTING.md

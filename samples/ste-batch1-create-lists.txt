@@ -1,0 +1,23 @@
+--batch_hrp
+Content-Type: multipart/mixed; boundary=cs_d4b1379312c8
+
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=verbose
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"hrRequests","Description":"One item per request, including the selected contact snapshot, process status and approval payload"}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=verbose
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"hrContacts","Description":"Reference data for partner companies and their contacts"}
+--cs_d4b1379312c8--
+--batch_hrp--

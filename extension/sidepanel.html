@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SharePoint Utility</title>
+  <link rel="stylesheet" href="sidepanel.css">
+  <script type="module" src="sidepanel.js"></script>
+  <script type="module" src="export-panel.js"></script>
+  <script type="module" src="nav-panel.js"></script>
+  <script type="module" src="permissions-panel.js"></script>
+  <script type="module" src="compare-panel.js"></script>
+  <script type="module" src="schema-panel.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <!-- The browser already shows the extension name above the panel. -->
+    <h1 class="sr-only">SharePoint Utility</h1>
+    <div class="header-row">
+      <nav class="tabs" role="tablist" aria-label="Tools">
+        <button type="button" role="tab" id="tab-batch" aria-controls="view-batch" aria-selected="true">Batch Runner</button>
+        <button type="button" role="tab" id="tab-export" aria-controls="view-export" aria-selected="false" tabindex="-1">Export Architecture</button>
+        <button type="button" role="tab" id="tab-nav" aria-controls="view-nav" aria-selected="false" tabindex="-1">Navigation</button>
+        <button type="button" role="tab" id="tab-perm" aria-controls="view-perm" aria-selected="false" tabindex="-1">Permissions</button>
+        <button type="button" role="tab" id="tab-cmp" aria-controls="view-cmp" aria-selected="false" tabindex="-1">Compare</button>
+        <button type="button" role="tab" id="tab-sch" aria-controls="view-sch" aria-selected="false" tabindex="-1">Search Schema</button>
+      </nav>
+      <span id="version" class="version"></span>
+    </div>
+  </header>
+
+  <main id="view-batch" role="tabpanel" aria-labelledby="tab-batch">
+    <section class="block" aria-labelledby="site-h">
+      <h2 id="site-h">Target site</h2>
+      <div class="row">
+        <input id="site" type="url" spellcheck="false" autocomplete="off"
+               placeholder="https://tenant.sharepoint.com/sites/site" aria-describedby="site-hint">
+        <button id="detect" type="button" class="secondary">Detect</button>
+      </div>
+      <p id="site-hint" class="hint">Open any page of the site in the active tab, then click Detect.</p>
+    </section>
+
+    <section class="block" aria-labelledby="stages-h">
+      <div class="block-head">
+        <h2 id="stages-h">Stages</h2>
+        <div class="row tight">
+          <button id="load-file" type="button" class="secondary" title="A .txt file; sections starting with &quot;### STAGE:&quot; become separate stages">Load batch file…</button>
+          <input id="file-input" type="file" accept=".txt,text/plain" hidden>
+          <button id="load-folder" type="button" class="secondary">Load folder…</button>
+          <input id="folder-input" type="file" webkitdirectory multiple hidden>
+        </div>
+      </div>
+      <p class="hint">Stages run top to bottom. A folder load adds one stage per .txt file, sorted by file name. In a batch file, each "### STAGE:" section becomes a stage.</p>
+      <ol id="stage-list" class="stage-list"></ol>
+      <p id="no-stages" class="empty">No stages yet. Add a stage or load a folder of .txt files.</p>
+      <button id="add-stage" type="button" class="secondary add-stage">+ Add stage</button>
+    </section>
+
+    <section class="block">
+      <div class="actions">
+        <button id="preview" type="button" class="secondary">Preview</button>
+        <button id="run" type="button" class="primary" disabled>Run</button>
+      </div>
+      <p id="run-hint" class="hint">Run Preview first. Run is enabled once Preview finds no errors.</p>
+    </section>
+
+    <section id="progress" class="block progress" hidden>
+      <progress id="progress-bar" max="1" value="0"></progress>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="output" class="block" hidden aria-labelledby="output-h">
+      <div class="block-head">
+        <h2 id="output-h">Results</h2>
+        <div class="row tight">
+          <button id="copy-log" type="button" class="secondary">Copy log</button>
+          <button id="export-json" type="button" class="secondary">Export JSON</button>
+        </div>
+      </div>
+      <div id="output-body"></div>
+    </section>
+  </main>
+
+  <main id="view-export" role="tabpanel" aria-labelledby="tab-export" hidden>
+    <section class="block" aria-labelledby="exp-site-h">
+      <div class="block-head">
+        <h2 id="exp-site-h">Site</h2>
+        <button id="exp-reload" type="button" class="secondary">Reload lists</button>
+      </div>
+      <p id="exp-site" class="exp-site">Open any page of the site in the active tab.</p>
+    </section>
+
+    <section class="block" aria-labelledby="exp-lists-h">
+      <div class="block-head">
+        <h2 id="exp-lists-h">Lists</h2>
+        <span id="exp-count" class="hint"></span>
+      </div>
+      <div class="row exp-filters">
+        <input id="exp-filter" type="search" placeholder="Filter lists" aria-label="Filter lists" spellcheck="false">
+        <button id="exp-all" type="button" class="secondary small">All</button>
+        <button id="exp-none" type="button" class="secondary small">None</button>
+      </div>
+      <label class="check-label"><input id="exp-system" type="checkbox"> Show system lists</label>
+      <div class="exp-table-wrap">
+        <table id="exp-table" class="exp-table">
+          <thead>
+            <tr>
+              <th class="sel"><input id="exp-toggle" type="checkbox" aria-label="Select all shown lists"></th>
+              <th>List</th>
+              <th class="kind">Type</th>
+              <th class="num">Items</th>
+              <th class="perm">Permissions</th>
+            </tr>
+          </thead>
+          <tbody id="exp-rows"></tbody>
+        </table>
+      </div>
+      <p id="exp-empty" class="empty" hidden></p>
+    </section>
+
+    <section class="block">
+      <label class="check-label"><input id="exp-allcols" type="checkbox"> Include built-in and hidden columns (CSV only)</label>
+      <div class="actions">
+        <button id="exp-run" type="button" class="primary" disabled>Export CSV</button>
+        <button id="exp-batches" type="button" class="secondary" disabled>Export batches</button>
+      </div>
+      <p class="hint"><strong>CSV:</strong> the site, site permissions and, per list: settings, permissions, columns (with SchemaXml), views and content types; separator ";", one row per item with its kind in the Type column.</p>
+      <p class="hint"><strong>Batches:</strong> stages for the Batch Runner that rebuild the selected lists, libraries, columns, views and display names on any site; load them into the runner or download them as a .txt file. Permissions and content types are not included.</p>
+      <p class="hint">Both only read from SharePoint.</p>
+    </section>
+
+    <section id="exp-progress" class="block progress" hidden>
+      <progress id="exp-bar" max="1" value="0"></progress>
+      <p id="exp-status" class="status" role="status" aria-live="polite"></p>
+      <div id="exp-result"></div>
+    </section>
+  </main>
+
+  <main id="view-nav" role="tabpanel" aria-labelledby="tab-nav" hidden>
+    <section class="block" aria-labelledby="nav-site-h">
+      <div class="block-head">
+        <h2 id="nav-site-h">Site</h2>
+        <button id="nav-reload" type="button" class="secondary">Reload</button>
+      </div>
+      <p id="nav-site" class="exp-site">Open any page of the site in the active tab.</p>
+      <p class="nav-detected">Navigation: <strong id="nav-target-name">…</strong></p>
+      <p id="nav-target-hint" class="hint"></p>
+      <button id="nav-switch" type="button" class="link-button" hidden></button>
+    </section>
+
+    <section class="block" aria-labelledby="nav-lists-h">
+      <div class="block-head">
+        <h2 id="nav-lists-h">Lists and libraries</h2>
+        <span id="nav-list-count" class="hint"></span>
+      </div>
+      <p class="hint">Grouped by the tag at the start of the internal name (hrpLocations → HRP). "+ Add as menu" adds a heading with all lists of the group; + adds one list. Or drag a list or a group into the navigation.</p>
+      <div class="row exp-filters">
+        <input id="nav-filter" type="search" placeholder="Filter lists" aria-label="Filter lists" spellcheck="false">
+      </div>
+      <div id="nav-groups"></div>
+    </section>
+
+    <section class="block" aria-labelledby="nav-tree-h">
+      <div class="block-head">
+        <h2 id="nav-tree-h">Navigation</h2>
+        <span id="nav-dirty" class="hint dirty"></span>
+      </div>
+      <p class="hint">Drag ⠿ to reorder, or drop onto the middle of an item to nest it. With ⠿ focused: ↑/↓ reorder, → nest under the item above, ← move out. Up to 3 levels.</p>
+      <ol id="nav-tree" class="nav-tree"></ol>
+      <p id="nav-empty" class="empty" hidden>The navigation is empty. Add lists from above, or drop them here.</p>
+      <div class="row">
+        <button id="nav-add-heading" type="button" class="secondary add-stage">+ Heading</button>
+        <button id="nav-add-link" type="button" class="secondary add-stage">+ Link</button>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="actions">
+        <button id="nav-discard" type="button" class="secondary" disabled>Discard changes</button>
+        <button id="nav-save" type="button" class="primary" disabled>Save navigation</button>
+      </div>
+      <p id="nav-save-hint" class="hint"></p>
+    </section>
+
+    <section id="nav-progress" class="block progress" hidden>
+      <progress id="nav-bar" max="1" value="0"></progress>
+      <p id="nav-status" class="status" role="status" aria-live="polite"></p>
+      <div id="nav-result"></div>
+    </section>
+  </main>
+
+  <main id="view-perm" role="tabpanel" aria-labelledby="tab-perm" hidden>
+    <section class="block" aria-labelledby="perm-site-h">
+      <div class="block-head">
+        <h2 id="perm-site-h">Site</h2>
+        <div class="row tight">
+          <button id="perm-reload-roles" type="button" class="secondary" title="Read the permission levels again; the plan is kept">Reload levels</button>
+          <button id="perm-reload" type="button" class="secondary" title="Read lists, levels and groups again; clears the plan">Reload</button>
+        </div>
+      </div>
+      <p id="perm-site" class="exp-site">Open any page of the site in the active tab.</p>
+    </section>
+
+    <section class="block" aria-labelledby="perm-lists-h">
+      <div class="block-head">
+        <h2 id="perm-lists-h">1. Lists</h2>
+        <span id="perm-list-count" class="hint"></span>
+      </div>
+      <div class="row exp-filters">
+        <input id="perm-filter" type="search" placeholder="Filter lists" aria-label="Filter lists" spellcheck="false">
+      </div>
+      <label class="check-label"><input id="perm-system" type="checkbox"> Show system lists</label>
+      <div class="exp-table-wrap perm-lists-wrap">
+        <table class="exp-table">
+          <thead>
+            <tr>
+              <th class="sel"><input id="perm-toggle" type="checkbox" aria-label="Select all shown lists"></th>
+              <th>List</th>
+              <th class="perm">Permissions</th>
+            </tr>
+          </thead>
+          <tbody id="perm-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="perm-who-h">
+      <h2 id="perm-who-h">2. Users and groups</h2>
+      <div class="perm-search">
+        <input id="perm-search" type="search" placeholder="Search people, groups or site groups" spellcheck="false" autocomplete="off"
+               role="combobox" aria-expanded="false" aria-controls="perm-results" aria-autocomplete="list" aria-label="Search users and groups">
+        <ul id="perm-results" class="perm-results" role="listbox" hidden></ul>
+      </div>
+      <p class="hint">Click the field to see the site's groups (SPO Group, without Owners, Members and Visitors). Typing filters them and also searches the tenant's users and Entra groups (security and Microsoft 365) with SharePoint's people picker.</p>
+      <ul id="perm-picked" class="perm-picked"></ul>
+      <details id="perm-items" class="check perm-items">
+        <summary><span id="perm-items-chip" class="chip muted">off</span>Item-level permissions (lists only)</summary>
+        <div class="check-body">
+          <label class="perm-field">Read access
+            <select id="perm-read">
+              <option value="">Don't change</option>
+              <option value="1">Read all items</option>
+              <option value="2">Read items that were created by the user</option>
+            </select>
+          </label>
+          <label class="perm-field">Create and Edit access
+            <select id="perm-write">
+              <option value="">Don't change</option>
+              <option value="1">Create and edit all items</option>
+              <option value="2">Create items and edit items that were created by the user</option>
+              <option value="4">None</option>
+            </select>
+          </label>
+          <p class="hint">Set on the selected lists with Add to plan, with or without users and groups. Libraries don't have this setting and are skipped.</p>
+        </div>
+      </details>
+      <button id="perm-add" type="button" class="primary perm-add" disabled>Add to plan</button>
+      <p id="perm-add-hint" class="hint"></p>
+    </section>
+
+    <section class="block" aria-labelledby="perm-plan-h">
+      <div class="block-head">
+        <h2 id="perm-plan-h">3. Plan</h2>
+        <button id="perm-clear" type="button" class="secondary small" disabled>Clear plan</button>
+      </div>
+      <div id="perm-plan"></div>
+      <p id="perm-plan-empty" class="empty">Nothing planned yet. Pick lists and users or groups, then click Add to plan.</p>
+      <fieldset class="perm-options">
+        <legend>Current permissions of the lists</legend>
+        <label class="check-label"><input type="radio" name="perm-mode" value="add" checked> Keep them and add the planned ones</label>
+        <label class="check-label"><input type="radio" name="perm-mode" value="replace"> Replace them with the planned ones</label>
+        <div id="perm-keep" class="perm-keep perm-indent">
+          <span class="perm-keep-label">Keep these default groups:</span>
+          <label class="check-label"><input type="checkbox" data-group="owners" checked disabled> <span>Owners</span></label>
+          <label class="check-label"><input type="checkbox" data-group="members" disabled> <span>Members</span></label>
+          <label class="check-label"><input type="checkbox" data-group="visitors" disabled> <span>Visitors</span></label>
+        </div>
+      </fieldset>
+      <p class="hint">Lists that inherit their permissions get unique permissions first, starting from a copy of the inherited ones. Users and groups who only have "Limited Access" are always kept.</p>
+    </section>
+
+    <section class="block">
+      <div class="actions">
+        <button id="perm-preview" type="button" class="secondary" disabled>Preview</button>
+        <button id="perm-apply" type="button" class="primary" disabled>Apply</button>
+      </div>
+      <p id="perm-apply-hint" class="hint">Run Preview first. It reads the current permissions and changes nothing.</p>
+    </section>
+
+    <section id="perm-progress" class="block progress" hidden>
+      <progress id="perm-bar" max="1" value="0"></progress>
+      <p id="perm-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="perm-output" class="block" hidden aria-labelledby="perm-output-h">
+      <div class="block-head">
+        <h2 id="perm-output-h">Preview</h2>
+        <button id="perm-copy" type="button" class="secondary small" hidden>Copy log</button>
+      </div>
+      <div id="perm-output-body"></div>
+    </section>
+  </main>
+
+  <template id="stage-template">
+    <li class="stage">
+      <div class="stage-head">
+        <span class="drag-handle" draggable="true" tabindex="0" role="button"
+              title="Drag to reorder (or focus and press ↑/↓)" aria-label="Move stage: drag, or press Arrow Up or Arrow Down">⠿</span>
+        <span class="stage-num"></span>
+        <input class="stage-name" type="text" aria-label="Stage name" spellcheck="false">
+        <span class="stage-count"></span>
+        <div class="stage-tools">
+          <button type="button" class="icon" data-act="load" title="Load .txt file" aria-label="Load .txt file">Load</button>
+          <button type="button" class="icon" data-act="up" title="Move up" aria-label="Move up">↑</button>
+          <button type="button" class="icon" data-act="down" title="Move down" aria-label="Move down">↓</button>
+          <button type="button" class="icon danger" data-act="remove" title="Remove stage" aria-label="Remove stage">✕</button>
+        </div>
+      </div>
+      <div class="find-bar" role="search" hidden>
+        <div class="find-row">
+          <input class="find-input" type="text" placeholder="Find" aria-label="Find in this stage" spellcheck="false">
+          <span class="find-count" aria-live="polite"></span>
+          <button type="button" class="icon" data-find="prev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button>
+          <button type="button" class="icon" data-find="next" title="Next match (Enter)" aria-label="Next match">↓</button>
+          <button type="button" class="icon" data-find="case" title="Match case" aria-label="Match case" aria-pressed="false">Aa</button>
+          <button type="button" class="icon" data-find="close" title="Close (Esc)" aria-label="Close find">✕</button>
+        </div>
+        <div class="find-row">
+          <input class="replace-input" type="text" placeholder="Replace" aria-label="Replace with" spellcheck="false">
+          <button type="button" class="icon" data-find="replace" title="Replace this match (Enter in the Replace field)">Replace</button>
+          <button type="button" class="icon" data-find="all" title="Replace all matches in this stage">All</button>
+        </div>
+      </div>
+      <div class="editor">
+        <div class="stage-mirror" aria-hidden="true"></div>
+        <textarea class="stage-body" spellcheck="false" wrap="off" aria-label="Batch body"
+                  placeholder="--batch_xyz&#10;Content-Type: multipart/mixed; boundary=changeset_xyz&#10;…"></textarea>
+      </div>
+      <input class="stage-file" type="file" accept=".txt,text/plain" hidden>
+    </li>
+  </template>
+
+  <main id="view-cmp" role="tabpanel" aria-labelledby="tab-cmp" hidden>
+    <section class="block" aria-labelledby="cmp-sites-h">
+      <div class="block-head">
+        <h2 id="cmp-sites-h">Sites</h2>
+        <button id="cmp-reload" type="button" class="secondary">Reload tabs</button>
+      </div>
+      <div class="cmp-sites">
+        <label for="cmp-source">Source</label>
+        <select id="cmp-source"></select>
+        <span class="lbl">Target</span>
+        <span id="cmp-target" class="cmp-target"></span>
+      </div>
+      <p id="cmp-site-msg" class="hint error" hidden></p>
+      <p class="hint">Source: another open SharePoint tab (e.g. dev). Target: the site in the active tab (e.g. prod). Keep both tabs open while comparing.</p>
+    </section>
+
+    <section class="block">
+      <label class="check-label"><input id="cmp-system" type="checkbox"> Include system lists</label>
+      <div class="actions">
+        <button id="cmp-run" type="button" class="primary" disabled>Compare</button>
+      </div>
+      <p class="hint">Reads the lists and columns of both sites. Nothing is changed.</p>
+    </section>
+
+    <section id="cmp-progress" class="block progress" hidden>
+      <progress id="cmp-bar" max="1" value="0"></progress>
+      <p id="cmp-status" class="status" role="status" aria-live="polite"></p>
+      <div id="cmp-result" hidden>
+        <div id="cmp-counts" class="cmp-counts"></div>
+        <div class="row exp-filters">
+          <input id="cmp-filter" type="search" placeholder="Filter lists or columns" aria-label="Filter lists or columns" spellcheck="false">
+        </div>
+        <label class="check-label"><input id="cmp-custom" type="checkbox" checked> Custom columns only</label>
+        <div id="cmp-lists"></div>
+        <p id="cmp-empty" class="empty" hidden>Nothing to show for the checked statuses.</p>
+        <div class="row"><button id="cmp-download" type="button" class="secondary small">Download CSV</button></div>
+      </div>
+    </section>
+  </main>
+
+  <main id="view-sch" role="tabpanel" aria-labelledby="tab-sch" hidden>
+    <section class="block" aria-labelledby="sch-site-h">
+      <div class="block-head">
+        <h2 id="sch-site-h">Site collection</h2>
+        <button id="sch-reload" type="button" class="secondary" title="Read the site, its list columns and the mapping status again; the rows are kept">Reload</button>
+      </div>
+      <p id="sch-site" class="exp-site">Open any page of the site collection in the active tab.</p>
+      <div class="sch-status">
+        <span id="sch-status-text"></span>
+        <button id="sch-refresh" type="button" class="secondary small" title="Read which Refinable properties are mapped (cached for an hour)">Refresh status</button>
+      </div>
+      <details class="check">
+        <summary><span class="chip warn">Note</span> Uses the classic search schema pages</summary>
+        <div class="check-body"><p class="hint">There is no API for the site collection search schema. This tab reads <code>crawledproperty.aspx</code> and sends the same request as its OK button. If Microsoft changes those pages, saving fails with an error and the row shows it.</p></div>
+      </details>
+    </section>
+
+    <section class="block" aria-labelledby="sch-rows-h">
+      <div class="block-head">
+        <h2 id="sch-rows-h">Mappings</h2>
+        <button id="sch-clear" type="button" class="secondary small">Clear</button>
+      </div>
+      <p class="hint">One crawled property and one managed property per row. Both fields suggest names and show what is already mapped. Paste rows from Excel (crawled ⇥ managed) into a crawled property field.</p>
+      <p id="sch-suggest" class="hint" role="status" aria-live="polite" hidden></p>
+      <ol id="sch-rows" class="sch-rows"></ol>
+    </section>
+
+    <section class="block">
+      <div class="actions">
+        <button id="sch-save" type="button" class="primary" disabled>Save</button>
+      </div>
+      <p class="hint">Asks for confirmation, writes each crawled property and reads it back. Reindex the list or library afterwards so values appear.</p>
+      <p id="sch-foot" class="status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <dialog id="dialog">
+    <form method="dialog">
+      <h2 id="dialog-title"></h2>
+      <div id="dialog-body"></div>
+      <div class="row end">
+        <button value="cancel" id="dialog-cancel" class="secondary">Cancel</button>
+        <button value="ok" id="dialog-ok" class="primary">OK</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

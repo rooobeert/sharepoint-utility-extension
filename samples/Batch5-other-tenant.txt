@@ -1,0 +1,1085 @@
+--batch_provisioning
+Content-Type: multipart/mixed; boundary=changeset_provisioning
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsRequests","Description":"Requests of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsAssessments","Description":"Assessments of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsApprovalQueue","Description":"Approval Queue of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsRequestItems","Description":"Request Items of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsRoles","Description":"Roles of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"opsConfig","Description":"Configuration of the ops use case"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestsNote1\" StaticName=\"opsRequestsNote1\" DisplayName=\"opsRequestsNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestsBoolean2\" StaticName=\"opsRequestsBoolean2\" DisplayName=\"opsRequestsBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestsDateTime3\" StaticName=\"opsRequestsDateTime3\" DisplayName=\"opsRequestsDateTime3\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestsNumber4\" StaticName=\"opsRequestsNumber4\" DisplayName=\"opsRequestsNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRequestsUser5\" StaticName=\"opsRequestsUser5\" DisplayName=\"opsRequestsUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRequestsText6\" StaticName=\"opsRequestsText6\" DisplayName=\"opsRequestsText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestsNote7\" StaticName=\"opsRequestsNote7\" DisplayName=\"opsRequestsNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestsBoolean8\" StaticName=\"opsRequestsBoolean8\" DisplayName=\"opsRequestsBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestsDateTime9\" StaticName=\"opsRequestsDateTime9\" DisplayName=\"opsRequestsDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestsNumber10\" StaticName=\"opsRequestsNumber10\" DisplayName=\"opsRequestsNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"opsAssessmentsRequest\" StaticName=\"opsAssessmentsRequest\" DisplayName=\"opsAssessmentsRequest\" List=\"{@{variables('objListGuids')?['/sites/ops-use-cases/Lists/opsRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRequestsText12\" StaticName=\"opsRequestsText12\" DisplayName=\"opsRequestsText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestsNote13\" StaticName=\"opsRequestsNote13\" DisplayName=\"opsRequestsNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestsBoolean14\" StaticName=\"opsRequestsBoolean14\" DisplayName=\"opsRequestsBoolean14\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestsDateTime15\" StaticName=\"opsRequestsDateTime15\" DisplayName=\"opsRequestsDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestsNumber16\" StaticName=\"opsRequestsNumber16\" DisplayName=\"opsRequestsNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRequestsUser17\" StaticName=\"opsRequestsUser17\" DisplayName=\"opsRequestsUser17\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsAssessmentsNote1\" StaticName=\"opsAssessmentsNote1\" DisplayName=\"opsAssessmentsNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsAssessmentsBoolean2\" StaticName=\"opsAssessmentsBoolean2\" DisplayName=\"opsAssessmentsBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsAssessmentsDateTime3\" StaticName=\"opsAssessmentsDateTime3\" DisplayName=\"opsAssessmentsDateTime3\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsAssessmentsNumber4\" StaticName=\"opsAssessmentsNumber4\" DisplayName=\"opsAssessmentsNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsAssessmentsUser5\" StaticName=\"opsAssessmentsUser5\" DisplayName=\"opsAssessmentsUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsAssessmentsText6\" StaticName=\"opsAssessmentsText6\" DisplayName=\"opsAssessmentsText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsAssessmentsNote7\" StaticName=\"opsAssessmentsNote7\" DisplayName=\"opsAssessmentsNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsAssessmentsBoolean8\" StaticName=\"opsAssessmentsBoolean8\" DisplayName=\"opsAssessmentsBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsAssessmentsDateTime9\" StaticName=\"opsAssessmentsDateTime9\" DisplayName=\"opsAssessmentsDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsAssessmentsNumber10\" StaticName=\"opsAssessmentsNumber10\" DisplayName=\"opsAssessmentsNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsAssessmentsUser11\" StaticName=\"opsAssessmentsUser11\" DisplayName=\"opsAssessmentsUser11\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsAssessmentsText12\" StaticName=\"opsAssessmentsText12\" DisplayName=\"opsAssessmentsText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsAssessmentsNote13\" StaticName=\"opsAssessmentsNote13\" DisplayName=\"opsAssessmentsNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"opsQueueRequest\" StaticName=\"opsQueueRequest\" DisplayName=\"opsQueueRequest\" List=\"{@{variables('objListGuids')?['/sites/ops-use-cases/Lists/opsRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsAssessmentsDateTime15\" StaticName=\"opsAssessmentsDateTime15\" DisplayName=\"opsAssessmentsDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsAssessmentsNumber16\" StaticName=\"opsAssessmentsNumber16\" DisplayName=\"opsAssessmentsNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsAssessments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsAssessmentsUser17\" StaticName=\"opsAssessmentsUser17\" DisplayName=\"opsAssessmentsUser17\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsApprovalQueueNote1\" StaticName=\"opsApprovalQueueNote1\" DisplayName=\"opsApprovalQueueNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsApprovalQueueBoolean2\" StaticName=\"opsApprovalQueueBoolean2\" DisplayName=\"opsApprovalQueueBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsApprovalQueueDateTime3\" StaticName=\"opsApprovalQueueDateTime3\" DisplayName=\"opsApprovalQueueDateTime3\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsApprovalQueueNumber4\" StaticName=\"opsApprovalQueueNumber4\" DisplayName=\"opsApprovalQueueNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsApprovalQueueUser5\" StaticName=\"opsApprovalQueueUser5\" DisplayName=\"opsApprovalQueueUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsApprovalQueueText6\" StaticName=\"opsApprovalQueueText6\" DisplayName=\"opsApprovalQueueText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsApprovalQueueNote7\" StaticName=\"opsApprovalQueueNote7\" DisplayName=\"opsApprovalQueueNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsApprovalQueueBoolean8\" StaticName=\"opsApprovalQueueBoolean8\" DisplayName=\"opsApprovalQueueBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsApprovalQueueDateTime9\" StaticName=\"opsApprovalQueueDateTime9\" DisplayName=\"opsApprovalQueueDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsApprovalQueueNumber10\" StaticName=\"opsApprovalQueueNumber10\" DisplayName=\"opsApprovalQueueNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsApprovalQueueUser11\" StaticName=\"opsApprovalQueueUser11\" DisplayName=\"opsApprovalQueueUser11\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsApprovalQueueText12\" StaticName=\"opsApprovalQueueText12\" DisplayName=\"opsApprovalQueueText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsApprovalQueueNote13\" StaticName=\"opsApprovalQueueNote13\" DisplayName=\"opsApprovalQueueNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsApprovalQueueBoolean14\" StaticName=\"opsApprovalQueueBoolean14\" DisplayName=\"opsApprovalQueueBoolean14\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsApprovalQueueDateTime15\" StaticName=\"opsApprovalQueueDateTime15\" DisplayName=\"opsApprovalQueueDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsApprovalQueue')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsApprovalQueueNumber16\" StaticName=\"opsApprovalQueueNumber16\" DisplayName=\"opsApprovalQueueNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"opsItemRequest\" StaticName=\"opsItemRequest\" DisplayName=\"opsItemRequest\" List=\"{@{variables('objListGuids')?['/sites/ops-use-cases/Lists/opsRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestItemsNote1\" StaticName=\"opsRequestItemsNote1\" DisplayName=\"opsRequestItemsNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestItemsBoolean2\" StaticName=\"opsRequestItemsBoolean2\" DisplayName=\"opsRequestItemsBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestItemsDateTime3\" StaticName=\"opsRequestItemsDateTime3\" DisplayName=\"opsRequestItemsDateTime3\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestItemsNumber4\" StaticName=\"opsRequestItemsNumber4\" DisplayName=\"opsRequestItemsNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRequestItemsUser5\" StaticName=\"opsRequestItemsUser5\" DisplayName=\"opsRequestItemsUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRequestItemsText6\" StaticName=\"opsRequestItemsText6\" DisplayName=\"opsRequestItemsText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestItemsNote7\" StaticName=\"opsRequestItemsNote7\" DisplayName=\"opsRequestItemsNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestItemsBoolean8\" StaticName=\"opsRequestItemsBoolean8\" DisplayName=\"opsRequestItemsBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestItemsDateTime9\" StaticName=\"opsRequestItemsDateTime9\" DisplayName=\"opsRequestItemsDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestItemsNumber10\" StaticName=\"opsRequestItemsNumber10\" DisplayName=\"opsRequestItemsNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRequestItemsUser11\" StaticName=\"opsRequestItemsUser11\" DisplayName=\"opsRequestItemsUser11\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRequestItemsText12\" StaticName=\"opsRequestItemsText12\" DisplayName=\"opsRequestItemsText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRequestItemsNote13\" StaticName=\"opsRequestItemsNote13\" DisplayName=\"opsRequestItemsNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRequestItemsBoolean14\" StaticName=\"opsRequestItemsBoolean14\" DisplayName=\"opsRequestItemsBoolean14\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRequestItemsDateTime15\" StaticName=\"opsRequestItemsDateTime15\" DisplayName=\"opsRequestItemsDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRequestItemsNumber16\" StaticName=\"opsRequestItemsNumber16\" DisplayName=\"opsRequestItemsNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRequestItems')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRequestItemsUser17\" StaticName=\"opsRequestItemsUser17\" DisplayName=\"opsRequestItemsUser17\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRolesNote1\" StaticName=\"opsRolesNote1\" DisplayName=\"opsRolesNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRolesBoolean2\" StaticName=\"opsRolesBoolean2\" DisplayName=\"opsRolesBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"LookupMulti\" Name=\"opsRoleAssessments\" StaticName=\"opsRoleAssessments\" DisplayName=\"opsRoleAssessments\" Mult=\"TRUE\" List=\"{@{variables('objListGuids')?['/sites/ops-use-cases/Lists/opsAssessments']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRolesNumber4\" StaticName=\"opsRolesNumber4\" DisplayName=\"opsRolesNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRolesUser5\" StaticName=\"opsRolesUser5\" DisplayName=\"opsRolesUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRolesText6\" StaticName=\"opsRolesText6\" DisplayName=\"opsRolesText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRolesNote7\" StaticName=\"opsRolesNote7\" DisplayName=\"opsRolesNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRolesBoolean8\" StaticName=\"opsRolesBoolean8\" DisplayName=\"opsRolesBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRolesDateTime9\" StaticName=\"opsRolesDateTime9\" DisplayName=\"opsRolesDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRolesNumber10\" StaticName=\"opsRolesNumber10\" DisplayName=\"opsRolesNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRolesUser11\" StaticName=\"opsRolesUser11\" DisplayName=\"opsRolesUser11\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsRolesText12\" StaticName=\"opsRolesText12\" DisplayName=\"opsRolesText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsRolesNote13\" StaticName=\"opsRolesNote13\" DisplayName=\"opsRolesNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsRolesBoolean14\" StaticName=\"opsRolesBoolean14\" DisplayName=\"opsRolesBoolean14\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsRolesDateTime15\" StaticName=\"opsRolesDateTime15\" DisplayName=\"opsRolesDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsRolesNumber16\" StaticName=\"opsRolesNumber16\" DisplayName=\"opsRolesNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsRoles')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsRolesUser17\" StaticName=\"opsRolesUser17\" DisplayName=\"opsRolesUser17\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsConfigNote1\" StaticName=\"opsConfigNote1\" DisplayName=\"opsConfigNote1\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsConfigBoolean2\" StaticName=\"opsConfigBoolean2\" DisplayName=\"opsConfigBoolean2\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsConfigDateTime3\" StaticName=\"opsConfigDateTime3\" DisplayName=\"opsConfigDateTime3\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsConfigNumber4\" StaticName=\"opsConfigNumber4\" DisplayName=\"opsConfigNumber4\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsConfigUser5\" StaticName=\"opsConfigUser5\" DisplayName=\"opsConfigUser5\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsConfigText6\" StaticName=\"opsConfigText6\" DisplayName=\"opsConfigText6\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsConfigNote7\" StaticName=\"opsConfigNote7\" DisplayName=\"opsConfigNote7\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsConfigBoolean8\" StaticName=\"opsConfigBoolean8\" DisplayName=\"opsConfigBoolean8\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsConfigDateTime9\" StaticName=\"opsConfigDateTime9\" DisplayName=\"opsConfigDateTime9\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsConfigNumber10\" StaticName=\"opsConfigNumber10\" DisplayName=\"opsConfigNumber10\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsConfigUser11\" StaticName=\"opsConfigUser11\" DisplayName=\"opsConfigUser11\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"opsConfigText12\" StaticName=\"opsConfigText12\" DisplayName=\"opsConfigText12\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"opsConfigNote13\" StaticName=\"opsConfigNote13\" DisplayName=\"opsConfigNote13\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"opsConfigBoolean14\" StaticName=\"opsConfigBoolean14\" DisplayName=\"opsConfigBoolean14\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"opsConfigDateTime15\" StaticName=\"opsConfigDateTime15\" DisplayName=\"opsConfigDateTime15\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"opsConfigNumber16\" StaticName=\"opsConfigNumber16\" DisplayName=\"opsConfigNumber16\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://fabrikam.sharepoint.com/sites/ops-use-cases/_api/web/getList('/sites/ops-use-cases/Lists/opsConfig')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"opsConfigUser17\" StaticName=\"opsConfigUser17\" DisplayName=\"opsConfigUser17\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning--
+--batch_provisioning--

@@ -1,0 +1,75 @@
+--batch_provisioning
+Content-Type: multipart/mixed; boundary=changeset_provisioning
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"crRequests","Description":"All change requests with their master data (ID, status, priority, owner, …)"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"crReviewSteps","Description":"Per-department review steps for each request"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"crDepartments","Description":"Departments that take part in reviews"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":101,"Title":"crInternalDocuments","Description":"Internal documents for requests"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":101,"Title":"crAttachments","Description":"Files attached to requests"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"crComments","Description":"Comments on requests"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata":{"type":"SP.List"},"BaseTemplate":100,"Title":"crProductionSites","Description":"Reference data for production sites"}
+
+--changeset_provisioning--
+--batch_provisioning--

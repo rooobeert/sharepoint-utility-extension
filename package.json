@@ -1,0 +1,10 @@
+{
+  "name": "sp-batch-runner",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only: lets node --test load the extension's ES modules. Not part of the extension package.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "package": "sh scripts/package.sh"
+  }
+}

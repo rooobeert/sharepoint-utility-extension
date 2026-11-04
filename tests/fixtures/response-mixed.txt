@@ -1,0 +1,42 @@
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+HTTP/1.1 201 Created
+CONTENT-TYPE: application/json;odata=nometadata;streaming=true;charset=utf-8
+ETAG: "1"
+
+{"Id":"3f2a1c4e-9b8d-4e7f-a6c5-1d2e3f4a5b6c","Title":"crRequests","BaseTemplate":100}
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+HTTP/1.1 400 Bad Request
+CONTENT-TYPE: application/json;odata=nometadata;streaming=true;charset=utf-8
+
+{"odata.error":{"code":"-2130575245, System.ArgumentException","message":{"lang":"en-US","value":"A duplicate field name \"crStatus\" was found."}}}
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+HTTP/1.1 429 Too Many Requests
+CONTENT-TYPE: application/json;odata=verbose;charset=utf-8
+Retry-After: 7
+
+{"error":{"code":"-2147024860, Microsoft.SharePoint.SPQueryThrottledException","message":{"lang":"en-US","value":"The request has been throttled. Retry after 7 seconds."}}}
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+HTTP/1.1 400 Bad Request
+CONTENT-TYPE: application/json;odata=verbose;charset=utf-8
+
+{"error":{"code":"-2146232832, Microsoft.SharePoint.SPException","message":{"lang":"en-US","value":"Field type Lookupp is not installed properly. Go to the list settings page to delete this field."}}}
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+HTTP/1.1 204 No Content
+CONTENT-TYPE: application/json;odata=nometadata;streaming=true;charset=utf-8
+
+--batchresponse_5e1c9a2f-7b3d-4c11-9a0e-2f6d8b1c4a77--

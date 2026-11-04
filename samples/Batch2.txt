@@ -1,0 +1,666 @@
+--batch_provisioning
+Content-Type: multipart/mixed; boundary=changeset_provisioning
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('Title') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Required":false}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crCalendarYear\" StaticName=\"crCalendarYear\" DisplayName=\"crCalendarYear\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crStatus\" StaticName=\"crStatus\" DisplayName=\"crStatus\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Draft</Default><CHOICES><CHOICE>Draft</CHOICE><CHOICE>Submitted</CHOICE><CHOICE>In Review</CHOICE><CHOICE>In Progress</CHOICE><CHOICE>Completed</CHOICE><CHOICE>Rejected</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crPriority\" StaticName=\"crPriority\" DisplayName=\"crPriority\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Low</Default><CHOICES><CHOICE>Low</CHOICE><CHOICE>Medium</CHOICE><CHOICE>High</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crChangeType\" StaticName=\"crChangeType\" DisplayName=\"crChangeType\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Standard</Default><CHOICES><CHOICE>Standard</CHOICE><CHOICE>Urgent</CHOICE><CHOICE>Emergency</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crChangeScope\" StaticName=\"crChangeScope\" DisplayName=\"crChangeScope\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Single item</Default><CHOICES><CHOICE>Single item</CHOICE><CHOICE>Product family</CHOICE><CHOICE>All items</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crInitiator\" StaticName=\"crInitiator\" DisplayName=\"crInitiator\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crChangeManager\" StaticName=\"crChangeManager\" DisplayName=\"crChangeManager\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"UserMulti\" Name=\"crReviewers\" StaticName=\"crReviewers\" DisplayName=\"crReviewers\" Mult=\"TRUE\" UserSelectionMode=\"PeopleAndGroups\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crDescription\" StaticName=\"crDescription\" DisplayName=\"crDescription\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crReason\" StaticName=\"crReason\" DisplayName=\"crReason\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crImpact\" StaticName=\"crImpact\" DisplayName=\"crImpact\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crRollbackPlan\" StaticName=\"crRollbackPlan\" DisplayName=\"crRollbackPlan\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crRequestedOn\" StaticName=\"crRequestedOn\" DisplayName=\"crRequestedOn\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crDueDate\" StaticName=\"crDueDate\" DisplayName=\"crDueDate\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crCompletedOn\" StaticName=\"crCompletedOn\" DisplayName=\"crCompletedOn\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crCustomerSpecific\" StaticName=\"crCustomerSpecific\" DisplayName=\"crCustomerSpecific\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crDrawingNeeded\" StaticName=\"crDrawingNeeded\" DisplayName=\"crDrawingNeeded\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crStockAffected\" StaticName=\"crStockAffected\" DisplayName=\"crStockAffected\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crRunningOrders\" StaticName=\"crRunningOrders\" DisplayName=\"crRunningOrders\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crPilotSeries\" StaticName=\"crPilotSeries\" DisplayName=\"crPilotSeries\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"crCostEstimate\" StaticName=\"crCostEstimate\" DisplayName=\"crCostEstimate\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crExternalRef\" StaticName=\"crExternalRef\" DisplayName=\"crExternalRef\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crAffectedParts\" StaticName=\"crAffectedParts\" DisplayName=\"crAffectedParts\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crWorkflowState\" StaticName=\"crWorkflowState\" DisplayName=\"crWorkflowState\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crDetailsJson\" StaticName=\"crDetailsJson\" DisplayName=\"crDetailsJson\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crLookupProject\" StaticName=\"crLookupProject\" DisplayName=\"crLookupProject\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/rdProjects']}}\" ShowField=\"rdProjectNumber\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crProductionSite\" StaticName=\"crProductionSite\" DisplayName=\"crProductionSite\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crProductionSites']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crParentRequest\" StaticName=\"crParentRequest\" DisplayName=\"crParentRequest\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crDepartment\" StaticName=\"crDepartment\" DisplayName=\"crDepartment\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crDepartments']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"LookupMulti\" Name=\"crRelatedRequests\" StaticName=\"crRelatedRequests\" DisplayName=\"crRelatedRequests\" Mult=\"TRUE\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crRequest\" StaticName=\"crRequest\" DisplayName=\"crRequest\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crReviewDepartment\" StaticName=\"crReviewDepartment\" DisplayName=\"crReviewDepartment\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crDepartments']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crReviewer\" StaticName=\"crReviewer\" DisplayName=\"crReviewer\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crDecision\" StaticName=\"crDecision\" DisplayName=\"crDecision\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Pending</Default><CHOICES><CHOICE>Pending</CHOICE><CHOICE>Approved</CHOICE><CHOICE>Rejected</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crDecisionDate\" StaticName=\"crDecisionDate\" DisplayName=\"crDecisionDate\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crApprovalComment\" StaticName=\"crApprovalComment\" DisplayName=\"crApprovalComment\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"crStepOrder\" StaticName=\"crStepOrder\" DisplayName=\"crStepOrder\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crRequired\" StaticName=\"crRequired\" DisplayName=\"crRequired\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crApprovalRun\" StaticName=\"crApprovalRun\" DisplayName=\"crApprovalRun\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crConversationId\" StaticName=\"crConversationId\" DisplayName=\"crConversationId\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crReminderSent\" StaticName=\"crReminderSent\" DisplayName=\"crReminderSent\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crOutcomeNote\" StaticName=\"crOutcomeNote\" DisplayName=\"crOutcomeNote\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crDelegate\" StaticName=\"crDelegate\" DisplayName=\"crDelegate\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crEscalated\" StaticName=\"crEscalated\" DisplayName=\"crEscalated\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crStepStatus\" StaticName=\"crStepStatus\" DisplayName=\"crStepStatus\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Open</Default><CHOICES><CHOICE>Open</CHOICE><CHOICE>Done</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"crCommentRequest\" StaticName=\"crCommentRequest\" DisplayName=\"crCommentRequest\" List=\"{@{variables('objListGuids')?['/sites/rd-hub-projects/Lists/crRequests']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crCommentAuthor\" StaticName=\"crCommentAuthor\" DisplayName=\"crCommentAuthor\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crCommentText\" StaticName=\"crCommentText\" DisplayName=\"crCommentText\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crCommentType\" StaticName=\"crCommentType\" DisplayName=\"crCommentType\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Note</Default><CHOICES><CHOICE>Note</CHOICE><CHOICE>Question</CHOICE><CHOICE>Decision</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"crCommentedOn\" StaticName=\"crCommentedOn\" DisplayName=\"crCommentedOn\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crInternalOnly\" StaticName=\"crInternalOnly\" DisplayName=\"crInternalOnly\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crReplyTo\" StaticName=\"crReplyTo\" DisplayName=\"crReplyTo\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"UserMulti\" Name=\"crMentions\" StaticName=\"crMentions\" DisplayName=\"crMentions\" Mult=\"TRUE\" UserSelectionMode=\"PeopleAndGroups\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crDepartmentCode\" StaticName=\"crDepartmentCode\" DisplayName=\"crDepartmentCode\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crDepartmentLead\" StaticName=\"crDepartmentLead\" DisplayName=\"crDepartmentLead\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crActive\" StaticName=\"crActive\" DisplayName=\"crActive\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crDefaultReviewer\" StaticName=\"crDefaultReviewer\" DisplayName=\"crDefaultReviewer\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"crReviewScope\" StaticName=\"crReviewScope\" DisplayName=\"crReviewScope\" Format=\"Dropdown\" Required=\"FALSE\"><Default>Always</Default><CHOICES><CHOICE>Always</CHOICE><CHOICE>On demand</CHOICE></CHOICES></Field>","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crDepartmentNote\" StaticName=\"crDepartmentNote\" DisplayName=\"crDepartmentNote\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crSiteCode\" StaticName=\"crSiteCode\" DisplayName=\"crSiteCode\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crCountry\" StaticName=\"crCountry\" DisplayName=\"crCountry\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"crCity\" StaticName=\"crCity\" DisplayName=\"crCity\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"crSiteActive\" StaticName=\"crSiteActive\" DisplayName=\"crSiteActive\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"User\" Name=\"crSiteManager\" StaticName=\"crSiteManager\" DisplayName=\"crSiteManager\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"crSiteNote\" StaticName=\"crSiteNote\" DisplayName=\"crSiteNote\" Required=\"FALSE\" />","Options":24}}
+
+--changeset_provisioning--
+--batch_provisioning--

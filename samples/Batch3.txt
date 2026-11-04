@@ -1,0 +1,1589 @@
+--batch_provisioning
+Content-Type: multipart/mixed; boundary=changeset_provisioning
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('Title') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Titel"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCalendarYear') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kalenderjahr"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crStatus') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Status"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crPriority') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Priorität"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeType') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Änderungsart"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeScope') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Änderungsumfang"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crInitiator') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Antragsteller"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeManager') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Änderungsmanager"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crReviewers') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Prüfer"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDescription') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Beschreibung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crReason') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Begründung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crImpact') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Auswirkung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRollbackPlan') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Rückfallplan"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRequestedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Angefragt am"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDueDate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Fälligkeitsdatum"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCompletedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Abgeschlossen am"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCustomerSpecific') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kundenspezifisch"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDrawingNeeded') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Zeichnung erforderlich"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crStockAffected') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Lagerbestand betroffen"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRunningOrders') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Laufende Aufträge"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crPilotSeries') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Pilotserie"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCostEstimate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kostenschätzung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crExternalRef') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Externe Referenz"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crAffectedParts') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Betroffene Teile"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crWorkflowState') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Workflow-Status"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDetailsJson') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Details JSON"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crLookupProject') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Projekt"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crProductionSite') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Produktionsstandort"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crParentRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Übergeordneter Antrag"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDepartment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Abteilung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRelatedRequests') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Verwandte Anträge"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Antrag"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReviewDepartment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Abteilung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReviewer') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Prüfer"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDecision') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Entscheidung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDecisionDate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Entscheidungsdatum"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crApprovalComment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Freigabekommentar"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crStepOrder') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reihenfolge"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crRequired') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Erforderlich"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crApprovalRun') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Freigabelauf"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crConversationId') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Konversations-ID"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReminderSent') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Erinnerung gesendet"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crOutcomeNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Ergebnisnotiz"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDelegate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Vertretung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crEscalated') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Eskaliert"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crStepStatus') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Schrittstatus"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Antrag"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentAuthor') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kommentarautor"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentText') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kommentar"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentType') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kommentartyp"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Kommentiert am"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crInternalOnly') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Nur intern"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crReplyTo') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Antwort auf"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crMentions') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Erwähnungen"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentCode') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Abteilungskürzel"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentLead') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Abteilungsleitung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crActive') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Aktiv"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDefaultReviewer') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Standardprüfer"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crReviewScope') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Prüfumfang"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Notiz"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteCode') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Standortkürzel"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crCountry') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Land"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crCity') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Stadt"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteActive') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Aktiv"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteManager') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Standortleitung"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: de-DE
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Notiz"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('Title') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Title"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCalendarYear') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Calendar Year"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crStatus') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Status"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crPriority') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Priority"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeType') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Change Type"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeScope') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Change Scope"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crInitiator') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Initiator"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crChangeManager') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Change Manager"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crReviewers') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reviewers"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDescription') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Description"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crReason') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reason"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crImpact') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Impact"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRollbackPlan') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Rollback Plan"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRequestedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Requested On"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDueDate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Due Date"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCompletedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Completed On"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCustomerSpecific') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Customer Specific"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDrawingNeeded') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Drawing Needed"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crStockAffected') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Stock Affected"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRunningOrders') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Running Orders"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crPilotSeries') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Pilot Series"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crCostEstimate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Cost Estimate"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crExternalRef') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"External Reference"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crAffectedParts') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Affected Parts"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crWorkflowState') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Workflow State"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDetailsJson') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Details JSON"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crLookupProject') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Project"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crProductionSite') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Production Site"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crParentRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Parent Request"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crDepartment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Department"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crRequests')/fields/getByInternalNameOrTitle('crRelatedRequests') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Related Requests"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Request"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReviewDepartment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Department"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReviewer') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reviewer"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDecision') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Decision"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDecisionDate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Decision Date"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crApprovalComment') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Approval Comment"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crStepOrder') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Step Order"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crRequired') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Required"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crApprovalRun') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Approval Run"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crConversationId') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Conversation ID"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crReminderSent') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reminder Sent"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crOutcomeNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Outcome Note"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crDelegate') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Delegate"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crEscalated') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Escalated"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crReviewSteps')/fields/getByInternalNameOrTitle('crStepStatus') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Step Status"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentRequest') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Request"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentAuthor') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Comment Author"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentText') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Comment"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentType') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Comment Type"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crCommentedOn') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Commented On"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crInternalOnly') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Internal Only"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crReplyTo') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Reply To"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crComments')/fields/getByInternalNameOrTitle('crMentions') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Mentions"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentCode') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Department Code"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentLead') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Department Lead"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crActive') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Active"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDefaultReviewer') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Default Reviewer"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crReviewScope') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Review Scope"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crDepartments')/fields/getByInternalNameOrTitle('crDepartmentNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Note"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteCode') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Site Code"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crCountry') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Country"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crCity') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"City"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteActive') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Active"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteManager') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Site Manager"}
+
+--changeset_provisioning
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/rd-hub-projects/_api/web/getList('/sites/rd-hub-projects/Lists/crProductionSites')/fields/getByInternalNameOrTitle('crSiteNote') HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+Accept-Language: en-US
+IF-MATCH: *
+
+{"__metadata":{"type":"SP.Field"},"Title":"Note"}
+
+--changeset_provisioning--
+--batch_provisioning--

@@ -1,0 +1,266 @@
+--batch_hrp
+Content-Type: multipart/mixed; boundary=cs_d4b1379312c8
+
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"hrText1\" StaticName=\"hrText1\" DisplayName=\"hrText1\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"hrNote2\" StaticName=\"hrNote2\" DisplayName=\"hrNote2\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"hrBoolean3\" StaticName=\"hrBoolean3\" DisplayName=\"hrBoolean3\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"hrDateTime4\" StaticName=\"hrDateTime4\" DisplayName=\"hrDateTime4\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"hrNumber5\" StaticName=\"hrNumber5\" DisplayName=\"hrNumber5\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"hrChoice6\" StaticName=\"hrChoice6\" DisplayName=\"hrChoice6\" Format=\"Dropdown\" Required=\"FALSE\"><Default>A</Default><CHOICES><CHOICE>A</CHOICE><CHOICE>B</CHOICE></CHOICES></Field>","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"hrText7\" StaticName=\"hrText7\" DisplayName=\"hrText7\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"hrNote8\" StaticName=\"hrNote8\" DisplayName=\"hrNote8\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"hrBoolean9\" StaticName=\"hrBoolean9\" DisplayName=\"hrBoolean9\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"hrDateTime10\" StaticName=\"hrDateTime10\" DisplayName=\"hrDateTime10\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"hrNumber11\" StaticName=\"hrNumber11\" DisplayName=\"hrNumber11\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"hrChoice12\" StaticName=\"hrChoice12\" DisplayName=\"hrChoice12\" Format=\"Dropdown\" Required=\"FALSE\"><Default>A</Default><CHOICES><CHOICE>A</CHOICE><CHOICE>B</CHOICE></CHOICES></Field>","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"hrText13\" StaticName=\"hrText13\" DisplayName=\"hrText13\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"hrNote14\" StaticName=\"hrNote14\" DisplayName=\"hrNote14\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"hrBoolean15\" StaticName=\"hrBoolean15\" DisplayName=\"hrBoolean15\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"hrDateTime16\" StaticName=\"hrDateTime16\" DisplayName=\"hrDateTime16\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"hrNumber17\" StaticName=\"hrNumber17\" DisplayName=\"hrNumber17\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"hrChoice18\" StaticName=\"hrChoice18\" DisplayName=\"hrChoice18\" Format=\"Dropdown\" Required=\"FALSE\"><Default>A</Default><CHOICES><CHOICE>A</CHOICE><CHOICE>B</CHOICE></CHOICES></Field>","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"hrText19\" StaticName=\"hrText19\" DisplayName=\"hrText19\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"hrNote20\" StaticName=\"hrNote20\" DisplayName=\"hrNote20\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"hrBoolean21\" StaticName=\"hrBoolean21\" DisplayName=\"hrBoolean21\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"hrDateTime22\" StaticName=\"hrDateTime22\" DisplayName=\"hrDateTime22\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Number\" Name=\"hrNumber23\" StaticName=\"hrNumber23\" DisplayName=\"hrNumber23\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Choice\" Name=\"hrChoice24\" StaticName=\"hrChoice24\" DisplayName=\"hrChoice24\" Format=\"Dropdown\" Required=\"FALSE\"><Default>A</Default><CHOICES><CHOICE>A</CHOICE><CHOICE>B</CHOICE></CHOICES></Field>","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Text\" Name=\"hrText25\" StaticName=\"hrText25\" DisplayName=\"hrText25\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Note\" Name=\"hrNote26\" StaticName=\"hrNote26\" DisplayName=\"hrNote26\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Boolean\" Name=\"hrBoolean27\" StaticName=\"hrBoolean27\" DisplayName=\"hrBoolean27\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrContacts')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"DateTime\" Name=\"hrDateTime28\" StaticName=\"hrDateTime28\" DisplayName=\"hrDateTime28\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/hr-processes-app-dev/_api/web/getList('/sites/hr-processes-app-dev/Lists/hrRequests')/fields/createfieldasxml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters":{"__metadata":{"type":"SP.XmlSchemaFieldCreationInformation"},"SchemaXml":"<Field Type=\"Lookup\" Name=\"hrContact\" StaticName=\"hrContact\" DisplayName=\"hrContact\" List=\"{@{variables('objListGuids')?['/sites/hr-processes-app-dev/Lists/hrContacts']}}\" ShowField=\"Title\" Required=\"FALSE\" />","Options":24}}
+--cs_d4b1379312c8--
+--batch_hrp--

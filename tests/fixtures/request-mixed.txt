@@ -1,0 +1,56 @@
+--batch_fixture
+Content-Type: multipart/mixed; boundary=changeset_fixture
+
+--changeset_fixture
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/demo/_api/web/lists HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"__metadata": {"type": "SP.List"}, "BaseTemplate": 100, "Title": "crRequests"}
+
+--changeset_fixture
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/demo/_api/web/getList('/sites/demo/Lists/crRequests')/fields/CreateFieldAsXml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=nometadata
+
+{"parameters": {"__metadata": {"type": "SP.XmlSchemaFieldCreationInformation"}, "SchemaXml": "<Field Type=\"Choice\" Name=\"crStatus\" DisplayName=\"crStatus\" />", "Options": 24}}
+
+--changeset_fixture
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/demo/_api/web/getList('/sites/demo/Lists/crRequests')/fields/CreateFieldAsXml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=verbose
+
+{"parameters": {"__metadata": {"type": "SP.XmlSchemaFieldCreationInformation"}, "SchemaXml": "<Field Type=\"Lookup\" Name=\"crSite\" DisplayName=\"crSite\" List=\"{{{ListId:/sites/demo/Lists/crSites}}}\" ShowField=\"Title\" />", "Options": 24}}
+
+--changeset_fixture
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/demo/_api/web/getList('/sites/demo/Lists/crRequests')/fields/CreateFieldAsXml HTTP/1.1
+Content-Type: application/json;odata=verbose
+Accept: application/json;odata=verbose
+
+{"parameters": {"__metadata": {"type": "SP.XmlSchemaFieldCreationInformation"}, "SchemaXml": "<Field Type=\"Lookupp\" Name=\"crBroken\" DisplayName=\"crBroken\" List=\"{@{variables('objListGuids')?['/sites/demo/Lists/crSites']}}\" />", "Options": 24}}
+
+--changeset_fixture
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+MERGE https://contoso.sharepoint.com/sites/demo/_api/web/getList('/sites/demo/Lists/crRequests') HTTP/1.1
+Content-Type: application/json;odata=nometadata
+Accept: application/json;odata=nometadata
+IF-MATCH: *
+
+{"Title": "Change Requests {{WebId}}"}
+
+--changeset_fixture--
+--batch_fixture--
