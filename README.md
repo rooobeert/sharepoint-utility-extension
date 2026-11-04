@@ -1,3 +1,7 @@
+> **Disclaimer 1:** This extension is fully vibe coded with [Claude Code](https://claude.com/claude-code). Review the code and test it on a non-production site before you rely on it.
+
+> **Disclaimer 2:** The extension is not publicly available in the Microsoft Edge Add-ons store. It can only be installed through this private link: [SharePoint Utility on Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/sharepoint-utility/ijbljmohkldogjablkclbkhjfncfnola)
+
 # SharePoint Utility
 
 A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owners. It works as the signed-in user, from a side panel with these tabs:
