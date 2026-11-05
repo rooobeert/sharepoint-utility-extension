@@ -98,7 +98,17 @@ function loadSites() {
 }
 
 /** Read the site of one tab: { tabId, site, title }, or null if it can't be read (discarded, still loading). */
+const tabCache = new Map(); // tabId -> { url, entry }: a tab is only read again after it navigated
+
 async function readTab(t) {
+  const hit = tabCache.get(t.id);
+  if (hit && hit.url === t.url) return { ...hit.entry };
+  const entry = await readTabNow(t);
+  if (entry) tabCache.set(t.id, { url: t.url, entry });
+  return entry;
+}
+
+async function readTabNow(t) {
   try {
     const site = await withTimeout(siteOfTab(t), 5000);
     if (!site) return null;
@@ -121,9 +131,14 @@ function remember(entry, manual) {
 
 /** Every open SharePoint site goes into both dropdowns. Nothing is selected for you. */
 async function readSites() {
-  ui.siteMsg.hidden = true;
   const tabs = (await chrome.tabs.query({})).filter((t) => t.url && isSharePointUrl(t.url));
+  for (const id of [...tabCache.keys()]) if (!tabs.some((t) => t.id === id)) tabCache.delete(id);
+  const fresh = tabs.some((t) => (tabCache.get(t.id) || {}).url !== t.url);
+  if (fresh) showLoading('Reading the open SharePoint tabs…');
+  else ui.siteMsg.hidden = true;
   const found = (await Promise.all(tabs.map(readTab))).filter(Boolean);
+  ui.siteMsg.classList.remove('sch-loading');
+  ui.siteMsg.hidden = true;
   for (const s of cmp.sites) s.tabId = null; // set again below for the sites still open
   for (const f of found) remember(f, false);
   cmp.sites = cmp.sites.filter((s) => s.manual || s.tabId != null);
@@ -134,11 +149,21 @@ async function readSites() {
   }
 }
 
+function showLoading(text) {
+  ui.siteMsg.textContent = text;
+  ui.siteMsg.classList.add('sch-loading');
+  ui.siteMsg.hidden = false;
+}
+
 /** The site in the active tab goes into one dropdown and is selected there. */
 async function addActive(select) {
+  ui.siteMsg.classList.remove('sch-loading');
   ui.siteMsg.hidden = true;
   const tab = await activeTab();
+  if (tab && tab.url && isSharePointUrl(tab.url) && !tabCache.has(tab.id)) showLoading('Reading the active tab…');
   const entry = tab && tab.url && isSharePointUrl(tab.url) ? await readTab(tab) : null;
+  ui.siteMsg.classList.remove('sch-loading');
+  ui.siteMsg.hidden = true;
   if (!entry) {
     ui.siteMsg.textContent = "The active tab is not a SharePoint page (or can't be read). Switch to a page of the site in the browser first.";
     ui.siteMsg.hidden = false;
@@ -185,6 +210,7 @@ async function loadScope() {
   const sides = [source];
   setBusy(true);
   ui.scopeSum.textContent = 'Lists: loading…';
+  showLoading('Loading the lists of the source…');
   try {
     const byKey = new Map();
     for (const side of sides) {
@@ -205,6 +231,8 @@ async function loadScope() {
     ui.siteMsg.textContent = `Could not read the lists: ${e.message}`;
     ui.siteMsg.hidden = false;
   } finally {
+    ui.siteMsg.classList.remove('sch-loading');
+    if (ui.siteMsg.textContent.startsWith('Loading')) ui.siteMsg.hidden = true;
     setBusy(false);
   }
 }
@@ -372,15 +400,15 @@ function listBody({ list, columns, showSettings }) {
   }
   if (columns.length) {
     body.push(el('table', { class: 'cmp-table' },
-      el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' }), el('th', { class: 'act' }))),
+      el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' })))),
       el('tbody', {}, columns.map((c) => el('tr', {},
         el('td', {},
           c.title, el('span', { class: 'iname', text: c.name }),
           c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
-          c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null),
+          c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null,
+          columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null),
         el('td', { class: 'kind', text: c.type }),
-        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] })),
-        el('td', { class: 'act' }, columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null))))));
+        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] }))))));
   }
   return el('div', { class: 'check-body' }, body);
 }

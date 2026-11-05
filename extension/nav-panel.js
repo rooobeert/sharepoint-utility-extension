@@ -130,7 +130,7 @@ async function loadAll() {
     nav.lists = data.lists;
     ui.site.replaceChildren(el('strong', { text: data.web.Title }), el('span', { class: 'exp-url', text: data.web.Url }));
     nav.detected = detectNavigation(await createNavigator({ request: nav.request }).settings(site));
-    if (!nav.target) nav.target = nav.detected.target;
+    if (!nav.target) nav.target = 'quicklaunch'; // almost always what is edited, whatever the site detects
     await loadNav();
   } catch (e) {
     ui.site.textContent = `Could not read the site: ${e.message}`;

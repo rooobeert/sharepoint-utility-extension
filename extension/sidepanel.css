@@ -64,6 +64,7 @@ main { padding: 4px 14px 24px; }
 .row.end { justify-content: flex-end; margin-top: 14px; }
 .hint { color: var(--muted); margin: 6px 0 0; font-size: 12px; }
 .hint.error { color: var(--fail); }
+.hint.error.sch-loading { color: var(--muted); }
 .empty { color: var(--muted); font-style: italic; margin: 8px 0 0; }
 
 input[type="url"], input[type="text"], textarea {
@@ -398,7 +399,6 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .cmp-scope-rows { max-height: 220px; overflow-y: auto; margin-top: 6px; padding-right: 14px; }
 .cmp-scope-rows label { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: 12px; padding: 2px 0; cursor: pointer; }
 .cmp-scope-rows .exp-url { margin-left: auto; min-width: 0; text-align: right; overflow-wrap: anywhere; }
-.cmp-table td.act, .cmp-table th.act { width: 1%; white-space: nowrap; }
 .cmp-table td.st, .cmp-table th.st { width: 7.6em; }
 .cmp-table td.kind, .cmp-table th.kind { width: 5.6em; color: var(--muted); overflow-wrap: anywhere; }
 .cmp-table .iname { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); word-break: break-all; }
