@@ -595,6 +595,13 @@ function updateButtons() {
   ui.refresh.disabled = sch.saving || !sch.site || !!sch.statusLoading;
 }
 
+/** While saving, the rows can't be focused or clicked (inert also covers rows and chips re-rendered meanwhile). */
+function lockRows(on) {
+  closeSuggestions();
+  ui.rows.inert = on;
+  ui.rows.classList.toggle('locked', on);
+}
+
 function setFoot(text, cls = '') {
   ui.foot.className = cls ? `status ${cls}` : 'status';
   ui.foot.textContent = text;
@@ -619,33 +626,38 @@ async function saveAll() {
   if (!ok) return;
 
   sch.saving = true;
+  lockRows(true); // no edits while the save runs: the rows are what is being saved
   const site = sch.site;
   const t0 = performance.now();
   setFoot(`Saving ${list.length} crawled propert${list.length === 1 ? 'y' : 'ies'}…`);
   let failed = 0;
-  await Promise.all(list.map(async (g) => {
-    const affected = rows.filter((r) => r.c && sameName(r.c, g.crawled));
-    affected.forEach((r) => setState(r, 'saving'));
-    try {
-      sch.crawledCache.delete(lc(g.crawled));
-      const info = await crawledInfo(g.crawled);
-      if (!info.exists) throw new Error('crawled property not found');
-      const { next, deleted } = nextMappings(info.current, g.add, g.remove);
-      await postMappings(info.page, next, deleted);
-      sch.crawledCache.delete(lc(g.crawled));
-      [...g.add, ...g.remove].forEach((m) => sch.managedCache.delete(lc(m)));
-      const problems = verifyProblems((await crawledInfo(g.crawled)).current || [], g.add, g.remove);
-      if (problems.length) throw new Error(`saved, but the page shows ${problems.join(', ')}`);
-      removals.delete(lc(g.crawled));
-      patchStatus(sch.status, splitCrawled(g.crawled).name, g.add, g.remove);
-    } catch (e) {
-      failed++;
-      affected.forEach((r) => setState(r, 'error', e.message));
-      return;
-    }
-    await Promise.all(affected.map((r) => validate(r, true)));
-  }));
-  sch.saving = false;
+  try {
+    await Promise.all(list.map(async (g) => {
+      const affected = rows.filter((r) => r.c && sameName(r.c, g.crawled));
+      affected.forEach((r) => setState(r, 'saving'));
+      try {
+        sch.crawledCache.delete(lc(g.crawled));
+        const info = await crawledInfo(g.crawled);
+        if (!info.exists) throw new Error('crawled property not found');
+        const { next, deleted } = nextMappings(info.current, g.add, g.remove);
+        await postMappings(info.page, next, deleted);
+        sch.crawledCache.delete(lc(g.crawled));
+        [...g.add, ...g.remove].forEach((m) => sch.managedCache.delete(lc(m)));
+        const problems = verifyProblems((await crawledInfo(g.crawled)).current || [], g.add, g.remove);
+        if (problems.length) throw new Error(`saved, but the page shows ${problems.join(', ')}`);
+        removals.delete(lc(g.crawled));
+        patchStatus(sch.status, splitCrawled(g.crawled).name, g.add, g.remove);
+      } catch (e) {
+        failed++;
+        affected.forEach((r) => setState(r, 'error', e.message));
+        return;
+      }
+      await Promise.all(affected.map((r) => validate(r, true)));
+    }));
+  } finally {
+    sch.saving = false;
+    lockRows(false);
+  }
   if (sch.site === site) {
     renderSuggestions();
     updateStatusText();

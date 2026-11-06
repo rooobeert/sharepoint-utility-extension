@@ -64,7 +64,8 @@ main { padding: 4px 14px 24px; }
 .row.end { justify-content: flex-end; margin-top: 14px; }
 .hint { color: var(--muted); margin: 6px 0 0; font-size: 12px; }
 .hint.error { color: var(--fail); }
-.hint.error.sch-loading { color: var(--muted); }
+.hint.error.sch-rows.locked { opacity: 0.6; }
+.sch-loading { color: var(--muted); }
 .empty { color: var(--muted); font-style: italic; margin: 8px 0 0; }
 
 input[type="url"], input[type="text"], textarea {
