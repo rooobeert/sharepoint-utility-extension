@@ -25,10 +25,10 @@
         <button type="button" role="tab" id="tab-perm" aria-controls="view-perm" aria-selected="false" tabindex="-1">Permissions</button>
         <button type="button" role="tab" id="tab-cmp" aria-controls="view-cmp" aria-selected="false" tabindex="-1">Compare</button>
         <button type="button" role="tab" id="tab-sch" aria-controls="view-sch" aria-selected="false" tabindex="-1">Search Schema</button>
+        <button type="button" role="tab" id="tab-json" aria-controls="view-json" aria-selected="false" tabindex="-1">JSON</button>
       </nav>
       <span id="version" class="version"></span>
     </div>
-    <label class="json-toggle" title="Opening a SharePoint _api URL in a tab then returns JSON instead of XML. Applies to page loads only."><input id="json-toggle" type="checkbox"> Show _api pages as JSON</label>
   </header>
 
   <main id="view-batch" role="tabpanel" aria-labelledby="tab-batch">
@@ -430,6 +430,21 @@
       </div>
       <p class="hint">Asks for confirmation, writes each crawled property and reads it back. Reindex the list or library afterwards so values appear.</p>
       <p id="sch-foot" class="status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <main id="view-json" role="tabpanel" aria-labelledby="tab-json" hidden>
+    <section class="block" aria-labelledby="json-h">
+      <h2 id="json-h">Show SharePoint pages as JSON</h2>
+      <label class="check-label"><input id="json-on" type="checkbox"> Return JSON for the paths below</label>
+      <p class="hint">When on, opening a SharePoint URL in a tab (<code>https://&lt;tenant&gt;.sharepoint.com/…</code>) whose path contains one of these texts returns JSON instead of XML. Only page loads in tabs are affected, in all tabs of the browser.</p>
+      <ul id="json-paths" class="json-paths"></ul>
+      <div class="row">
+        <input id="json-new" type="text" placeholder="Path text, e.g. /_vti_bin/" aria-label="New path text" spellcheck="false" autocomplete="off">
+        <button id="json-add" type="button" class="secondary">Add</button>
+      </div>
+      <p id="json-msg" class="hint" hidden></p>
+      <div class="actions"><button id="json-reset" type="button" class="secondary small">Reset to default (/_api/)</button></div>
     </section>
   </main>
 

@@ -313,14 +313,14 @@ export const pageError = (doc) =>
 const TYPE_BY_RADIO = { textRadioButton: 'Text', integerRadioButton: 'Integer', decimalRadioButton: 'Decimal',
   dateTimeRadioButton: 'DateTime', yesNoRadioButton: 'YesNo', doubleRadioButton: 'Double', binaryRadioButton: 'Binary' };
 
-/** managedproperty.aspx -> { exists, type, mapped } */
+/** managedproperty.aspx -> { exists, name, type, mapped }; name is the property's own spelling (case), which saving needs. */
 export function parseManagedPage(doc) {
   if (!field(doc, 'nameTextBox')) return { exists: false };
   const radio = doc.querySelector('input[type=radio][name$="$typeButtonGroup"][checked]');
   const list = field(doc, 'mappedPropertiesListBox');
   // Options: value "<propset>;ows_Name", text "ows_Name"
   const mapped = list ? [...list.options].map((o) => o.textContent.trim()).filter(Boolean) : [];
-  return { exists: true, type: TYPE_BY_RADIO[radio?.value] || null, mapped };
+  return { exists: true, name: field(doc, 'nameTextBox').value.trim() || null, type: TYPE_BY_RADIO[radio?.value] || null, mapped };
 }
 
 /** listmanagedproperties.aspx: the filter postback ({ form, overrides }), or throws. */

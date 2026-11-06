@@ -639,7 +639,13 @@ async function saveAll() {
         sch.crawledCache.delete(lc(g.crawled));
         const info = await crawledInfo(g.crawled);
         if (!info.exists) throw new Error('crawled property not found');
-        const { next, deleted } = nextMappings(info.current, g.add, g.remove);
+        // SharePoint looks managed properties up by their exact name: post the spelling the site uses, not what was typed.
+        const add = await Promise.all(g.add.map(async (m) => {
+          const mi = await managedInfo(m);
+          if (!mi.exists) throw new Error(`managed property ${m} not found`);
+          return mi.name || m;
+        }));
+        const { next, deleted } = nextMappings(info.current, add, g.remove);
         await postMappings(info.page, next, deleted);
         sch.crawledCache.delete(lc(g.crawled));
         [...g.add, ...g.remove].forEach((m) => sch.managedCache.delete(lc(m)));

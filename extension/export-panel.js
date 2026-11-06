@@ -20,6 +20,7 @@ const tabs = [
   { id: 'perm', tab: $('tab-perm'), view: $('view-perm') },
   { id: 'cmp', tab: $('tab-cmp'), view: $('view-cmp') },
   { id: 'sch', tab: $('tab-sch'), view: $('view-sch') },
+  { id: 'json', tab: $('tab-json'), view: $('view-json') },
 ];
 
 function selectTab(i) {
