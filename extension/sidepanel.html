@@ -10,6 +10,7 @@
   <script type="module" src="nav-panel.js"></script>
   <script type="module" src="permissions-panel.js"></script>
   <script type="module" src="compare-panel.js"></script>
+  <script type="module" src="json-header.js"></script>
   <script type="module" src="schema-panel.js"></script>
 </head>
 <body>
@@ -27,6 +28,7 @@
       </nav>
       <span id="version" class="version"></span>
     </div>
+    <label class="json-toggle" title="Opening a SharePoint _api URL in a tab then returns JSON instead of XML. Applies to page loads only."><input id="json-toggle" type="checkbox"> Show _api pages as JSON</label>
   </header>
 
   <main id="view-batch" role="tabpanel" aria-labelledby="tab-batch">

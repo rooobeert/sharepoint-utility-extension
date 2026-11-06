@@ -264,6 +264,7 @@ button.small { padding: 3px 9px; font-size: 12px; margin-top: 8px; }
 /* Header: version and tool tabs */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .header-row { display: flex; align-items: center; gap: 8px; }
+.json-toggle { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); padding: 2px 0 4px; cursor: pointer; }
 .version { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: auto; padding-bottom: 2px; white-space: nowrap; }
 .tabs { display: flex; gap: 2px; min-width: 0; }
 .tabs [role="tab"] {
