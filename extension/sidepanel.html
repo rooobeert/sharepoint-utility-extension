@@ -11,12 +11,14 @@
   <script type="module" src="permissions-panel.js"></script>
   <script type="module" src="compare-panel.js"></script>
   <script type="module" src="request-headers.js"></script>
+  <script type="module" src="list-context.js"></script>
   <script type="module" src="schema-panel.js"></script>
 </head>
 <body>
   <header class="app-header">
     <!-- The browser already shows the extension name above the panel. -->
     <h1 class="sr-only">SharePoint Utility</h1>
+    <p id="list-ctx" class="list-ctx" hidden></p>
     <div class="header-row">
       <nav class="tabs" role="tablist" aria-label="Tools">
         <button type="button" role="tab" id="tab-batch" aria-controls="view-batch" aria-selected="true">Batch Runner</button>
@@ -53,6 +55,22 @@
         </div>
       </div>
       <p class="hint">Stages run top to bottom. A folder load adds one stage per .txt file, sorted by file name. In a batch file, each "### STAGE:" section becomes a stage.</p>
+      <details class="check vars">
+        <summary>Variables you can use in batches</summary>
+        <div class="check-body">
+          <p class="hint">Write these in the URLs and bodies of the operations. They are replaced before Preview and Run, so one batch file works on any site. Names are not case sensitive.</p>
+          <dl class="var-list">
+            <dt><code>{{WebUrl}}</code></dt><dd>URL of the target site, e.g. <code>https://tenant.sharepoint.com/sites/hr</code> (no trailing slash).</dd>
+            <dt><code>{{WebServerRelativeUrl}}</code></dt><dd>The same without the host: <code>/sites/hr</code> (empty for a root site).</dd>
+            <dt><code>{{SiteUrl}}</code></dt><dd>URL of the site collection (differs from <code>{{WebUrl}}</code> on a subsite).</dd>
+            <dt><code>{{SiteServerRelativeUrl}}</code></dt><dd>The site collection without the host.</dd>
+            <dt><code>{{WebId}}</code></dt><dd>GUID of the target web, read from SharePoint when the batch runs.</dd>
+            <dt><code>{{ListId:Lists/crRequests}}</code></dt><dd>GUID of a list on the target site, without braces. Use it for lookup columns and anywhere a list ID is needed. After <code>ListId:</code> you can give the list title, its URL name (<code>crDocumentVault</code>), the URL relative to the site (<code>Lists/crRequests</code>), or a server-relative or full URL.</dd>
+            <dt><code>@{variables('x')?['Lists/crRequests']}</code></dt><dd>The Power Automate form of <code>{{ListId:…}}</code>, so existing flow bodies keep working.</dd>
+          </dl>
+          <p class="hint">Example: <code>POST {{WebUrl}}/_api/web/lists</code> or a lookup field with <code>List="{{ListId:Lists/crRequests}}"</code>. Preview lists the web and list IDs it found.</p>
+        </div>
+      </details>
       <ol id="stage-list" class="stage-list"></ol>
       <p id="no-stages" class="empty">No stages yet. Add a stage or load a folder of .txt files.</p>
       <button id="add-stage" type="button" class="secondary add-stage">+ Add stage</button>
