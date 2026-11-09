@@ -10,7 +10,7 @@
   <script type="module" src="nav-panel.js"></script>
   <script type="module" src="permissions-panel.js"></script>
   <script type="module" src="compare-panel.js"></script>
-  <script type="module" src="json-header.js"></script>
+  <script type="module" src="request-headers.js"></script>
   <script type="module" src="schema-panel.js"></script>
 </head>
 <body>
@@ -25,7 +25,7 @@
         <button type="button" role="tab" id="tab-perm" aria-controls="view-perm" aria-selected="false" tabindex="-1">Permissions</button>
         <button type="button" role="tab" id="tab-cmp" aria-controls="view-cmp" aria-selected="false" tabindex="-1">Compare</button>
         <button type="button" role="tab" id="tab-sch" aria-controls="view-sch" aria-selected="false" tabindex="-1">Search Schema</button>
-        <button type="button" role="tab" id="tab-json" aria-controls="view-json" aria-selected="false" tabindex="-1">JSON</button>
+        <button type="button" role="tab" id="tab-hdr" aria-controls="view-hdr" aria-selected="false" tabindex="-1">Headers</button>
       </nav>
       <span id="version" class="version"></span>
     </div>
@@ -433,18 +433,29 @@
     </section>
   </main>
 
-  <main id="view-json" role="tabpanel" aria-labelledby="tab-json" hidden>
-    <section class="block" aria-labelledby="json-h">
-      <h2 id="json-h">Show SharePoint pages as JSON</h2>
-      <label class="check-label"><input id="json-on" type="checkbox"> Return JSON for the paths below</label>
-      <p class="hint">When on, opening a SharePoint URL in a tab (<code>https://&lt;tenant&gt;.sharepoint.com/…</code>) whose path contains one of these texts returns JSON instead of XML. Only page loads in tabs are affected, in all tabs of the browser.</p>
-      <ul id="json-paths" class="json-paths"></ul>
+  <main id="view-hdr" role="tabpanel" aria-labelledby="tab-hdr" hidden>
+    <section class="block" aria-labelledby="hdr-h">
+      <h2 id="hdr-h">Request headers for SharePoint pages</h2>
+      <label class="check-label"><input id="hdr-on" type="checkbox"> Send the headers below</label>
+      <p class="hint">When on, the browser adds these headers whenever you open a SharePoint URL (<code>https://&lt;tenant&gt;.sharepoint.com/…</code>) in a tab whose path contains one of the path texts. It applies to all tabs of the browser. The default, <code>Accept: application/json</code>, returns JSON instead of XML. Add <code>Accept-Language</code> to read texts such as column names in another language. The Batch Runner is not affected: it sends the headers written in the batch.</p>
+      <h3 class="hdr-h3">Headers</h3>
+      <ul id="hdr-headers" class="hdr-list"></ul>
       <div class="row">
-        <input id="json-new" type="text" placeholder="Path text, e.g. /_vti_bin/" aria-label="New path text" spellcheck="false" autocomplete="off">
-        <button id="json-add" type="button" class="secondary">Add</button>
+        <input id="hdr-name" type="text" list="hdr-names" placeholder="Header, e.g. Accept-Language" aria-label="Header name" spellcheck="false" autocomplete="off">
+        <input id="hdr-value" type="text" list="hdr-values" placeholder="Value, e.g. de-DE" aria-label="Header value" spellcheck="false" autocomplete="off">
+        <button id="hdr-add-header" type="button" class="secondary">Add</button>
       </div>
-      <p id="json-msg" class="hint" hidden></p>
-      <div class="actions"><button id="json-reset" type="button" class="secondary small">Reset to default (/_api/)</button></div>
+      <datalist id="hdr-names"><option value="Accept"><option value="Accept-Language"></datalist>
+      <datalist id="hdr-values"></datalist>
+      <div class="actions"><button id="hdr-reset-headers" type="button" class="secondary small">Reset to default (Accept: JSON)</button></div>
+      <h3 class="hdr-h3">Applies to paths containing</h3>
+      <ul id="hdr-paths" class="hdr-list"></ul>
+      <div class="row">
+        <input id="hdr-new-path" type="text" placeholder="Path text, e.g. /_vti_bin/" aria-label="New path text" spellcheck="false" autocomplete="off">
+        <button id="hdr-add-path" type="button" class="secondary">Add</button>
+      </div>
+      <div class="actions"><button id="hdr-reset-paths" type="button" class="secondary small">Reset to default (/_api/)</button></div>
+      <p id="hdr-msg" class="hint" hidden></p>
     </section>
   </main>
 

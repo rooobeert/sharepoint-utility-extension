@@ -12,8 +12,9 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 - **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests.
 - **Compare** shows the differences in lists and columns between two open sites, e.g. dev and prod. It only reads.
 - **Search Schema** maps crawled properties (list columns) to `Refinable*` managed properties on the site collection, many at once.
+- **Headers** adds request headers (default `Accept: application/json`, optionally `Accept-Language`) when you open SharePoint URLs such as `/_api/` in a browser tab. This uses the `declarativeNetRequest` permission and only changes page loads, not the extension's own requests.
 
-The header shows the extension's version (currently 1.12.1).
+The header shows the extension's version (currently 1.16.0).
 
 ## Batch Runner
 
@@ -33,6 +34,7 @@ extension/              the extension (this folder is what you load or zip)
   permissions-panel.js  Permissions tab
   compare-panel.js      Compare tab
   schema-panel.js       Search Schema tab
+  request-headers.js    Headers tab
   shared.js             helpers used by all tabs (dialog, tab requests)
   lib/batch.js          batch body parser and builder
   lib/response.js       multipart response parser, classification, Retry-After

@@ -1,12 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { jsonRule, pathsRegex, addPath, normalizePath, DEFAULT_PATHS } from '../extension/lib/json-header.js';
+import { headerRule, pathsRegex, addPath, normalizePath, normalizeHeader, setHeader, DEFAULT_PATHS, DEFAULT_HEADERS } from '../extension/lib/request-headers.js';
 
-test('rule sets Accept for main-frame page loads only', () => {
-  const r = jsonRule();
+test('default rule sets Accept JSON for main-frame page loads only', () => {
+  const r = headerRule();
   assert.deepEqual(r.condition.resourceTypes, ['main_frame']);
-  assert.equal(r.action.requestHeaders[0].header, 'Accept');
-  assert.match(r.action.requestHeaders[0].value, /^application\/json/);
+  assert.deepEqual(r.action.requestHeaders, [{ header: 'Accept', operation: 'set', value: 'application/json;odata=nometadata' }]);
+});
+
+test('every listed header is set', () => {
+  const r = headerRule(['/_api/'], [...DEFAULT_HEADERS, { name: 'Accept-Language', value: 'de-DE' }]);
+  assert.deepEqual(r.action.requestHeaders.map((h) => h.header), ['Accept', 'Accept-Language']);
+  assert.equal(r.action.requestHeaders[1].value, 'de-DE');
 });
 
 test('regex matches SharePoint URLs whose path contains a listed text', () => {
@@ -35,6 +40,18 @@ test('addPath trims, rejects unusable and duplicate paths', () => {
   assert.equal(normalizePath('  '), null);
 });
 
+test('headers: validation and replace by name', () => {
+  assert.deepEqual(normalizeHeader(' Accept-Language ', ' de-DE '), { name: 'Accept-Language', value: 'de-DE' });
+  assert.equal(normalizeHeader('Bad Name', 'x'), null);
+  assert.equal(normalizeHeader('X-Test', ''), null);
+  assert.equal(normalizeHeader('X-Test', 'a\r\nb: c'), null);
+  const list = setHeader(DEFAULT_HEADERS, 'accept', 'application/xml');
+  assert.deepEqual(list, [{ name: 'accept', value: 'application/xml' }]);
+  assert.equal(setHeader(list, 'X-A', 'v').length, 2);
+  assert.equal(setHeader(list, 'bad name', 'v'), list);
+});
+
 test('an empty list gives no rule', () => {
-  assert.equal(jsonRule([]), null);
+  assert.equal(headerRule([], DEFAULT_HEADERS), null);
+  assert.equal(headerRule(['/_api/'], []), null);
 });

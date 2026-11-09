@@ -113,6 +113,9 @@ async function postMappings(page, next, deleted) {
   const res = await postForm(url, body, rowLane, { redirect: 'manual' });
   if (res.type === 'opaqueredirect' || (res.status >= 300 && res.status < 400)) return;
   const msg = res.text ? pageError(parseHtml(res.text)) : '';
+  if (/SettingDoesNotExist/i.test(msg)) {
+    throw new Error('This crawled property is not in the search schema yet. Add a value to the column in at least one item, wait for (or request) a reindex of the list, then save again.');
+  }
   throw new Error(`Save rejected (HTTP ${res.status})${msg ? ': ' + msg : ''}`);
 }
 
@@ -336,6 +339,7 @@ function renderSuggestions() {
   const note = (text) => el('li', { class: 'perm-note', text });
   const notes = [];
   if (kind === 'crawled' && sch.columnsLoading) notes.push(note('Reading the list columns…'));
+  if (kind === 'crawled' && items.length) notes.push(note('Names come from the list columns. SharePoint creates a crawled property only after the column has a value in an item and the list was crawled; until then it is not in the search schema and saving fails.'));
   if (sch.site && !sch.statusAt) notes.push(note(sch.statusLoading || sch.columnsLoading ? 'Mapping status still loading; shown once it\'s read.' : 'Mapping status not loaded.'));
   combo.items = items;
   combo.active = -1;
