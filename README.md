@@ -8,9 +8,9 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 
 - **Batch Runner** sends SharePoint REST `$batch` requests that create lists, libraries and columns.
 - **Export Architecture** exports a site's lists, columns, views, content types and permissions to a CSV file, or as ready-made batches that rebuild the lists on another site.
-- **Navigation** builds the site's Quick Launch or top navigation from its lists, grouped by solution tag, with drag and drop.
+- **Navigation** builds the site's Quick Launch, top navigation or hub navigation from its lists, grouped by solution tag, with drag and drop. It can copy a navigation to another site and restore the one a site had before a save.
 - **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests.
-- **Compare** shows the differences in lists and columns between two open sites, e.g. dev and prod. It only reads.
+- **Compare** shows the differences in lists and columns between two sites, e.g. dev and prod, and can send the chosen differences to the Batch Runner. Comparing only reads.
 - **Search Schema** maps crawled properties (list columns) to `Refinable*` managed properties on the site collection, many at once.
 - **Headers** adds request headers (default `Accept: application/json`, optionally `Accept-Language`) when you open SharePoint URLs such as `/_api/` in a browser tab. This uses the `declarativeNetRequest` permission and only changes page loads, not the extension's own requests.
 
@@ -275,7 +275,7 @@ A text file can hold several stages:
 …
 ```
 
-Each `### STAGE: <name>` line starts a stage. The text up to the next marker must be a complete batch body. **Load batch file…** and **Load folder…** both understand this format. A file without markers is loaded as a single stage, as before.
+Each `### STAGE: <name>` line starts a stage. The text up to the next marker must be a complete batch body. **Load batch file…**, **Load folder…** and **Paste stages…** (paste the text instead of loading a file) all understand this format. A file or text without markers is loaded as a single stage. When stages already exist, you are asked whether to replace them or add the new ones at the end.
 
 ## Navigation
 
@@ -291,9 +291,15 @@ Links use the list's title and its root-folder URL. Both can be edited in the tr
 
 **Navigation** is the tree that will be saved. It starts as the navigation that is on the site now. Drag ⠿ to reorder; dropping on the top or bottom of an item puts it before or after, dropping on the middle nests it. With ⠿ focused, ↑/↓ reorder, → nests under the item above and ← moves out. SharePoint shows at most three levels, so deeper drops are refused. A heading without a link has an empty URL (saved as SharePoint's `http://linkless.header/`).
 
-**Which navigation** is read from the site: communication sites use the top navigation; team sites use the Quick Launch, whether it is shown on the left or, with the horizontal layout, at the top (SharePoint stores both as the Quick Launch). The panel says what it found, also when the site navigation is turned off. For other cases, such as classic sites that show both, a link below lets you edit the other navigation instead. Hub navigation is not changed.
+**Which navigation** is read from the site: communication sites use the top navigation; team sites use the Quick Launch, whether it is shown on the left or, with the horizontal layout, at the top (SharePoint stores both as the Quick Launch). The panel says what it found, also when the site navigation is turned off. For other cases, such as classic sites that show both, a link below lets you edit the other navigation instead. The Quick Launch is the default.
+
+**Hub navigation** is the top navigation of the hub site. On a site that belongs to a hub, a link "Edit the hub navigation … instead" reads and saves that navigation on the hub site (you need to be an owner of the hub site). The hub is found with `/_api/web/HubSiteData`, then the site collection's hub ID and `/_api/hubsites`. If no hub is found, the hint says why. On a hub site itself, the top navigation already is the hub navigation.
 
 **Save navigation** shows what will be added, renamed, removed and recreated, and sends nothing until you confirm. SharePoint can only add a node at the end of its level and can't move nodes, so a moved node, and everything after the first new or moved node on its level, is deleted and created again. Audience targeting on recreated nodes is lost. Nodes that stay in place keep their ID and settings. After saving, the tree is read again from SharePoint; reload the SharePoint page to see the result. Requests that fail are listed and the rest still run.
+
+**Copy and Paste…** move a navigation between sites. **Copy** puts the tree as shown (including unsaved edits) on the clipboard as JSON. Links into the current site are stored with `{{WebServerRelativeUrl}}`, so they follow the site you paste onto; other links stay as they are. **Paste…** asks for that text, then replaces the tree or adds the items at the end. Nothing is written until you Save. Links to lists point at the lists of the same URL on the new site, so create them there first.
+
+**Backup and Restore…:** every Save first keeps the navigation the site has (titles, links, nesting; the last 5 per site and navigation, in `chrome.storage.local`). **Restore…** lists them with date and size and loads the chosen one into the editor; Save then writes it back, and keeps a backup of what it replaced. Audience targeting and node IDs are not part of a backup.
 
 ## Permissions
 
@@ -321,9 +327,10 @@ How it is applied:
 
 **Compare** shows how the lists and columns of two sites differ, for example before moving changes from a dev site to prod. It only reads; nothing is changed on either site.
 
-1. Open the **target** site (e.g. prod) in the active tab, and the **source** site (e.g. dev) in another tab of the same browser. The source can be on another tenant.
-2. Switch to **Compare**. The target is the site in the active tab; pick the source from the open SharePoint tabs. **Reload tabs** reads the open tabs again. The target also follows when you switch tabs.
-3. **Compare** reads the lists and columns of both sites, each in its own tab with that tab's sign-in. System lists are left out unless **Include system lists** is checked. Keep both tabs open until it finishes.
+1. Open both sites in tabs of the same browser, e.g. dev (source) and prod (target). The source can be on another tenant.
+2. Switch to **Compare**. **Source** and **Target** are dropdowns of the open SharePoint sites; nothing is selected for you. **Add active tab** next to a dropdown adds the site of the tab you are on and selects it there. **Reload tabs** reads the open tabs again (each tab is read once, until it navigates).
+3. Optional: under **Lists** the lists of the source load when you choose it. Untick the ones to leave out; the checkbox above them marks all or none of the shown lists. Without this, all lists are compared.
+4. **Compare** reads the lists and columns of both sites, each in its own tab with that tab's sign-in. System lists are left out unless **Include system lists** is checked. Keep both tabs open until it finishes.
 
 How items are matched:
 
@@ -360,9 +367,20 @@ Using the results:
 - The chips at the top count lists and columns per status. Their checkboxes choose what is shown; *Not compared* is always shown.
 - **Custom columns only** (on at first) uses the same rule as the export: columns added to the list, plus `Title`.
 - The filter searches list titles, URLs, column names and internal names.
+- Every missing list, a list's changed settings, and every missing or changed column has a checkbox (ticked at first). The checkbox above the changes marks all or none of the shown ones. **Send n changes to Batch Runner** turns the ticked changes into stages: missing lists first (with their columns), then list settings, then columns, at most 50 operations per stage. The stages keep `{{WebUrl}}` and `{{WebServerRelativeUrl}}` instead of the target's URL, the Batch Runner's site field is set to the target, and the Batch Runner asks whether to replace or add to its stages. Nothing runs until you Preview and Run there. Not sent: managed metadata columns, changes SharePoint can't make in place, items that exist only in the target.
 - **Download CSV** saves what is shown as `<target title>-compare-<date>.csv`, in the same format as the architecture CSV (UTF-8 with BOM, `;`, formula guard). The CSV has one row per list or column, and one row per changed property, with the columns `Status`, `Item`, `List`, `ListUrl`, `Name`, `Title`, `Property`, `Source`, `Target` and `Note`.
 
 Views, content types and permissions are not compared yet.
+
+## Headers
+
+Adds request headers when you open a SharePoint URL in a browser tab. The default, `Accept: application/json;odata=nometadata`, makes `/_api/` URLs return JSON instead of XML, so the browser shows them readably. Add `Accept-Language` (e.g. `de-DE`) to read texts such as column titles in another language.
+
+- **Send the headers below** turns it on. It is off until you do.
+- **Headers:** name and value pairs; adding a name that is already there changes its value.
+- **Applies to paths containing:** URL path texts, default `/_api/`. Only `https://<tenant>.sharepoint.com/…` page loads whose path (before the `?`) contains one of them are changed.
+
+This is one `declarativeNetRequest` rule for top-level page loads in all tabs; the extension's own requests and the Batch Runner are not affected (batches carry their own headers). The rule is kept by the browser; the two lists are stored in `chrome.storage.local`.
 
 ## Search Schema
 
@@ -378,7 +396,9 @@ Using it:
 4. Click **×** on a mapping under a crawled property to remove it on save (**↶** undoes).
 5. **Save (+n −n)** shows the changes per crawled property, writes them, and reads each crawled property page back to confirm. Reindex the list or library afterwards so the values appear in search.
 
-The mapping status behind the suggestions comes from `listmanagedproperties.aspx` (filtered per `Refinable*` prefix, 50 rows per page). It is cached for an hour while the side panel is open; **Refresh status** reloads it. Reading it takes a while on big sites; until it is done, a line above the rows says so, and the suggestions show names without their mapping. Rows and the status are not stored: they are gone when the side panel closes.
+The mapping status behind the suggestions comes from `listmanagedproperties.aspx` (filtered per `Refinable*` prefix, 50 rows per page). It is cached for an hour while the side panel is open; **Refresh status** reloads it. Reading it takes a while on big sites; until it is done, a line above the rows says so, and the suggestions show names without their mapping. Rows and the status are not stored: they are gone when the side panel closes. While a save runs, the rows are locked.
+
+The suggestions for crawled properties come from the site's list columns. SharePoint creates a crawled property only after the column has a value in an item and the list was crawled; until then saving fails with *SettingDoesNotExist*, which the tab explains.
 
 ## Loading unpacked
 
@@ -408,9 +428,9 @@ For every update, raise `version` in `manifest.json` (patch for fixes, minor for
 ## Permissions and data
 
 - `host_permissions`: `https://*.sharepoint.com/*` only.
-- `permissions`: `scripting`, `sidePanel`, `storage`.
+- `permissions`: `declarativeNetRequest` (the Headers tab), `scripting`, `sidePanel`, `storage`.
 - Nothing is sent anywhere except the SharePoint site. There are no external libraries, no CDN and no analytics.
-- `chrome.storage.local` holds only the last site URL and the stage names and bodies. The export, the comparison, the navigation builder, the permissions tool and the search schema tool store nothing (the permissions plan lives only in the open side panel); the CSV is created in the side panel and downloaded directly.
+- `chrome.storage.local` holds the last site URL, the stage names and bodies, the Headers settings (header names and values, URL paths) and the navigation backups (titles, links and nesting of the last 5 navigations per site). The export, the comparison, the permissions tool and the search schema tool store nothing (the permissions plan lives only in the open side panel); the CSV is created in the side panel and downloaded directly.
 - Cookies are never read. The form digest is fetched and used inside the page and never returned to the extension, logged or stored. Run logs contain methods, URLs, status codes and error messages, but no request bodies.
 
 ## Known limits
