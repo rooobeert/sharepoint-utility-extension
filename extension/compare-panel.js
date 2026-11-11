@@ -9,7 +9,7 @@ import { createExporter } from './lib/exporter.js';
 import {
   compareSites, countStatuses, columnSummary, listStatus, filterView, diffRows, diffCsv, diffFileName, STATUSES, STATUS_LABELS,
 } from './lib/diff.js';
-import { settingsStage, settingsTransferable, columnStage, columnTransferable, listStages, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId } from './lib/transfer.js';
+import { settingsTransferable, columnTransferable, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId } from './lib/transfer.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -381,43 +381,7 @@ function listSubtitle(list) {
 }
 
 /** A button that hands the stages from `build()` to the Batch Runner (appended to its stages). */
-function sendButton(what, build, label = 'To Batch Runner') {
-  const b = el('button', { type: 'button', class: 'secondary small send', text: label, title: `Send ${what} to the Batch Runner as a stage. Nothing runs yet.` });
-  b.addEventListener('click', () => send(what, build()));
-  return b;
-}
-
-/** Tick box of one change: ticked changes go to the Batch Runner with "Selected to Batch Runner". */
-function pickBox(id) {
-  const box = el('input', { type: 'checkbox', 'aria-label': 'Include in the selection for the Batch Runner' });
-  box.checked = cmp.send.has(id);
-  box.addEventListener('change', () => {
-    if (box.checked) cmp.send.add(id);
-    else cmp.send.delete(id);
-    updateSelection();
-  });
-  return el('label', { title: 'Include in "Selected to Batch Runner"' }, box, 'Select');
-}
-
-/** Master box and send button above the lists, for the changes in the shown view. */
-function updateSelection() {
-  if (!cmp.result) return;
-  const items = changeItems(currentView());
-  const ticked = items.filter((i) => cmp.send.has(i.id)).length;
-  ui.pickAll.checked = !!items.length && ticked === items.length;
-  ui.pickAll.indeterminate = ticked > 0 && ticked < items.length;
-  ui.pickAll.disabled = !items.length;
-  ui.pickText.textContent = items.length ? `${ticked} of ${items.length} changes selected` : 'No changes to send';
-  ui.sendAll.textContent = ticked ? `Selected to Batch Runner (${ticked})` : 'Selected to Batch Runner';
-  ui.sendAll.disabled = !ticked;
-}
-
-function setSendPicked(on) {
-  for (const { id } of changeItems(currentView())) (on ? cmp.send.add(id) : cmp.send.delete(id));
-  renderLists();
-}
-
-/** Hand stages to the Batch Runner (appended to its stages) and switch to it; it is set to the target site. */
+/** Hand stages to the Batch Runner (it asks whether to replace or add to its stages) and switch to it; it is set to the target site. */
 function send(what, built) {
   const stages = [built].flat().filter(Boolean);
   if (!stages.length) {
@@ -426,7 +390,7 @@ function send(what, built) {
   }
   document.getElementById('tab-batch').click();
   document.dispatchEvent(new CustomEvent('sp-utility:load-stages', {
-    detail: { stages, append: true, site: cmp.result.ctx.targetSite, label: `${what} from Compare` },
+    detail: { stages, site: cmp.result.ctx.targetSite, label: `${what} from Compare` },
   }));
 }
 
@@ -434,30 +398,24 @@ function listBody({ list, columns, showSettings }) {
   const body = [];
   if (list.status === 'missing') {
     body.push(el('p', { class: 'hint', text: 'The whole list is missing in the target.' }));
-    if (list.item && list.item.list) body.push(el('div', { class: 'cmp-send' }, pickBox(listChangeId(list)), sendButton(`creating "${list.title}"`, () => listStages(list, cmp.result.ctx))));
+    if (list.item && list.item.list) body.push(el('label', { class: 'cmp-col' }, pickBox(listChangeId(list), 'Create this list in the target'), el('span', { class: 'main', text: 'Create this list (with its columns) in the target' })));
   }
   if (list.status === 'only') body.push(el('p', { class: 'hint', text: 'This list exists only in the target.' }));
   if (list.status === 'error') body.push(el('div', { class: 'msg fail', text: `Not compared: ${list.error}.` }));
   if (list.note) body.push(el('div', { class: 'msg info cmp-note', text: list.note }));
   if (showSettings && list.diffs.length) {
     body.push(el('p', { class: 'summary-text cmp-settings-h', text: 'List settings' }), el('ul', { class: 'cmp-diff cmp-props' }, list.diffs.map(diffItem)));
-    if (settingsTransferable(list)) body.push(el('div', { class: 'cmp-send' }, pickBox(settingsChangeId(list)), sendButton(`the settings of "${list.title}"`, () => settingsStage(list))));
+    if (settingsTransferable(list)) body.push(el('label', { class: 'cmp-col' }, pickBox(settingsChangeId(list), 'Apply these list settings in the target'), el('span', { class: 'main', text: 'Apply these list settings in the target' })));
   }
   if (columns.length) {
-    const head = el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' })));
-    const rows = columns.map((c) => {
-      const send1 = columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null;
-      return el('tr', {},
-        el('td', {},
-          el('span', { class: 'cname', text: c.title }),
-          el('span', { class: 'iname', text: c.name }),
-          c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
-          c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null,
-          send1 ? el('div', { class: 'cmp-send' }, pickBox(columnChangeId(list, c)), send1) : null),
-        el('td', { class: 'kind', text: c.type }),
-        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] })));
-    });
-    body.push(el('table', { class: 'cmp-table' }, head, el('tbody', {}, rows)));
+    body.push(el('div', { class: 'cmp-cols' }, columns.map((c) => el('div', { class: 'cmp-col' },
+      columnTransferable(c) ? pickBox(columnChangeId(list, c), `Send column ${c.title} to the Batch Runner`) : el('span', { class: 'cmp-nobox' }),
+      el('div', { class: 'main' },
+        el('span', { class: 'cname', text: c.title }),
+        el('span', { class: 'iname', text: c.name }),
+        c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
+        c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null),
+      el('div', { class: 'meta' }, el('span', { text: c.type }), el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] }))))));
   }
   return el('div', { class: 'check-body' }, body);
 }

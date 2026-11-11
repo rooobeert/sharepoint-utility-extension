@@ -14,7 +14,7 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 - **Search Schema** maps crawled properties (list columns) to `Refinable*` managed properties on the site collection, many at once.
 - **Headers** adds request headers (default `Accept: application/json`, optionally `Accept-Language`) when you open SharePoint URLs such as `/_api/` in a browser tab. This uses the `declarativeNetRequest` permission and only changes page loads, not the extension's own requests.
 
-The header shows the extension's version (currently 1.22.0).
+The header shows the extension's version (currently 1.22.1).
 
 ## Batch Runner
 

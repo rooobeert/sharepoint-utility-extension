@@ -415,11 +415,10 @@
         <label class="check-label"><input id="cmp-custom" type="checkbox" checked> Custom columns only</label>
         <div class="cmp-pickbar">
           <label class="check-label cmp-master"><input id="cmp-pick-all" type="checkbox"> <span id="cmp-pick-text">Changes to send</span></label>
-          <button id="cmp-send-all" type="button" class="secondary small" title="Send the ticked changes to the Batch Runner as stages. Nothing runs yet.">Selected to Batch Runner</button>
         </div>
         <div id="cmp-lists"></div>
         <p id="cmp-empty" class="empty" hidden>Nothing to show for the checked statuses.</p>
-        <div class="row"><button id="cmp-download" type="button" class="secondary small">Download CSV</button></div>
+        <div class="row cmp-foot"><button id="cmp-send-all" type="button" class="primary" disabled title="Send the ticked changes to the Batch Runner as stages. Nothing runs yet.">Send changes to Batch Runner</button><button id="cmp-download" type="button" class="secondary">Download CSV</button></div>
       </div>
     </section>
   </main>
