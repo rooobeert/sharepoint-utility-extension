@@ -380,7 +380,36 @@ function listSubtitle(list) {
   return [settings, cols].filter(Boolean).join(' · ') || 'no differences';
 }
 
-/** A button that hands the stages from `build()` to the Batch Runner (appended to its stages). */
+/** Tick box of one change: ticked changes go to the Batch Runner with the button at the bottom. */
+function pickBox(id, label) {
+  const box = el('input', { type: 'checkbox', 'aria-label': label });
+  box.checked = cmp.send.has(id);
+  box.addEventListener('change', () => {
+    if (box.checked) cmp.send.add(id);
+    else cmp.send.delete(id);
+    updateSelection();
+  });
+  return box;
+}
+
+/** Master box and send button, for the changes in the shown view. */
+function updateSelection() {
+  if (!cmp.result) return;
+  const items = changeItems(currentView());
+  const ticked = items.filter((i) => cmp.send.has(i.id)).length;
+  ui.pickAll.checked = !!items.length && ticked === items.length;
+  ui.pickAll.indeterminate = ticked > 0 && ticked < items.length;
+  ui.pickAll.disabled = !items.length;
+  ui.pickText.textContent = items.length ? `${ticked} of ${items.length} changes selected` : 'No changes to send';
+  ui.sendAll.textContent = ticked ? `Send ${plural(ticked, 'change')} to Batch Runner` : 'Send changes to Batch Runner';
+  ui.sendAll.disabled = !ticked;
+}
+
+function setSendPicked(on) {
+  for (const { id } of changeItems(currentView())) (on ? cmp.send.add(id) : cmp.send.delete(id));
+  renderLists();
+}
+
 /** Hand stages to the Batch Runner (it asks whether to replace or add to its stages) and switch to it; it is set to the target site. */
 function send(what, built) {
   const stages = [built].flat().filter(Boolean);

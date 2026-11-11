@@ -396,6 +396,8 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 /* Compare tab */
 .cmp-sites { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 8px; align-items: center; margin-top: 6px; }
 .cmp-sites > label, .cmp-sites > .lbl { font-size: 12px; color: var(--muted); }
+.cmp-sites button.small { margin: 0; }
+.cmp-sites select, .cmp-sites button.small { box-sizing: border-box; height: 30px; }
 .cmp-sites select { width: 100%; min-width: 0; padding: 5px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font: inherit; }
 .cmp-counts { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 8px 0 4px; }
 .cmp-counts label { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; cursor: pointer; }
