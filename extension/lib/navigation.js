@@ -30,6 +30,20 @@ export function parseHubSite(json) {
   return /^https:\/\//i.test(url) ? { url, name: String(data.name || '') } : null;
 }
 
+const NO_GUID = /^\{?0{8}-0{4}-0{4}-0{4}-0{12}\}?$/;
+const bareGuid = (g) => String(g || '').replace(/[{}]/g, '').toLowerCase();
+
+/** The hub a site collection belongs to, from /_api/site (HubSiteId, IsHubSite, Url) and /_api/hubsites. Returns { url, name } or null. */
+export function hubFromSite(site, hubSites) {
+  if (site && site.IsHubSite && site.Url) return { url: String(site.Url).replace(/\/+$/, ''), name: '' };
+  const id = bareGuid(site && site.HubSiteId);
+  if (!id || NO_GUID.test(id)) return null;
+  const list = (hubSites && (hubSites.value || (hubSites.d && hubSites.d.results))) || [];
+  const hit = list.find((h) => bareGuid(h.SiteId || h.ID || h.Id) === id);
+  const url = hit && (hit.SiteUrl || hit.Url);
+  return url ? { url: String(url).replace(/\/+$/, ''), name: String(hit.Title || '') } : null;
+}
+
 /** SharePoint's URL for a heading that is only a label (what the modern UI uses). */
 export const LINKLESS = 'http://linkless.header/';
 

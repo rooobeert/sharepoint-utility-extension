@@ -391,3 +391,13 @@ test('parseHubSite reads HubSiteData in its string and object forms', () => {
   assert.equal(parseHubSite({ value: 'not json' }), null);
   assert.equal(parseHubSite({ url: 'http://x/y' }), null);
 });
+
+import { hubFromSite } from '../extension/lib/navigation.js';
+
+test('hubFromSite: hub site itself, associated site, no hub', () => {
+  assert.deepEqual(hubFromSite({ IsHubSite: true, Url: 'https://t.sharepoint.com/sites/hub/' }, null), { url: 'https://t.sharepoint.com/sites/hub', name: '' });
+  const hubs = { value: [{ SiteId: 'AAAA0000-0000-0000-0000-000000000001', SiteUrl: 'https://t.sharepoint.com/sites/intranet', Title: 'Intranet' }] };
+  assert.deepEqual(hubFromSite({ HubSiteId: '{aaaa0000-0000-0000-0000-000000000001}' }, hubs), { url: 'https://t.sharepoint.com/sites/intranet', name: 'Intranet' });
+  assert.equal(hubFromSite({ HubSiteId: '00000000-0000-0000-0000-000000000000' }, hubs), null);
+  assert.equal(hubFromSite({ HubSiteId: 'bbbb0000-0000-0000-0000-000000000002' }, hubs), null);
+});

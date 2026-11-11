@@ -3,7 +3,9 @@
 // SharePoint tab through `request` (pageRequest).
 
 import { extractError, isThrottled, retryAfterMs } from './response.js';
-import { NAV_TARGETS, MAX_DEPTH, sharePointUrl, parseHubSite } from './navigation.js';
+import { NAV_TARGETS, MAX_DEPTH, sharePointUrl, parseHubSite, hubFromSite } from './navigation.js';
+
+const bareNonEmpty = (g) => !!g && !/^\{?0{8}-0{4}-0{4}-0{4}-0{12}\}?$/.test(String(g));
 
 export const MAX_RETRIES = 3;
 
@@ -69,14 +71,33 @@ export function createNavigator({ request, sleep = defaultSleep, onEvent = () =>
     }
   }
 
-  /** The hub site the web belongs to (or is): { url, name }, or null when it has none or it can't be read. */
+  /**
+   * The hub site the web belongs to (or is). Tries HubSiteData, then the site collection's HubSiteId
+   * with the list of hub sites. Returns { hub: { url, name } | null, note } (note says why not found).
+   */
   async function hub(site) {
-    try {
-      return parseHubSite(await call(site, '/_api/web/HubSiteData'));
-    } catch (e) {
-      if (!(e instanceof NavError)) throw e;
+    const notes = [];
+    const attempt = async (label, path, fn) => {
+      try {
+        const found = fn(await call(site, path));
+        if (found) return found;
+        notes.push(`${label}: no hub`);
+      } catch (e) {
+        if (!(e instanceof NavError)) throw e;
+        notes.push(`${label}: ${e.message}`);
+      }
       return null;
+    };
+    let found = await attempt('HubSiteData', '/_api/web/HubSiteData(false)', parseHubSite)
+      || await attempt('HubSiteData', '/_api/web/HubSiteData', parseHubSite);
+    if (!found) {
+      let siteInfo = null;
+      await attempt('site', '/_api/site?$select=HubSiteId,IsHubSite,Url', (j) => { siteInfo = j; return null; });
+      if (siteInfo && (siteInfo.IsHubSite || bareNonEmpty(siteInfo.HubSiteId))) {
+        found = await attempt('hubsites', '/_api/hubsites', (j) => hubFromSite(siteInfo, j));
+      }
     }
+    return { hub: found, note: found ? '' : notes.join('; ') };
   }
 
   /** The navigation as REST nodes with Children, up to MAX_DEPTH levels. */

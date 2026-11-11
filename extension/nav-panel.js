@@ -69,6 +69,7 @@ const nav = {
   web: null,
   lists: [],
   target: null, // 'quicklaunch' | 'topnav' | 'hub'
+  hubNote: '', // why no hub was found
   hub: null, // { url, name } of the hub site the site belongs to or is, if any
   detected: null, // detectNavigation() of the site
   original: [], // tree as read from SharePoint
@@ -182,7 +183,7 @@ async function loadAll() {
     ui.site.replaceChildren(el('strong', { text: data.web.Title }), el('span', { class: 'exp-url', text: data.web.Url }));
     const navigator = createNavigator({ request: nav.request });
     nav.detected = detectNavigation(await navigator.settings(site));
-    nav.hub = await navigator.hub(site);
+    ({ hub: nav.hub, note: nav.hubNote } = await navigator.hub(site));
     if (nav.target === 'hub' && !nav.hub) nav.target = null;
     if (!nav.target) nav.target = 'quicklaunch'; // almost always what is edited, whatever the site detects
     await loadNav();
@@ -205,7 +206,7 @@ async function loadNav() {
     : NAV_TARGETS[nav.target].label + (nav.target === d.target ? '' : ' (chosen instead of the detected one)');
   ui.targetHint.textContent = isHub
     ? `The top navigation of the hub site ${nav.hub.url}, shown on every site of the hub. You need to be an owner of the hub site to save it.`
-    : `${d.text}${hubIsHere ? ' This is a hub site: its top navigation is the hub navigation of all associated sites.' : ''}`;
+    : `${d.text}${hubIsHere ? ' This is a hub site: its top navigation is the hub navigation of all associated sites.' : ''}${nav.hub ? '' : ` Hub navigation: no hub found (${nav.hubNote || 'not part of a hub'}).`}`;
   ui.switchTarget.hidden = false;
   ui.switchTarget.textContent = isHub || other === d.target ? `Back to the ${NAV_TARGETS[other].label}` : `Edit the ${NAV_TARGETS[other].label} instead`;
   // A hub site's own top navigation already is the hub navigation, so the extra choice is for associated sites.
