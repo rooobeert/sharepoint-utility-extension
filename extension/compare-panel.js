@@ -9,7 +9,7 @@ import { createExporter } from './lib/exporter.js';
 import {
   compareSites, countStatuses, columnSummary, listStatus, filterView, diffRows, diffCsv, diffFileName, STATUSES, STATUS_LABELS,
 } from './lib/diff.js';
-import { settingsStage, settingsTransferable, columnStage, columnTransferable, listStages } from './lib/transfer.js';
+import { settingsStage, settingsTransferable, columnStage, columnTransferable, listStages, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId } from './lib/transfer.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -32,11 +32,14 @@ const ui = {
   lists: $('cmp-lists'),
   empty: $('cmp-empty'),
   download: $('cmp-download'),
+  sendAll: $('cmp-send-all'),
   scopeSum: $('cmp-scope-sum'),
   scopeLoad: $('cmp-scope-load'),
   scopeFilter: $('cmp-scope-filter'),
-  scopeAll: $('cmp-scope-all'),
-  scopeNone: $('cmp-scope-none'),
+  scopeMaster: $('cmp-scope-master'),
+  scopeMasterText: $('cmp-scope-master-text'),
+  pickAll: $('cmp-pick-all'),
+  pickText: $('cmp-pick-text'),
   scopeRows: $('cmp-scope-rows'),
 };
 
@@ -46,6 +49,7 @@ const cmp = {
   loading: null, // the running loadSites(), so calls don't overlap
   sites: [], // [{ tabId, site, title, manual }]: open SharePoint sites and the ones added by hand
   result: null, // { lists, source, target }
+  send: new Set(), // ids of the changes ticked for the Batch Runner (see lib/transfer.js)
   scope: null, // null = all lists; else { lists: [{ key, title, rel, system }], picked: Set of keys } of the chosen source
   statuses: new Set(['missing', 'changed', 'only']),
 };
@@ -195,6 +199,8 @@ const listKey = (l, web) => webRelative(l.url, web.ServerRelativeUrl).toLowerCas
 function clearScope() {
   cmp.scope = null;
   ui.scopeRows.replaceChildren();
+  ui.scopeMaster.checked = ui.scopeMaster.indeterminate = false;
+  ui.scopeMasterText.textContent = 'All lists';
   ui.scopeSum.textContent = 'Lists: all';
 }
 
@@ -261,6 +267,12 @@ function renderScope() {
     return el('label', {}, box, l.title, el('span', { class: 'exp-url', text: l.rel }));
   }));
   ui.scopeSum.textContent = `Lists: ${cmp.scope.picked.size} of ${cmp.scope.lists.length} chosen`;
+  const shown = scopeShown();
+  const on = shown.filter((l) => cmp.scope.picked.has(l.key)).length;
+  ui.scopeMaster.checked = !!shown.length && on === shown.length;
+  ui.scopeMaster.indeterminate = on > 0 && on < shown.length;
+  ui.scopeMaster.disabled = !shown.length;
+  ui.scopeMasterText.textContent = shown.length ? `${on} of ${shown.length} shown lists` : 'No lists';
 }
 
 // ---------------------------------------------------------------- compare
@@ -369,46 +381,83 @@ function listSubtitle(list) {
 }
 
 /** A button that hands the stages from `build()` to the Batch Runner (appended to its stages). */
-function sendButton(what, build) {
-  const b = el('button', { type: 'button', class: 'secondary small', text: 'To Batch Runner', title: `Send ${what} to the Batch Runner as a stage. Nothing runs yet.` });
-  b.addEventListener('click', () => {
-    const stages = [build()].flat().filter(Boolean);
-    if (!stages.length) {
-      setStatus(`Nothing to send for ${what}.`);
-      return;
-    }
-    document.getElementById('tab-batch').click();
-    document.dispatchEvent(new CustomEvent('sp-utility:load-stages', {
-      detail: { stages, append: true, label: `${what} from Compare` },
-    }));
-  });
+function sendButton(what, build, label = 'To Batch Runner') {
+  const b = el('button', { type: 'button', class: 'secondary small send', text: label, title: `Send ${what} to the Batch Runner as a stage. Nothing runs yet.` });
+  b.addEventListener('click', () => send(what, build()));
   return b;
+}
+
+/** Tick box of one change: ticked changes go to the Batch Runner with "Selected to Batch Runner". */
+function pickBox(id) {
+  const box = el('input', { type: 'checkbox', 'aria-label': 'Include in the selection for the Batch Runner' });
+  box.checked = cmp.send.has(id);
+  box.addEventListener('change', () => {
+    if (box.checked) cmp.send.add(id);
+    else cmp.send.delete(id);
+    updateSelection();
+  });
+  return el('label', { title: 'Include in "Selected to Batch Runner"' }, box, 'Select');
+}
+
+/** Master box and send button above the lists, for the changes in the shown view. */
+function updateSelection() {
+  if (!cmp.result) return;
+  const items = changeItems(currentView());
+  const ticked = items.filter((i) => cmp.send.has(i.id)).length;
+  ui.pickAll.checked = !!items.length && ticked === items.length;
+  ui.pickAll.indeterminate = ticked > 0 && ticked < items.length;
+  ui.pickAll.disabled = !items.length;
+  ui.pickText.textContent = items.length ? `${ticked} of ${items.length} changes selected` : 'No changes to send';
+  ui.sendAll.textContent = ticked ? `Selected to Batch Runner (${ticked})` : 'Selected to Batch Runner';
+  ui.sendAll.disabled = !ticked;
+}
+
+function setSendPicked(on) {
+  for (const { id } of changeItems(currentView())) (on ? cmp.send.add(id) : cmp.send.delete(id));
+  renderLists();
+}
+
+/** Hand stages to the Batch Runner (appended to its stages) and switch to it; it is set to the target site. */
+function send(what, built) {
+  const stages = [built].flat().filter(Boolean);
+  if (!stages.length) {
+    setStatus(`Nothing to send for ${what}.`);
+    return;
+  }
+  document.getElementById('tab-batch').click();
+  document.dispatchEvent(new CustomEvent('sp-utility:load-stages', {
+    detail: { stages, append: true, site: cmp.result.ctx.targetSite, label: `${what} from Compare` },
+  }));
 }
 
 function listBody({ list, columns, showSettings }) {
   const body = [];
   if (list.status === 'missing') {
     body.push(el('p', { class: 'hint', text: 'The whole list is missing in the target.' }));
-    if (list.item && list.item.list) body.push(el('div', { class: 'row' }, sendButton(`creating "${list.title}"`, () => listStages(list, cmp.result.ctx))));
+    if (list.item && list.item.list) body.push(el('div', { class: 'cmp-send' }, pickBox(listChangeId(list)), sendButton(`creating "${list.title}"`, () => listStages(list, cmp.result.ctx))));
   }
   if (list.status === 'only') body.push(el('p', { class: 'hint', text: 'This list exists only in the target.' }));
   if (list.status === 'error') body.push(el('div', { class: 'msg fail', text: `Not compared: ${list.error}.` }));
   if (list.note) body.push(el('div', { class: 'msg info cmp-note', text: list.note }));
   if (showSettings && list.diffs.length) {
     body.push(el('p', { class: 'summary-text cmp-settings-h', text: 'List settings' }), el('ul', { class: 'cmp-diff cmp-props' }, list.diffs.map(diffItem)));
-    if (settingsTransferable(list)) body.push(el('div', { class: 'row' }, sendButton(`the settings of "${list.title}"`, () => settingsStage(list, cmp.result.ctx.targetSite))));
+    if (settingsTransferable(list)) body.push(el('div', { class: 'cmp-send' }, pickBox(settingsChangeId(list)), sendButton(`the settings of "${list.title}"`, () => settingsStage(list))));
   }
   if (columns.length) {
-    body.push(el('table', { class: 'cmp-table' },
-      el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' })))),
-      el('tbody', {}, columns.map((c) => el('tr', {},
+    const head = el('thead', {}, el('tr', {}, el('th', { text: 'Column' }), el('th', { class: 'kind', text: 'Type' }), el('th', { class: 'st', text: 'Status' })));
+    const rows = columns.map((c) => {
+      const send1 = columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null;
+      return el('tr', {},
         el('td', {},
-          c.title, el('span', { class: 'iname', text: c.name }),
+          el('span', { class: 'cname', text: c.title }),
+          el('span', { class: 'iname', text: c.name }),
           c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
           c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null,
-          columnTransferable(c) ? sendButton(`column "${c.title}"`, () => columnStage(list, c, cmp.result.ctx)) : null),
+          send1 ? el('div', { class: 'cmp-send' }, pickBox(columnChangeId(list, c)), send1) : null),
         el('td', { class: 'kind', text: c.type }),
-        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] }))))));
+        el('td', { class: 'st' }, el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] })));
+    });
+    body.push(el('table', { class: 'cmp-table' }, head, el('tbody', {}, rows)));
   }
   return el('div', { class: 'check-body' }, body);
 }
@@ -436,10 +485,13 @@ function renderLists() {
   }));
   ui.empty.hidden = view.length > 0;
   ui.download.disabled = view.length === 0;
+  updateSelection();
 }
 
 function renderResult() {
   openLists.clear();
+  // Everything that can be sent starts ticked, whatever the filter hides.
+  cmp.send = new Set(changeItems(filterView(cmp.result.lists, { statuses: [...STATUSES], customOnly: false })).map((i) => i.id));
   renderCounts();
   renderLists();
 }
@@ -479,11 +531,12 @@ ui.target.addEventListener('change', updateRunButton);
 ui.scopeLoad.addEventListener('click', loadScope);
 ui.scopeFilter.addEventListener('input', renderScope);
 ui.system.addEventListener('change', () => cmp.scope && renderScope());
-ui.scopeAll.addEventListener('click', () => setPicked(true));
-ui.scopeNone.addEventListener('click', () => setPicked(false));
+ui.scopeMaster.addEventListener('change', () => setPicked(ui.scopeMaster.checked));
+ui.pickAll.addEventListener('change', () => setSendPicked(ui.pickAll.checked));
 ui.addSource.addEventListener('click', () => addActive(ui.source));
 ui.addTarget.addEventListener('click', () => addActive(ui.target));
 ui.run.addEventListener('click', runCompare);
 ui.filter.addEventListener('input', () => cmp.result && renderLists());
 ui.custom.addEventListener('change', () => cmp.result && (renderCounts(), renderLists()));
 ui.download.addEventListener('click', download);
+ui.sendAll.addEventListener('click', () => send('the selected changes', allStages(currentView(), cmp.result.ctx, (id) => cmp.send.has(id))));

@@ -1,12 +1,11 @@
-// "Compare" -> Batch Runner: turns one difference into a stage that makes the
-// target match the source. Pure functions: no DOM, no chrome.* APIs.
+// "Compare" -> Batch Runner: turns differences into stages that make the target match
+// the source. Pure functions: no DOM, no chrome.* APIs.
 //
-// A stage is { name, body } like the ones the Batch Runner loads from a file.
-// The target's URLs are written into the operations (no {{WebUrl}}), so the
-// Batch Runner takes the target site from the batch, not from the active tab.
-// Only {{ListId:...}} placeholders for lookups remain; the Batch Runner resolves them.
+// A stage is { name, body } like the ones the Batch Runner loads from a file. URLs keep the
+// {{WebUrl}} / {{WebServerRelativeUrl}} placeholders (and {{ListId:...}} for lookups), so the
+// stages run on whichever site the Batch Runner is set to; the Compare tab sets it to the target.
 
-import { buildProvisioning, batchText, op, cleanFieldXml, listEndpoint } from './provision.js';
+import { buildProvisioning, batchText, op, cleanFieldXml, listEndpoint, MAX_OPS_PER_STAGE } from './provision.js';
 
 const items = (v) => (Array.isArray(v) ? v : (v && (v.Items || v.results)) || []);
 const SP_LIST = { __metadata: { type: 'SP.List' } };
@@ -44,20 +43,19 @@ const COLUMN_API = {
 
 const FIELD_TYPES = { Text: 'SP.FieldText', Note: 'SP.FieldMultiLineText', Choice: 'SP.FieldChoice', MultiChoice: 'SP.FieldMultiChoice', Calculated: 'SP.FieldCalculated', Number: 'SP.FieldNumber' };
 
-/** Put the target's URLs in place of the site placeholders. */
-export function forTarget(text, targetSite) {
-  const site = String(targetSite).replace(/\/+$/, '');
-  const path = new URL(site).pathname.replace(/\/+$/, '');
-  return text.replace(/\{\{\s*WebUrl\s*\}\}/gi, site).replace(/\{\{\s*WebServerRelativeUrl\s*\}\}/gi, path);
+const stage = (name, ops) => ({ name, body: batchText(ops) + '\n' });
+
+/** Operations of `ops` in stages of at most MAX_OPS_PER_STAGE, named "name (1/2)". */
+function stagesOf(name, ops) {
+  if (!ops.length) return [];
+  const n = Math.ceil(ops.length / MAX_OPS_PER_STAGE);
+  return Array.from({ length: n }, (_, i) => stage(n > 1 ? `${name} (${i + 1}/${n})` : name, ops.slice(i * MAX_OPS_PER_STAGE, (i + 1) * MAX_OPS_PER_STAGE)));
 }
 
-const stage = (name, ops, targetSite) => ({ name, body: forTarget(batchText(ops), targetSite) + '\n' });
+// ---------------------------------------------------------------- operations
 
-/** Does the transfer of this list's settings have anything to send? */
-export const settingsTransferable = (list) => !!list.item && list.diffs.some((d) => LIST_API[d.prop]);
-
-/** MERGE of the changed list settings, with the source's values. Null if none of them can be changed. */
-export function settingsStage(list, targetSite) {
+/** MERGE of the changed list settings, with the source's values; null if none of them can be changed. */
+function settingsOp(list) {
   if (!list.item || !list.item.list) return null;
   const body = { ...SP_LIST };
   for (const d of list.diffs) {
@@ -65,40 +63,101 @@ export function settingsStage(list, targetSite) {
     const [name, value] = LIST_API[d.prop](list.item.list);
     if (value !== undefined) body[name] = value;
   }
-  if (Object.keys(body).length < 2) return null;
-  return stage(`${list.title}: list settings`, [op('MERGE', listEndpoint(list.rel), body, { merge: true })], targetSite);
+  return Object.keys(body).length < 2 ? null : op('MERGE', listEndpoint(list.rel), body, { merge: true });
 }
+
+export const settingsTransferable = (list) => !!settingsOp(list);
 
 export const columnTransferable = (col) => !!col.field && (col.status === 'missing'
   ? !/^TaxonomyFieldType/i.test(col.type || '') && !!col.field.SchemaXml
   : col.status === 'changed' && col.diffs.some((d) => !d.blocked && COLUMN_API[d.prop]));
 
-/** CreateFieldAsXml for a missing column, MERGE of the changed properties for a changed one. Null if there is nothing to send. */
-export function columnStage(list, col, ctx) {
+/** CreateFieldAsXml for a missing column, MERGE of the changed properties for a changed one; null if there is nothing to send. */
+function columnOp(list, col, ctx) {
   if (!columnTransferable(col)) return null;
   const endpoint = listEndpoint(list.rel);
-  const name = `${list.title}: column "${col.title}"`;
   if (col.status === 'missing') {
     const listsById = Object.fromEntries((ctx.allLists || []).map((l) => [l.id, { title: l.title, url: l.url }]));
     const { xml } = cleanFieldXml(col.field.SchemaXml, listsById, ctx.web.ServerRelativeUrl);
-    return stage(name, [op('POST', `${endpoint}/fields/CreateFieldAsXml`, {
+    return op('POST', `${endpoint}/fields/CreateFieldAsXml`, {
       parameters: { __metadata: { type: 'SP.XmlSchemaFieldCreationInformation' }, SchemaXml: xml, Options: 24 },
-    })], ctx.targetSite);
+    });
   }
-  const type = FIELD_TYPES[col.field.TypeAsString] || 'SP.Field';
-  const body = { __metadata: { type } };
+  const body = { __metadata: { type: FIELD_TYPES[col.field.TypeAsString] || 'SP.Field' } };
   for (const d of col.diffs) {
     if (d.blocked || !COLUMN_API[d.prop]) continue;
     const [key, value] = COLUMN_API[d.prop](col.field);
     if (value !== undefined) body[key] = value;
   }
   if (Object.keys(body).length < 2) return null;
-  return stage(name, [op('MERGE', `${endpoint}/fields/getByInternalNameOrTitle('${col.name.replace(/'/g, "''")}')`, body, { merge: true })], ctx.targetSite);
+  return op('MERGE', `${endpoint}/fields/getByInternalNameOrTitle('${col.name.replace(/'/g, "''")}')`, body, { merge: true });
+}
+
+// ---------------------------------------------------------------- stages
+
+export function settingsStage(list) {
+  const o = settingsOp(list);
+  return o ? stage(`${list.title}: list settings`, [o]) : null;
+}
+
+export function columnStage(list, col, ctx) {
+  const o = columnOp(list, col, ctx);
+  return o ? stage(`${list.title}: column "${col.title}"`, [o]) : null;
 }
 
 /** A list missing in the target: create it with its settings and columns (stages as in the architecture export). */
 export function listStages(list, ctx) {
-  if (!list.item || !list.item.list) return [];
-  const { stages } = buildProvisioning({ web: ctx.web, allLists: ctx.allLists || [], lists: [list.item] });
-  return stages.map((s) => ({ name: `${list.title}: ${s.name}`, body: forTarget(batchText(s.ops), ctx.targetSite) + '\n' }));
+  return provisionStages([list], ctx, `${list.title}: `);
+}
+
+function provisionStages(lists, ctx, prefix = '') {
+  const withData = lists.filter((l) => l.item && l.item.list);
+  if (!withData.length) return [];
+  const { stages } = buildProvisioning({ web: ctx.web, allLists: ctx.allLists || [], lists: withData.map((l) => l.item) });
+  return stages.map((s) => ({ name: `${prefix}${s.name}`, body: batchText(s.ops) + '\n' }));
+}
+
+// ---------------------------------------------------------------- choosing changes
+
+/** Ids of the changes that can be sent: a missing list, a list's changed settings, a missing or changed column. */
+export const listChangeId = (list) => `L:${list.key}`;
+export const settingsChangeId = (list) => `S:${list.key}`;
+export const columnChangeId = (list, col) => `C:${list.key}:${col.name}`;
+
+/** The changes of a view (filterView output) that can be sent: [{ id }]. */
+export function changeItems(view) {
+  const out = [];
+  for (const { list, columns, showSettings } of view) {
+    if (list.status === 'missing') {
+      if (list.item && list.item.list) out.push({ id: listChangeId(list) });
+      continue;
+    }
+    if (showSettings && settingsTransferable(list)) out.push({ id: settingsChangeId(list) });
+    for (const c of columns) if (columnTransferable(c)) out.push({ id: columnChangeId(list, c) });
+  }
+  return out;
+}
+
+/**
+ * The changes in the shown view (filterView output) as stages: missing lists first (as in the
+ * architecture export), then changed list settings, then missing and changed columns.
+ * `pick(id)` leaves out the changes it returns false for (default: all).
+ */
+export function allStages(view, ctx, pick = () => true) {
+  const missing = view.filter((v) => v.list.status === 'missing' && pick(listChangeId(v.list))).map((v) => v.list);
+  const settings = [];
+  const columns = [];
+  for (const { list, columns: cols, showSettings } of view) {
+    if (list.status === 'missing') continue; // its columns come with the list
+    if (showSettings && pick(settingsChangeId(list))) {
+      const o = settingsOp(list);
+      if (o) settings.push(o);
+    }
+    for (const c of cols) {
+      if (!pick(columnChangeId(list, c))) continue;
+      const o = columnOp(list, c, ctx);
+      if (o) columns.push(o);
+    }
+  }
+  return [...provisionStages(missing, ctx), ...stagesOf('List settings', settings), ...stagesOf('Columns', columns)];
 }

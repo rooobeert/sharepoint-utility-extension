@@ -393,9 +393,8 @@
           <div class="row exp-filters">
             <button id="cmp-scope-load" type="button" class="secondary small">Reload lists</button>
             <input id="cmp-scope-filter" type="search" placeholder="Filter lists" aria-label="Filter lists" spellcheck="false">
-            <button id="cmp-scope-all" type="button" class="secondary small">All</button>
-            <button id="cmp-scope-none" type="button" class="secondary small">None</button>
           </div>
+          <label class="check-label cmp-master"><input id="cmp-scope-master" type="checkbox"> <span id="cmp-scope-master-text">All lists</span></label>
           <div id="cmp-scope-rows" class="cmp-scope-rows"></div>
         </div>
       </details>
@@ -414,6 +413,10 @@
           <input id="cmp-filter" type="search" placeholder="Filter lists or columns" aria-label="Filter lists or columns" spellcheck="false">
         </div>
         <label class="check-label"><input id="cmp-custom" type="checkbox" checked> Custom columns only</label>
+        <div class="cmp-pickbar">
+          <label class="check-label cmp-master"><input id="cmp-pick-all" type="checkbox"> <span id="cmp-pick-text">Changes to send</span></label>
+          <button id="cmp-send-all" type="button" class="secondary small" title="Send the ticked changes to the Batch Runner as stages. Nothing runs yet.">Selected to Batch Runner</button>
+        </div>
         <div id="cmp-lists"></div>
         <p id="cmp-empty" class="empty" hidden>Nothing to show for the checked statuses.</p>
         <div class="row"><button id="cmp-download" type="button" class="secondary small">Download CSV</button></div>

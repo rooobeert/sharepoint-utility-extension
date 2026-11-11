@@ -348,6 +348,12 @@ async function loadBatchFile(file) {
 // The Export tab can hand over generated stages directly.
 document.addEventListener('sp-utility:load-stages', async (e) => {
   await addStages(e.detail.stages, e.detail.label || 'exported batches', { append: e.detail.append });
+  // Stages with {{WebUrl}} placeholders don't name a site: the sender says which one they are for (the field is editable then).
+  if (e.detail.site && !ui.site.readOnly) {
+    ui.site.value = normalizeSiteUrl(e.detail.site);
+    setHint(`Set by Compare: the stages are meant for this site (the target). Preview checks it with SharePoint.`);
+    save();
+  }
 });
 
 // ---------------------------------------------------------------- find / replace
