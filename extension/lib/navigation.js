@@ -325,3 +325,30 @@ export function parseNavigationExport(text, { site, webServerRelativeUrl }) {
     source: !Array.isArray(data) && typeof data.source === 'string' ? data.source : '',
   };
 }
+
+// ---------------------------------------------------------------- backups of the previous navigation
+
+export const MAX_BACKUPS_PER_NAV = 5;
+const MAX_BACKUP_KEYS = 30;
+
+/** Backups are kept per site and navigation. */
+export const backupKey = (site, target) => `${String(site).replace(/\/+$/, '').toLowerCase()}|${target}`;
+
+/** Titles, links and nesting only: what is needed to rebuild the tree. */
+export const snapshotTree = (tree) => tree.map((n) => ({ title: n.title, url: editorUrl(n.url), children: snapshotTree(n.children) }));
+
+export const countNodes = (tree) => tree.reduce((n, x) => n + 1 + countNodes(x.children || []), 0);
+
+/** New list of backups for `key` with `entry` first (newest), at most MAX_BACKUPS_PER_NAV; other keys beyond MAX_BACKUP_KEYS drop the oldest. */
+export function addBackup(all, key, entry) {
+  const next = { ...all, [key]: [entry, ...(all[key] || [])].slice(0, MAX_BACKUPS_PER_NAV) };
+  const keys = Object.keys(next);
+  if (keys.length > MAX_BACKUP_KEYS) {
+    const newest = (k) => next[k][0]?.at || '';
+    for (const k of keys.filter((x) => x !== key).sort((a, b) => newest(a).localeCompare(newest(b))).slice(0, keys.length - MAX_BACKUP_KEYS)) delete next[k];
+  }
+  return next;
+}
+
+/** Editor tree (new nodes) from a stored snapshot. */
+export const treeFromSnapshot = (snap) => snap.map((n) => ({ key: newKey(), id: null, title: n.title, url: n.url || '', children: treeFromSnapshot(n.children || []) }));

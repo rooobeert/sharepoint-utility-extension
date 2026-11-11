@@ -350,3 +350,29 @@ test('parseNavigationExport: bare arrays work, bad input gives readable errors',
   assert.throws(() => parseNavigationExport('{"format":"sp-utility-navigation","nodes":[{"url":"/x"}]}', DST), /Item 1 has no title/);
   assert.throws(() => parseNavigationExport('{"format":"sp-utility-navigation","nodes":[{"title":"A","children":[{"title":5}]}]}', DST), /Item 1\.1/);
 });
+
+// ---------------------------------------------------------------- backups
+
+import { backupKey, snapshotTree, countNodes, addBackup, treeFromSnapshot, MAX_BACKUPS_PER_NAV } from '../extension/lib/navigation.js';
+
+test('backups: key per site and navigation, snapshot and rebuild', () => {
+  assert.equal(backupKey('https://T.sharepoint.com/sites/a/', 'quicklaunch'), 'https://t.sharepoint.com/sites/a|quicklaunch');
+  const tree = [{ key: 'id1', id: 1, title: 'HR', url: LINKLESS, children: [{ key: 'id2', id: 2, title: 'R', url: '/x', children: [] }] }];
+  const snap = snapshotTree(tree);
+  assert.deepEqual(snap, [{ title: 'HR', url: '', children: [{ title: 'R', url: '/x', children: [] }] }]);
+  assert.equal(countNodes(snap), 2);
+  const back = treeFromSnapshot(snap);
+  assert.ok(back[0].id === null && back[0].children[0].id === null && back[0].key !== back[0].children[0].key);
+  assert.equal(back[0].children[0].url, '/x');
+});
+
+test('addBackup keeps the newest few per navigation and limits the number of sites', () => {
+  let all = {};
+  for (let i = 0; i < MAX_BACKUPS_PER_NAV + 2; i++) all = addBackup(all, 'a|quicklaunch', { at: `2026-01-0${i + 1}`, tree: [] });
+  assert.equal(all['a|quicklaunch'].length, MAX_BACKUPS_PER_NAV);
+  assert.equal(all['a|quicklaunch'][0].at, '2026-01-07');
+  for (let i = 0; i < 40; i++) all = addBackup(all, `s${i}|topnav`, { at: `2026-02-${String(i + 1).padStart(2, '0')}`, tree: [] });
+  assert.ok(Object.keys(all).length <= 30);
+  assert.ok(all['s39|topnav']);
+  assert.ok(!all['s0|topnav']);
+});

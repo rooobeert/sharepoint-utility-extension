@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SharePoint Utility",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "description": "SharePoint tools for site owners: $batch requests, export and compare sites, navigation, list permissions, search schema.",
   "minimum_chrome_version": "116",
   "icons": {

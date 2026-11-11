@@ -24,6 +24,11 @@ import {
   editorUrl,
   exportNavigation,
   parseNavigationExport,
+  backupKey,
+  snapshotTree,
+  countNodes,
+  addBackup,
+  treeFromSnapshot,
 } from './lib/navigation.js';
 
 const $ = (id) => document.getElementById(id);
@@ -44,6 +49,7 @@ const ui = {
   addLink: $('nav-add-link'),
   copy: $('nav-copy'),
   paste: $('nav-paste'),
+  restore: $('nav-restore'),
   discard: $('nav-discard'),
   save: $('nav-save'),
   saveHint: $('nav-save-hint'),
@@ -66,6 +72,7 @@ const nav = {
   original: [], // tree as read from SharePoint
   tree: [], // tree being edited
   open: new Set(), // expanded list groups (by label)
+  backups: [], // earlier navigations of this site and target, newest first: { at, tree }
 };
 
 const isDirty = () => nav.loaded && treeSignature(nav.tree) !== treeSignature(nav.original);
@@ -75,7 +82,7 @@ const targetLabel = () => NAV_TARGETS[nav.target]?.label || 'navigation';
 
 function setBusy(busy) {
   nav.busy = busy;
-  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget, ui.copy, ui.paste]) n.disabled = busy;
+  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget, ui.copy, ui.paste, ui.restore]) n.disabled = busy;
   for (const n of document.querySelectorAll('#view-nav .nav-group button, #nav-tree input, #nav-tree button')) n.disabled = busy;
   updateSaveState();
 }
@@ -91,6 +98,7 @@ function updateSaveState() {
   ui.discard.disabled = nav.busy || !dirty;
   ui.addHeading.disabled = ui.addLink.disabled = ui.paste.disabled = nav.busy || !nav.loaded;
   ui.copy.disabled = nav.busy || !nav.loaded || !nav.tree.length;
+  ui.restore.disabled = nav.busy || !nav.loaded || !nav.backups.length;
   ui.dirty.textContent = dirty ? 'Unsaved changes' : '';
   const problems = nav.loaded ? validateTree(nav.tree) : [];
   ui.saveHint.className = problems.length ? 'hint error' : 'hint';
@@ -108,6 +116,36 @@ function changed({ structure = true } = {}) {
   if (structure) renderTree();
   renderGroups();
   updateSaveState();
+}
+
+// ---------------------------------------------------------------- backups
+
+const BACKUPS_KEY = 'navBackups'; // { "<site>|<target>": [{ at, tree }] }, kept in this browser's extension storage
+
+async function readBackups() {
+  try {
+    return (await chrome.storage.local.get(BACKUPS_KEY))[BACKUPS_KEY] || {};
+  } catch {
+    return {};
+  }
+}
+
+async function refreshBackups() {
+  nav.backups = nav.site && nav.target ? (await readBackups())[backupKey(nav.site, nav.target)] || [] : [];
+  ui.restore.textContent = nav.backups.length ? `Restore… (${nav.backups.length})` : 'Restore…';
+  updateSaveState();
+}
+
+/** Keep the navigation the site has now, before a Save changes it. Returns false if it could not be stored. */
+async function backupCurrent() {
+  if (!nav.original.length) return true; // nothing on the site to lose
+  try {
+    const all = await readBackups();
+    await chrome.storage.local.set({ [BACKUPS_KEY]: addBackup(all, backupKey(nav.site, nav.target), { at: new Date().toISOString(), tree: snapshotTree(nav.original) }) });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------- loading
@@ -137,6 +175,7 @@ async function loadAll() {
     nav.detected = detectNavigation(await createNavigator({ request: nav.request }).settings(site));
     if (!nav.target) nav.target = 'quicklaunch'; // almost always what is edited, whatever the site detects
     await loadNav();
+    await refreshBackups();
   } catch (e) {
     ui.site.textContent = `Could not read the site: ${e.message}`;
     ui.site.classList.add('error');
@@ -489,6 +528,7 @@ async function saveNav() {
     ok: 'Save',
   });
   if (!ok) return setStatus('Save cancelled. Nothing was sent.');
+  const backedUp = await backupCurrent();
 
   setBusy(true);
   ui.result.replaceChildren();
@@ -514,9 +554,10 @@ async function saveNav() {
     clearInterval(countdown);
     const failed = results.filter((r) => !r.ok);
     await loadNav(); // show what SharePoint has now
-    setStatus(failed.length
+    await refreshBackups();
+    setStatus((backedUp ? '' : 'The previous navigation could not be backed up. ') + (failed.length
       ? `Saved with ${failed.length} failure(s) of ${results.length} change(s). The tree shows the ${targetLabel()} as it is now.`
-      : `Saved ${results.length} change(s). Reload the SharePoint page to see the new ${targetLabel()}.`);
+      : `Saved ${results.length} change(s). Reload the SharePoint page to see the new ${targetLabel()}. The previous one can be brought back with Restore….`));
     ui.result.replaceChildren(
       ...(failed.length ? [el('details', { class: 'check', open: true },
             el('summary', {}, el('span', { class: 'chip fail', text: String(failed.length) }), 'Failed'),
@@ -545,6 +586,7 @@ ui.switchTarget.addEventListener('click', async () => {
   setBusy(true);
   try {
     await loadNav();
+    await refreshBackups();
   } catch (e) {
     nav.loaded = false;
     setStatus(`Could not read the ${targetLabel()}: ${e.message}`);
@@ -616,6 +658,27 @@ ui.paste.addEventListener('click', async () => {
   const from = imported.source ? ` from ${imported.source}` : '';
   const other = imported.target && imported.target !== nav.target ? ` It was the ${NAV_TARGETS[imported.target].label}, you are editing the ${targetLabel()}.` : '';
   setStatus(`Pasted ${imported.count} item(s)${from}.${other} Check the tree, then Save.`);
+  changed();
+});
+
+ui.restore.addEventListener('click', async () => {
+  await refreshBackups();
+  if (!nav.backups.length) return setStatus('There is no earlier navigation stored for this site.');
+  const when = (iso) => new Date(iso).toLocaleString();
+  const pick = el('select', { 'aria-label': 'Earlier navigation' },
+    nav.backups.map((b, i) => el('option', { value: String(i), text: `${when(b.at)} · ${countNodes(b.tree)} item(s)` })));
+  const ok = await ask({
+    title: `Restore an earlier ${targetLabel()}`,
+    body: [
+      el('p', { text: `These are the ${targetLabel()} versions ${nav.site} had before a Save from this extension (last ${nav.backups.length}, newest first). The chosen one replaces the tree in the editor; nothing is written until you Save.` }),
+      pick,
+    ],
+    ok: 'Load into editor',
+  });
+  if (!ok) return;
+  const entry = nav.backups[Number(pick.value)];
+  nav.tree = treeFromSnapshot(entry.tree);
+  setStatus(`Loaded the ${targetLabel()} from ${when(entry.at)} into the editor. Check the tree, then Save.`);
   changed();
 });
 
