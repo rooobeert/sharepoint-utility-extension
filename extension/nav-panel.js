@@ -22,6 +22,8 @@ import {
   planIsEmpty,
   newKey,
   editorUrl,
+  exportNavigation,
+  parseNavigationExport,
 } from './lib/navigation.js';
 
 const $ = (id) => document.getElementById(id);
@@ -40,6 +42,8 @@ const ui = {
   dirty: $('nav-dirty'),
   addHeading: $('nav-add-heading'),
   addLink: $('nav-add-link'),
+  copy: $('nav-copy'),
+  paste: $('nav-paste'),
   discard: $('nav-discard'),
   save: $('nav-save'),
   saveHint: $('nav-save-hint'),
@@ -71,7 +75,7 @@ const targetLabel = () => NAV_TARGETS[nav.target]?.label || 'navigation';
 
 function setBusy(busy) {
   nav.busy = busy;
-  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget]) n.disabled = busy;
+  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget, ui.copy, ui.paste]) n.disabled = busy;
   for (const n of document.querySelectorAll('#view-nav .nav-group button, #nav-tree input, #nav-tree button')) n.disabled = busy;
   updateSaveState();
 }
@@ -85,7 +89,8 @@ function updateSaveState() {
   const dirty = isDirty();
   ui.save.disabled = nav.busy || !nav.loaded || !dirty;
   ui.discard.disabled = nav.busy || !dirty;
-  ui.addHeading.disabled = ui.addLink.disabled = nav.busy || !nav.loaded;
+  ui.addHeading.disabled = ui.addLink.disabled = ui.paste.disabled = nav.busy || !nav.loaded;
+  ui.copy.disabled = nav.busy || !nav.loaded || !nav.tree.length;
   ui.dirty.textContent = dirty ? 'Unsaved changes' : '';
   const problems = nav.loaded ? validateTree(nav.tree) : [];
   ui.saveHint.className = problems.length ? 'hint error' : 'hint';
@@ -559,6 +564,61 @@ ui.addLink.addEventListener('click', () => {
   changed();
   ui.tree.lastElementChild?.querySelector('.nav-title')?.focus();
 });
+ui.copy.addEventListener('click', async () => {
+  const text = exportNavigation(nav.tree, {
+    target: nav.target,
+    site: nav.site,
+    origin: nav.origin,
+    webServerRelativeUrl: nav.web.ServerRelativeUrl,
+  });
+  const count = (list) => list.reduce((n, x) => n + 1 + count(x.children), 0);
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus(`Copied ${count(nav.tree)} item(s) of the ${targetLabel()}. Open the other site, go to Navigation and click Paste….`);
+  } catch {
+    // no clipboard access: show the text to copy by hand
+    const box = el('textarea', { class: 'nav-paste-box', readonly: true, rows: 12, spellcheck: 'false' });
+    box.value = text;
+    await ask({ title: 'Copy the navigation', body: [el('p', { text: 'The browser did not allow copying. Select all and copy:' }), box], ok: 'Close', cancel: null, wide: true });
+  }
+});
+
+ui.paste.addEventListener('click', async () => {
+  const box = el('textarea', { class: 'nav-paste-box', rows: 12, spellcheck: 'false', placeholder: 'Paste the copied navigation here' });
+  const ok = await ask({
+    title: 'Paste a navigation',
+    body: [el('p', { text: `The items are added to the editor below; nothing is written to ${nav.site} until you Save.` }), box],
+    ok: 'Paste',
+    wide: true,
+  });
+  if (!ok) return;
+  let imported;
+  try {
+    imported = parseNavigationExport(box.value, { site: nav.site, webServerRelativeUrl: nav.web.ServerRelativeUrl });
+  } catch (e) {
+    setStatus(`Could not paste: ${e.message}`);
+    return;
+  }
+  if (!imported.count) {
+    setStatus('Nothing to paste: the copied navigation is empty.');
+    return;
+  }
+  let replace = false;
+  if (nav.tree.length) {
+    replace = await ask({
+      title: 'Paste a navigation',
+      body: `Replace the ${nav.tree.length} top-level item(s) in the editor, or add the ${imported.nodes.length} pasted item(s) at the end?`,
+      ok: 'Replace',
+      cancel: 'Add to end',
+    });
+  }
+  nav.tree = replace ? imported.nodes : [...nav.tree, ...imported.nodes];
+  const from = imported.source ? ` from ${imported.source}` : '';
+  const other = imported.target && imported.target !== nav.target ? ` It was the ${NAV_TARGETS[imported.target].label}, you are editing the ${targetLabel()}.` : '';
+  setStatus(`Pasted ${imported.count} item(s)${from}.${other} Check the tree, then Save.`);
+  changed();
+});
+
 ui.discard.addEventListener('click', async () => {
   const ok = await ask({ title: 'Discard your changes?', body: `The tree goes back to the ${targetLabel()} as it is on the site.`, ok: 'Discard', cancel: 'Keep editing' });
   if (!ok) return;

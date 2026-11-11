@@ -462,6 +462,7 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .sch-opt .perm-kind { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip.mono { font-family: var(--mono); font-weight: 400; }
 
+.nav-paste-box { width: 100%; box-sizing: border-box; font: 12px var(--mono); }
 .var-list { margin: 6px 0; font-size: 12px; }
 .var-list dt { margin-top: 6px; overflow-wrap: anywhere; }
 .var-list dd { margin: 2px 0 0; color: var(--muted); }

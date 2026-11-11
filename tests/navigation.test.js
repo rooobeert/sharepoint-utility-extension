@@ -298,3 +298,55 @@ test('navigator retries on throttling', async () => {
   assert.deepEqual(nodes, []);
   assert.deepEqual(waits, [2000]);
 });
+
+// ---------------------------------------------------------------- copy and paste
+
+import { portableUrl, resolvePortableUrl, exportNavigation, parseNavigationExport } from '../extension/lib/navigation.js';
+
+const SRC = { origin: 'https://t.sharepoint.com', webServerRelativeUrl: '/sites/dev' };
+const DST = { site: 'https://t.sharepoint.com/sites/prod', webServerRelativeUrl: '/sites/prod' };
+
+test('portableUrl: links into the web follow the site; others stay', () => {
+  assert.equal(portableUrl('https://t.sharepoint.com/sites/dev/Lists/A/AllItems.aspx', SRC), '{{WebServerRelativeUrl}}/Lists/A/AllItems.aspx');
+  assert.equal(portableUrl('/sites/dev/Lists/A', SRC), '{{WebServerRelativeUrl}}/Lists/A');
+  assert.equal(portableUrl('/sites/dev', SRC), '{{WebServerRelativeUrl}}');
+  assert.equal(portableUrl('/sites/devtwo/Lists/A', SRC), '/sites/devtwo/Lists/A');
+  assert.equal(portableUrl('https://t.sharepoint.com/sites/other/x', SRC), 'https://t.sharepoint.com/sites/other/x');
+  assert.equal(portableUrl('https://example.com/x', SRC), 'https://example.com/x');
+  assert.equal(portableUrl(LINKLESS, SRC), '');
+  assert.equal(portableUrl('/Lists/A', { origin: SRC.origin, webServerRelativeUrl: '' }), '{{WebServerRelativeUrl}}/Lists/A');
+});
+
+test('resolvePortableUrl: placeholders become the target web; a root web link is /', () => {
+  assert.equal(resolvePortableUrl('{{WebServerRelativeUrl}}/Lists/A', DST), '/sites/prod/Lists/A');
+  assert.equal(resolvePortableUrl('{{WebServerRelativeUrl}}', DST), '/sites/prod');
+  assert.equal(resolvePortableUrl('{{WebServerRelativeUrl}}', { site: 'https://t.sharepoint.com', webServerRelativeUrl: '' }), '/');
+  assert.equal(resolvePortableUrl('{{WebUrl}}/SitePages/Home.aspx', DST), 'https://t.sharepoint.com/sites/prod/SitePages/Home.aspx');
+  assert.equal(resolvePortableUrl('https://example.com/x', DST), 'https://example.com/x');
+});
+
+test('export then paste on another site', () => {
+  const tree = [
+    { key: 'a', id: 1, title: 'HR', url: '', children: [
+      { key: 'b', id: 2, title: 'Requests', url: '/sites/dev/Lists/hrRequests', children: [] },
+      { key: 'c', id: 3, title: 'Docs', url: 'https://example.com/d', children: [] },
+    ] },
+  ];
+  const text = exportNavigation(tree, { target: 'quicklaunch', site: 'https://t.sharepoint.com/sites/dev', ...SRC });
+  const out = parseNavigationExport(text, DST);
+  assert.equal(out.count, 3);
+  assert.equal(out.target, 'quicklaunch');
+  assert.equal(out.nodes[0].title, 'HR');
+  assert.equal(out.nodes[0].url, '');
+  assert.equal(out.nodes[0].children[0].url, '/sites/prod/Lists/hrRequests');
+  assert.equal(out.nodes[0].children[1].url, 'https://example.com/d');
+  assert.ok(out.nodes[0].id === null && out.nodes[0].key.startsWith('new'));
+});
+
+test('parseNavigationExport: bare arrays work, bad input gives readable errors', () => {
+  assert.equal(parseNavigationExport('[{"title":"A","url":"/x"}]', DST).nodes[0].url, '/x');
+  assert.throws(() => parseNavigationExport('nope', DST), /not valid JSON/);
+  assert.throws(() => parseNavigationExport('{"foo":1}', DST), /not a navigation copied/);
+  assert.throws(() => parseNavigationExport('{"format":"sp-utility-navigation","nodes":[{"url":"/x"}]}', DST), /Item 1 has no title/);
+  assert.throws(() => parseNavigationExport('{"format":"sp-utility-navigation","nodes":[{"title":"A","children":[{"title":5}]}]}', DST), /Item 1\.1/);
+});

@@ -243,3 +243,85 @@ export function planSave(original, desired) {
 }
 
 export const planIsEmpty = (plan) => !plan.deletes.length && !plan.updates.length && !plan.creates.length;
+
+// ---------------------------------------------------------------- copy and paste between sites
+
+export const EXPORT_FORMAT = 'sp-utility-navigation';
+const MAX_IMPORT_NODES = 1000;
+const WEB_REL = '{{WebServerRelativeUrl}}';
+
+/**
+ * A link that works on any site: a link into this web becomes {{WebServerRelativeUrl}}/..., so
+ * it follows the site it is pasted on. Other links (other sites, other hosts, headings) stay.
+ */
+export function portableUrl(url, { origin, webServerRelativeUrl }) {
+  const u = editorUrl(url);
+  if (!u) return '';
+  const web = String(webServerRelativeUrl || '').replace(/\/+$/, '');
+  let path = u;
+  if (/^https?:\/\//i.test(u)) {
+    if (!origin || !u.toLowerCase().startsWith(origin.toLowerCase() + '/')) return u;
+    path = u.slice(origin.length);
+  }
+  if (!path.startsWith('/')) return u;
+  const lower = path.toLowerCase();
+  if (!web) return WEB_REL + path; // root web: every path on the host is inside it
+  if (lower === web.toLowerCase() || lower.startsWith(web.toLowerCase() + '/') || lower.startsWith(web.toLowerCase() + '?')) return WEB_REL + path.slice(web.length);
+  return u;
+}
+
+/** The pasted link for the target web (placeholders resolved). */
+export function resolvePortableUrl(url, { site, webServerRelativeUrl }) {
+  const web = String(webServerRelativeUrl || '').replace(/\/+$/, '');
+  const out = String(url || '')
+    .replace(/\{\{\s*WebServerRelativeUrl\s*\}\}/gi, web)
+    .replace(/\{\{\s*WebUrl\s*\}\}/gi, String(site || '').replace(/\/+$/, ''));
+  return out === '' && /WebServerRelativeUrl/i.test(String(url || '')) ? '/' : out;
+}
+
+/** Text to copy: the tree as JSON with portable links. */
+export function exportNavigation(tree, { target, site, origin, webServerRelativeUrl }) {
+  const nodes = (list) => list.map((n) => {
+    const url = portableUrl(n.url, { origin, webServerRelativeUrl });
+    return { title: n.title, ...(url ? { url } : {}), ...(n.children.length ? { children: nodes(n.children) } : {}) };
+  });
+  return JSON.stringify({ format: EXPORT_FORMAT, version: 1, target, source: site, nodes: nodes(tree) }, null, 2);
+}
+
+/**
+ * Pasted text -> { nodes, target, source } with editor nodes (new keys, links for the target web).
+ * Accepts the exported object or a bare array of { title, url?, children? }. Throws Error with a readable message.
+ */
+export function parseNavigationExport(text, { site, webServerRelativeUrl }) {
+  let data;
+  try {
+    data = JSON.parse(String(text).trim());
+  } catch {
+    throw new Error('The text is not a copied navigation (it is not valid JSON).');
+  }
+  if (data && !Array.isArray(data) && data.format !== EXPORT_FORMAT) throw new Error('The text is not a navigation copied from this extension.');
+  const list = Array.isArray(data) ? data : data && data.nodes;
+  if (!Array.isArray(list)) throw new Error('The copied navigation has no "nodes" list.');
+  let count = 0;
+  const build = (items, path) => items.map((n, i) => {
+    const where = `${path}${i + 1}`;
+    if (!n || typeof n !== 'object' || typeof n.title !== 'string') throw new Error(`Item ${where} has no title.`);
+    if (n.url != null && typeof n.url !== 'string') throw new Error(`Item ${where} ("${n.title}") has a link that is not text.`);
+    if (n.children != null && !Array.isArray(n.children)) throw new Error(`Item ${where} ("${n.title}") has children that are not a list.`);
+    if (++count > MAX_IMPORT_NODES) throw new Error(`More than ${MAX_IMPORT_NODES} items.`);
+    return {
+      key: newKey(),
+      id: null,
+      title: n.title,
+      url: editorUrl(resolvePortableUrl(n.url || '', { site, webServerRelativeUrl })),
+      children: build(n.children || [], `${where}.`),
+    };
+  });
+  const nodes = build(list, '');
+  return {
+    nodes,
+    count,
+    target: !Array.isArray(data) && NAV_TARGETS[data.target] ? data.target : null,
+    source: !Array.isArray(data) && typeof data.source === 'string' ? data.source : '',
+  };
+}
