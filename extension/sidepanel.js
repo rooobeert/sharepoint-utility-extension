@@ -22,6 +22,7 @@ const ui = {
   loadFolder: $('load-folder'),
   folderInput: $('folder-input'),
   loadFile: $('load-file'),
+  pasteStages: $('paste-stages'),
   fileInput: $('file-input'),
   stageList: $('stage-list'),
   noStages: $('no-stages'),
@@ -537,7 +538,7 @@ document.addEventListener('keydown', (e) => {
 
 function setBusy(busy) {
   state.running = busy;
-  for (const b of [ui.detect, ui.addStage, ui.loadFolder, ui.loadFile, ui.preview, ui.run, ui.copyLog, ui.exportJson]) b.disabled = busy;
+  for (const b of [ui.detect, ui.addStage, ui.loadFolder, ui.loadFile, ui.pasteStages, ui.preview, ui.run, ui.copyLog, ui.exportJson]) b.disabled = busy;
   ui.site.disabled = busy;
   for (const n of ui.stageList.querySelectorAll('input, textarea, button')) n.disabled = busy;
   if (!busy) {
@@ -1076,6 +1077,18 @@ ui.addStage.addEventListener('click', () => {
 });
 ui.loadFolder.addEventListener('click', () => ui.folderInput.click());
 ui.loadFile.addEventListener('click', () => ui.fileInput.click());
+ui.pasteStages.addEventListener('click', async () => {
+  const box = el('textarea', { class: 'nav-paste-box', rows: 14, spellcheck: 'false', placeholder: '### STAGE: 1 Create lists\n--batch_…\n…\n\nor a single batch starting with --batch_…' });
+  const ok = await ask({
+    title: 'Paste stages',
+    body: [el('p', { text: 'Paste the text as the generator gave it. Each "### STAGE:" line starts a stage; text without such lines becomes one stage.' }), box],
+    ok: 'Add stages',
+    wide: true,
+  });
+  if (!ok || !box.value.trim()) return;
+  const stages = splitStageFile(box.value, 'Pasted stage');
+  await addStages(stages, `${stages.length} pasted stage${stages.length === 1 ? '' : 's'}`);
+});
 ui.fileInput.addEventListener('change', async () => {
   const f = ui.fileInput.files[0];
   ui.fileInput.value = '';

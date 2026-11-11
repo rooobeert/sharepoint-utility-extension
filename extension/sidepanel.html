@@ -48,13 +48,14 @@
       <div class="block-head">
         <h2 id="stages-h">Stages</h2>
         <div class="row tight">
+          <button id="paste-stages" type="button" class="secondary" title="Paste text with several stages (each starting with a &quot;### STAGE:&quot; line), or a single batch">Paste stages…</button>
           <button id="load-file" type="button" class="secondary" title="A .txt file; sections starting with &quot;### STAGE:&quot; become separate stages">Load batch file…</button>
           <input id="file-input" type="file" accept=".txt,text/plain" hidden>
           <button id="load-folder" type="button" class="secondary">Load folder…</button>
           <input id="folder-input" type="file" webkitdirectory multiple hidden>
         </div>
       </div>
-      <p class="hint">Stages run top to bottom. A folder load adds one stage per .txt file, sorted by file name. In a batch file, each "### STAGE:" section becomes a stage.</p>
+      <p class="hint">Stages run top to bottom. A folder load adds one stage per .txt file, sorted by file name. In a batch file or in pasted text, each "### STAGE:" section becomes a stage.</p>
       <details class="check vars">
         <summary>Variables you can use in batches</summary>
         <div class="check-body">
