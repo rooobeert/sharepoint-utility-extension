@@ -9,7 +9,26 @@
 export const NAV_TARGETS = {
   quicklaunch: { label: 'Quick Launch', path: '/_api/web/navigation/QuickLaunch' },
   topnav: { label: 'Top navigation', path: '/_api/web/navigation/TopNavigationBar' },
+  // The hub navigation is the top navigation of the hub site's own web, so it is read and
+  // written there (same path, on the hub site's URL).
+  hub: { label: 'Hub navigation', path: '/_api/web/navigation/TopNavigationBar' },
 };
+
+/**
+ * Hub site of a web, from /_api/web/HubSiteData (with nometadata the answer is { value: "<json>" },
+ * for a site without hub null/empty). Returns { url, name } or null.
+ */
+export function parseHubSite(json) {
+  let data = json;
+  try {
+    if (data && typeof data.value === 'string') data = JSON.parse(data.value);
+    else if (typeof data === 'string') data = JSON.parse(data);
+  } catch {
+    return null;
+  }
+  const url = data && typeof data.url === 'string' ? data.url.trim().replace(/\/+$/, '') : '';
+  return /^https:\/\//i.test(url) ? { url, name: String(data.name || '') } : null;
+}
 
 /** SharePoint's URL for a heading that is only a label (what the modern UI uses). */
 export const LINKLESS = 'http://linkless.header/';

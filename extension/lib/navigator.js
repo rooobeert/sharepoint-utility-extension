@@ -3,7 +3,7 @@
 // SharePoint tab through `request` (pageRequest).
 
 import { extractError, isThrottled, retryAfterMs } from './response.js';
-import { NAV_TARGETS, MAX_DEPTH, sharePointUrl } from './navigation.js';
+import { NAV_TARGETS, MAX_DEPTH, sharePointUrl, parseHubSite } from './navigation.js';
 
 export const MAX_RETRIES = 3;
 
@@ -66,6 +66,16 @@ export function createNavigator({ request, sleep = defaultSleep, onEvent = () =>
     } catch (e) {
       if (e.status !== 400) throw e; // older sites may not know every property
       return call(site, '/_api/web?$select=WebTemplate,QuickLaunchEnabled');
+    }
+  }
+
+  /** The hub site the web belongs to (or is): { url, name }, or null when it has none or it can't be read. */
+  async function hub(site) {
+    try {
+      return parseHubSite(await call(site, '/_api/web/HubSiteData'));
+    } catch (e) {
+      if (!(e instanceof NavError)) throw e;
+      return null;
     }
   }
 
@@ -138,5 +148,5 @@ export function createNavigator({ request, sleep = defaultSleep, onEvent = () =>
     return out;
   }
 
-  return { settings, load, save };
+  return { settings, hub, load, save };
 }

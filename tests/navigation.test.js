@@ -376,3 +376,18 @@ test('addBackup keeps the newest few per navigation and limits the number of sit
   assert.ok(all['s39|topnav']);
   assert.ok(!all['s0|topnav']);
 });
+
+// ---------------------------------------------------------------- hub navigation
+
+import { parseHubSite } from '../extension/lib/navigation.js';
+
+test('parseHubSite reads HubSiteData in its string and object forms', () => {
+  const inner = { name: 'Intranet', url: 'https://t.sharepoint.com/sites/intranet/', navigation: [] };
+  assert.deepEqual(parseHubSite({ value: JSON.stringify(inner) }), { url: 'https://t.sharepoint.com/sites/intranet', name: 'Intranet' });
+  assert.deepEqual(parseHubSite(inner), { url: 'https://t.sharepoint.com/sites/intranet', name: 'Intranet' });
+  assert.equal(parseHubSite({ value: 'null' }), null);
+  assert.equal(parseHubSite({ value: '' }), null);
+  assert.equal(parseHubSite(null), null);
+  assert.equal(parseHubSite({ value: 'not json' }), null);
+  assert.equal(parseHubSite({ url: 'http://x/y' }), null);
+});

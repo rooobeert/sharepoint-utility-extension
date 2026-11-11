@@ -38,6 +38,7 @@ const ui = {
   reload: $('nav-reload'),
   targetName: $('nav-target-name'),
   switchTarget: $('nav-switch'),
+  switchHub: $('nav-hub'),
   targetHint: $('nav-target-hint'),
   filter: $('nav-filter'),
   listCount: $('nav-list-count'),
@@ -67,7 +68,8 @@ const nav = {
   request: null, // runs requests in the SharePoint tab
   web: null,
   lists: [],
-  target: null, // 'quicklaunch' | 'topnav'
+  target: null, // 'quicklaunch' | 'topnav' | 'hub'
+  hub: null, // { url, name } of the hub site the site belongs to or is, if any
   detected: null, // detectNavigation() of the site
   original: [], // tree as read from SharePoint
   tree: [], // tree being edited
@@ -77,12 +79,18 @@ const nav = {
 
 const isDirty = () => nav.loaded && treeSignature(nav.tree) !== treeSignature(nav.original);
 const targetLabel = () => NAV_TARGETS[nav.target]?.label || 'navigation';
+/** The web whose navigation is read and written: the hub site for the hub navigation, else the site itself. */
+const navSite = () => (nav.target === 'hub' && nav.hub ? nav.hub.url : nav.site);
+const navTitle = () => (nav.target === 'hub' && nav.hub ? nav.hub.name || nav.hub.url : nav.web.Title);
+const navWebPath = () => (nav.target === 'hub' && nav.hub ? new URL(nav.hub.url).pathname.replace(/\/+$/, '') : nav.web.ServerRelativeUrl);
+/** Backups are per web and navigation; the hub navigation is the hub site's top navigation. */
+const backupId = () => backupKey(navSite(), nav.target === 'hub' ? 'topnav' : nav.target);
 
 // ---------------------------------------------------------------- state
 
 function setBusy(busy) {
   nav.busy = busy;
-  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget, ui.copy, ui.paste, ui.restore]) n.disabled = busy;
+  for (const n of [ui.reload, ui.filter, ui.addHeading, ui.addLink, ui.discard, ui.switchTarget, ui.switchHub, ui.copy, ui.paste, ui.restore]) n.disabled = busy;
   for (const n of document.querySelectorAll('#view-nav .nav-group button, #nav-tree input, #nav-tree button')) n.disabled = busy;
   updateSaveState();
 }
@@ -131,7 +139,7 @@ async function readBackups() {
 }
 
 async function refreshBackups() {
-  nav.backups = nav.site && nav.target ? (await readBackups())[backupKey(nav.site, nav.target)] || [] : [];
+  nav.backups = nav.site && nav.target ? (await readBackups())[backupId()] || [] : [];
   ui.restore.textContent = nav.backups.length ? `Restore… (${nav.backups.length})` : 'Restore…';
   updateSaveState();
 }
@@ -141,7 +149,7 @@ async function backupCurrent() {
   if (!nav.original.length) return true; // nothing on the site to lose
   try {
     const all = await readBackups();
-    await chrome.storage.local.set({ [BACKUPS_KEY]: addBackup(all, backupKey(nav.site, nav.target), { at: new Date().toISOString(), tree: snapshotTree(nav.original) }) });
+    await chrome.storage.local.set({ [BACKUPS_KEY]: addBackup(all, backupId(), { at: new Date().toISOString(), tree: snapshotTree(nav.original) }) });
     return true;
   } catch {
     return false;
@@ -172,7 +180,10 @@ async function loadAll() {
     nav.web = data.web;
     nav.lists = data.lists;
     ui.site.replaceChildren(el('strong', { text: data.web.Title }), el('span', { class: 'exp-url', text: data.web.Url }));
-    nav.detected = detectNavigation(await createNavigator({ request: nav.request }).settings(site));
+    const navigator = createNavigator({ request: nav.request });
+    nav.detected = detectNavigation(await navigator.settings(site));
+    nav.hub = await navigator.hub(site);
+    if (nav.target === 'hub' && !nav.hub) nav.target = null;
     if (!nav.target) nav.target = 'quicklaunch'; // almost always what is edited, whatever the site detects
     await loadNav();
     await refreshBackups();
@@ -186,14 +197,23 @@ async function loadAll() {
 
 async function loadNav() {
   const d = nav.detected;
-  const other = nav.target === 'topnav' ? 'quicklaunch' : 'topnav';
-  ui.targetName.textContent = NAV_TARGETS[nav.target].label + (nav.target === d.target ? '' : ' (chosen instead of the detected one)');
-  ui.targetHint.textContent = `${d.text} Hub navigation is not changed here.`;
+  const isHub = nav.target === 'hub';
+  const hubIsHere = !!nav.hub && nav.hub.url.toLowerCase() === nav.site.toLowerCase();
+  const other = isHub ? d.target : nav.target === 'topnav' ? 'quicklaunch' : 'topnav';
+  ui.targetName.textContent = isHub
+    ? `Hub navigation of ${navTitle()}`
+    : NAV_TARGETS[nav.target].label + (nav.target === d.target ? '' : ' (chosen instead of the detected one)');
+  ui.targetHint.textContent = isHub
+    ? `The top navigation of the hub site ${nav.hub.url}, shown on every site of the hub. You need to be an owner of the hub site to save it.`
+    : `${d.text}${hubIsHere ? ' This is a hub site: its top navigation is the hub navigation of all associated sites.' : ''}`;
   ui.switchTarget.hidden = false;
-  ui.switchTarget.textContent = other === d.target ? `Back to the ${NAV_TARGETS[other].label}` : `Edit the ${NAV_TARGETS[other].label} instead`;
+  ui.switchTarget.textContent = isHub || other === d.target ? `Back to the ${NAV_TARGETS[other].label}` : `Edit the ${NAV_TARGETS[other].label} instead`;
+  // A hub site's own top navigation already is the hub navigation, so the extra choice is for associated sites.
+  ui.switchHub.hidden = isHub || !nav.hub || hubIsHere;
+  ui.switchHub.textContent = nav.hub ? `Edit the hub navigation (${nav.hub.name || nav.hub.url}) instead` : '';
   setStatus(`Reading the ${targetLabel()}…`);
   ui.bar.removeAttribute('value');
-  const nodes = await createNavigator({ request: nav.request }).load(nav.site, nav.target);
+  const nodes = await createNavigator({ request: nav.request }).load(navSite(), nav.target);
   nav.original = treeFromNodes(nodes);
   nav.tree = cloneTree(nav.original);
   nav.loaded = true;
@@ -514,8 +534,8 @@ async function saveNav() {
     title: `Save the ${targetLabel()}?`,
     wide: true,
     body: [
-      el('p', { class: 'target-title', text: nav.web.Title }),
-      el('p', { class: 'target', text: nav.site }),
+      el('p', { class: 'target-title', text: navTitle() }),
+      el('p', { class: 'target', text: navSite() }),
       el('p', { text: `${plan.deletes.length + plan.updates.length + plan.creates.length} change(s), sent as you (the signed-in user):` }),
       section('Add', added),
       section('Rename or change link', plan.updates, el('ul', {}, plan.updates.map((u) => el('li', { text: u.from.title === u.title ? `${u.title}: ${u.from.url || '(no link)'} → ${u.url || '(no link)'}` : `${u.from.title} → ${u.title}` })))),
@@ -550,7 +570,7 @@ async function saveNav() {
     },
   });
   try {
-    const results = await navigator.save(nav.site, nav.target, plan);
+    const results = await navigator.save(navSite(), nav.target, plan);
     clearInterval(countdown);
     const failed = results.filter((r) => !r.ok);
     await loadNav(); // show what SharePoint has now
@@ -579,8 +599,7 @@ document.addEventListener('sp-utility:tab-shown', (e) => {
 ui.reload.addEventListener('click', async () => {
   if (await confirmDiscard('Reloading')) loadAll();
 });
-ui.switchTarget.addEventListener('click', async () => {
-  const next = nav.target === 'topnav' ? 'quicklaunch' : 'topnav';
+async function switchTo(next) {
   if (!nav.loaded || !(await confirmDiscard(`Switching to the ${NAV_TARGETS[next].label}`))) return;
   nav.target = next;
   setBusy(true);
@@ -594,7 +613,9 @@ ui.switchTarget.addEventListener('click', async () => {
   } finally {
     setBusy(false);
   }
-});
+}
+ui.switchTarget.addEventListener('click', () => switchTo(nav.target === 'hub' ? nav.detected.target : nav.target === 'topnav' ? 'quicklaunch' : 'topnav'));
+ui.switchHub.addEventListener('click', () => switchTo('hub'));
 ui.filter.addEventListener('input', renderGroups);
 ui.addHeading.addEventListener('click', () => {
   nav.tree.push({ key: newKey(), id: null, title: '', url: '', children: [] });
@@ -609,9 +630,9 @@ ui.addLink.addEventListener('click', () => {
 ui.copy.addEventListener('click', async () => {
   const text = exportNavigation(nav.tree, {
     target: nav.target,
-    site: nav.site,
+    site: navSite(),
     origin: nav.origin,
-    webServerRelativeUrl: nav.web.ServerRelativeUrl,
+    webServerRelativeUrl: navWebPath(),
   });
   const count = (list) => list.reduce((n, x) => n + 1 + count(x.children), 0);
   try {
@@ -629,14 +650,14 @@ ui.paste.addEventListener('click', async () => {
   const box = el('textarea', { class: 'nav-paste-box', rows: 12, spellcheck: 'false', placeholder: 'Paste the copied navigation here' });
   const ok = await ask({
     title: 'Paste a navigation',
-    body: [el('p', { text: `The items are added to the editor below; nothing is written to ${nav.site} until you Save.` }), box],
+    body: [el('p', { text: `The items are added to the editor below; nothing is written to ${navSite()} until you Save.` }), box],
     ok: 'Paste',
     wide: true,
   });
   if (!ok) return;
   let imported;
   try {
-    imported = parseNavigationExport(box.value, { site: nav.site, webServerRelativeUrl: nav.web.ServerRelativeUrl });
+    imported = parseNavigationExport(box.value, { site: navSite(), webServerRelativeUrl: navWebPath() });
   } catch (e) {
     setStatus(`Could not paste: ${e.message}`);
     return;
@@ -670,7 +691,7 @@ ui.restore.addEventListener('click', async () => {
   const ok = await ask({
     title: `Restore an earlier ${targetLabel()}`,
     body: [
-      el('p', { text: `These are the ${targetLabel()} versions ${nav.site} had before a Save from this extension (last ${nav.backups.length}, newest first). The chosen one replaces the tree in the editor; nothing is written until you Save.` }),
+      el('p', { text: `These are the ${targetLabel()} versions ${navSite()} had before a Save from this extension (last ${nav.backups.length}, newest first). The chosen one replaces the tree in the editor; nothing is written until you Save.` }),
       pick,
     ],
     ok: 'Load into editor',
