@@ -11,6 +11,7 @@
 
 import { csvCell, isCustomField, templateName } from './export.js';
 import { webRelative, DEFAULT_LIBRARIES } from './provision.js';
+import { translationProps, bothSides } from './languages.js';
 
 export const STATUSES = ['missing', 'changed', 'only', 'same'];
 export const STATUS_LABELS = { missing: 'Missing in target', changed: 'Changed', only: 'Only in target', same: 'Same', error: 'Not compared' };
@@ -133,10 +134,11 @@ function indexSide(side) {
   return { byKey, lookupUrl, allKeys };
 }
 
-function compareColumns(src, tgt, s, t) {
+function compareColumns(src, tgt, s, t, skip) {
   const fieldsOf = (item, side) => {
     const m = new Map();
-    for (const f of results(item.fields)) m.set(f.InternalName, { f, props: columnProps(f, side.lookupUrl) });
+    const tr = (item.translations && item.translations.columns) || {};
+    for (const f of results(item.fields)) m.set(f.InternalName, { f, props: { ...columnProps(f, side.lookupUrl), ...translationProps('column', tr[f.InternalName], skip) } });
     return m;
   };
   const a = fieldsOf(src, s);
@@ -153,6 +155,7 @@ function compareColumns(src, tgt, s, t) {
       custom: isCustomField(f),
       id: stripBraces(f.Id),
       field: x ? x.f : null, // the source's field, for transferring the change
+      translations: x ? ((src.translations && src.translations.columns) || {})[name] || null : null, // the source's translated titles
     };
     if (x && !y) {
       col.status = 'missing';
@@ -163,6 +166,7 @@ function compareColumns(src, tgt, s, t) {
     } else if (!x && y) {
       col.status = 'only';
     } else {
+      bothSides(x.props, y.props);
       col.diffs = propDiffs(x.props, y.props, COLUMN_BLOCKED);
       if (col.diffs.some((d) => d.prop === 'Type')) col.diffs = col.diffs.filter((d) => !TYPE_SPECIFIC.has(d.prop));
       col.status = col.diffs.length ? 'changed' : 'same';
@@ -183,6 +187,8 @@ const columnCount = (item) => results(item.fields).filter(isCustomField).length;
 export function compareSites(source, target) {
   const s = indexSide(source);
   const t = indexSide(target);
+  // The default language is already compared as the title itself.
+  const skip = new Set(source.web.Language === target.web.Language ? [source.web.Language] : []);
   const out = [];
   for (const key of new Set([...s.byKey.keys(), ...t.byKey.keys()])) {
     const x = s.byKey.get(key);
@@ -207,8 +213,11 @@ export function compareSites(source, target) {
     if (x && !y) out.push({ ...base, status: 'missing', diffs: [], columns: [], columnCount: columnCount(x) });
     else if (!x && y) out.push({ ...base, status: 'only', diffs: [], columns: [], columnCount: columnCount(y) });
     else {
-      const diffs = propDiffs(listProps(x.list), listProps(y.list), LIST_BLOCKED);
-      out.push({ ...base, title: y.title, status: diffs.length ? 'changed' : 'same', diffs, columns: compareColumns(x, y, s, t) });
+      const a = { ...listProps(x.list), ...translationProps('list', x.translations && x.translations.list, skip) };
+      const b = { ...listProps(y.list), ...translationProps('list', y.translations && y.translations.list, skip) };
+      bothSides(a, b);
+      const diffs = propDiffs(a, b, LIST_BLOCKED);
+      out.push({ ...base, title: y.title, status: diffs.length ? 'changed' : 'same', diffs, columns: compareColumns(x, y, s, t, skip) });
     }
   }
 

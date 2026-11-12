@@ -9,7 +9,8 @@ import { createExporter } from './lib/exporter.js';
 import {
   compareSites, countStatuses, columnSummary, listStatus, filterView, diffRows, diffCsv, diffFileName, STATUSES, STATUS_LABELS,
 } from './lib/diff.js';
-import { settingsTransferable, columnTransferable, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId } from './lib/transfer.js';
+import { settingsTransferable, columnTransferable, onlyListTransferable, onlyColumnTransferable, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId, onlyListId, onlyColumnId, DEFAULT_PREFIX } from './lib/transfer.js';
+import { compareLanguages } from './lib/languages.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -21,6 +22,9 @@ const ui = {
   addTarget: $('cmp-add-target'),
   siteMsg: $('cmp-site-msg'),
   system: $('cmp-system'),
+  lang: $('cmp-lang'),
+  onlyMode: $('cmp-only-mode'),
+  onlyPrefix: $('cmp-only-prefix'),
   run: $('cmp-run'),
   progress: $('cmp-progress'),
   bar: $('cmp-bar'),
@@ -62,7 +66,7 @@ const bare = (url) => url.replace(/^https:\/\//, '');
 
 function setBusy(busy) {
   cmp.busy = busy;
-  for (const n of [ui.scopeLoad, ui.reload, ui.source, ui.target, ui.addSource, ui.addTarget, ui.system]) n.disabled = busy;
+  for (const n of [ui.scopeLoad, ui.reload, ui.source, ui.target, ui.addSource, ui.addTarget, ui.system, ui.lang]) n.disabled = busy;
   updateRunButton();
 }
 
@@ -106,9 +110,9 @@ const tabCache = new Map(); // tabId -> { url, entry }: a tab is only read again
 
 async function readTab(t) {
   const hit = tabCache.get(t.id);
-  if (hit && hit.url === t.url) return { ...hit.entry };
+  if (hit && hit.url === t.url) return hit.entry && { ...hit.entry };
   const entry = await readTabNow(t);
-  if (entry) tabCache.set(t.id, { url: t.url, entry });
+  tabCache.set(t.id, { url: t.url, entry }); // unreadable tabs are remembered too (entry null), so they don't re-trigger the loader
   return entry;
 }
 
@@ -300,10 +304,17 @@ async function readSide(side, label, progress) {
       .filter((l) => (cmp.scope ? cmp.scope.picked.has(listKey(l, loaded.web)) : ui.system.checked || !l.system))
       .map((l) => l.id);
     const data = await exporter.collect(side.site, loaded, ids, { permissions: false, views: false, contentTypes: false });
-    return { web: loaded.web, allLists: loaded.lists, lists: data.lists };
+    return { web: loaded.web, allLists: loaded.lists, lists: data.lists, exporter, site: side.site };
   } finally {
     clearInterval(countdown);
   }
+}
+
+/** Read the translated titles of one side (German, English and the languages either site has enabled). */
+async function readTranslations(side, label, langs, progress) {
+  await side.exporter.readTranslations(side.site, { lists: side.lists }, langs, {
+    onProgress: (done, total) => progress(done / (total || 1), `Reading the translated titles of the ${label} (${done} of ${total})…`),
+  });
 }
 
 async function runCompare() {
@@ -322,8 +333,13 @@ async function runCompare() {
     for (const side of [source, target]) if (side.tabId == null) throw new Error(`${side.title} is not open in a tab. Open it, then run again.`);
     const src = await readSide(source, 'source', (f, text) => { ui.bar.value = f / 2; setStatus(text); });
     const tgt = await readSide(target, 'target', (f, text) => { ui.bar.value = 0.5 + f / 2; setStatus(text); });
+    if (ui.lang.checked) {
+      const langs = compareLanguages(src.web, tgt.web);
+      await readTranslations(src, 'source', langs, (f, text) => { ui.bar.value = f / 2; setStatus(text); });
+      await readTranslations(tgt, 'target', langs, (f, text) => { ui.bar.value = 0.5 + f / 2; setStatus(text); });
+    }
     ui.bar.value = 1;
-    cmp.result = { lists: compareSites(src, tgt), ctx: { web: src.web, allLists: src.allLists, targetSite: target.site }, source: { ...source, title: src.web.Title || source.title }, target: { ...target, title: tgt.web.Title || target.title } };
+    cmp.result = { lists: compareSites(src, tgt), ctx: { web: src.web, allLists: src.allLists, targetSite: target.site, only: onlyOpts() }, source: { ...source, title: src.web.Title || source.title }, target: { ...target, title: tgt.web.Title || target.title } };
     setStatus(`Compared ${plural(src.lists.length, 'list')} from ${cmp.result.source.title} with ${cmp.result.target.title}.`);
     ui.result.hidden = false;
     renderResult();
@@ -337,6 +353,8 @@ async function runCompare() {
 // ---------------------------------------------------------------- results
 
 const opts = () => ({ customOnly: ui.custom.checked });
+/** What to do with lists and columns that only the target has: { mode: 'leave' | 'rename' | 'delete', prefix }. */
+const onlyOpts = () => ({ mode: ui.onlyMode.value, prefix: ui.onlyPrefix.value.trim() || DEFAULT_PREFIX });
 
 function renderCounts() {
   const n = countStatuses(cmp.result.lists, opts());
@@ -395,7 +413,7 @@ function pickBox(id, label) {
 /** Master box and send button, for the changes in the shown view. */
 function updateSelection() {
   if (!cmp.result) return;
-  const items = changeItems(currentView());
+  const items = changeItems(currentView(), onlyOpts());
   const ticked = items.filter((i) => cmp.send.has(i.id)).length;
   ui.pickAll.checked = !!items.length && ticked === items.length;
   ui.pickAll.indeterminate = ticked > 0 && ticked < items.length;
@@ -406,7 +424,7 @@ function updateSelection() {
 }
 
 function setSendPicked(on) {
-  for (const { id } of changeItems(currentView())) (on ? cmp.send.add(id) : cmp.send.delete(id));
+  for (const { id } of changeItems(currentView(), onlyOpts())) (on ? cmp.send.add(id) : cmp.send.delete(id));
   renderLists();
 }
 
@@ -429,7 +447,11 @@ function listBody({ list, columns, showSettings }) {
     body.push(el('p', { class: 'hint', text: 'The whole list is missing in the target.' }));
     if (list.item && list.item.list) body.push(el('label', { class: 'cmp-col' }, pickBox(listChangeId(list), 'Create this list in the target'), el('span', { class: 'main', text: 'Create this list (with its columns) in the target' })));
   }
-  if (list.status === 'only') body.push(el('p', { class: 'hint', text: 'This list exists only in the target.' }));
+  if (list.status === 'only') {
+    body.push(el('p', { class: 'hint', text: 'This list exists only in the target.' }));
+    const only = onlyOpts();
+    if (onlyListTransferable(list, only)) body.push(el('label', { class: 'cmp-col' }, pickBox(onlyListId(list), only.mode === 'delete' ? 'Delete this list in the target' : 'Rename this list in the target'), el('span', { class: 'main', text: only.mode === 'delete' ? 'Delete this list in the target (recycle bin)' : `Rename this list to "${only.prefix}${list.title}"` })));
+  }
   if (list.status === 'error') body.push(el('div', { class: 'msg fail', text: `Not compared: ${list.error}.` }));
   if (list.note) body.push(el('div', { class: 'msg info cmp-note', text: list.note }));
   if (showSettings && list.diffs.length) {
@@ -438,12 +460,15 @@ function listBody({ list, columns, showSettings }) {
   }
   if (columns.length) {
     body.push(el('div', { class: 'cmp-cols' }, columns.map((c) => el('div', { class: 'cmp-col' },
-      columnTransferable(c) ? pickBox(columnChangeId(list, c), `Send column ${c.title} to the Batch Runner`) : el('span', { class: 'cmp-nobox' }),
+      columnTransferable(c) ? pickBox(columnChangeId(list, c), `Send column ${c.title} to the Batch Runner`)
+        : onlyColumnTransferable(list, c, onlyOpts()) ? pickBox(onlyColumnId(list, c), `${onlyOpts().mode === 'delete' ? 'Delete' : 'Rename'} column ${c.title} in the target`)
+          : el('span', { class: 'cmp-nobox' }),
       el('div', { class: 'main' },
         el('span', { class: 'cname', text: c.title }),
         el('span', { class: 'iname', text: c.name }),
         c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
-        c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null),
+        c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null,
+        onlyColumnTransferable(list, c, onlyOpts()) ? el('ul', { class: 'cmp-diff' }, el('li', { text: onlyOpts().mode === 'delete' ? 'Will be deleted in the target' : `Will be renamed to "${onlyOpts().prefix}${c.title}"` })) : null),
       el('div', { class: 'meta' }, el('span', { text: c.type }), el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] }))))));
   }
   return el('div', { class: 'check-body' }, body);
@@ -478,7 +503,7 @@ function renderLists() {
 function renderResult() {
   openLists.clear();
   // Everything that can be sent starts ticked, whatever the filter hides.
-  cmp.send = new Set(changeItems(filterView(cmp.result.lists, { statuses: [...STATUSES], customOnly: false })).map((i) => i.id));
+  cmp.send = new Set(changeItems(filterView(cmp.result.lists, { statuses: [...STATUSES], customOnly: false }), onlyOpts()).filter((i) => i.id.startsWith('O') ? ui.onlyMode.value === 'rename' : true).map((i) => i.id));
   renderCounts();
   renderLists();
 }
@@ -505,20 +530,33 @@ document.addEventListener('sp-utility:tab-shown', (e) => {
 chrome.tabs.onActivated.addListener(() => {
   if (cmp.shown && !cmp.busy) loadSites();
 });
-chrome.tabs.onUpdated.addListener((_id, info) => {
+chrome.tabs.onUpdated.addListener((id, info) => {
+  if (info.status === 'complete' && tabCache.has(id) && !tabCache.get(id).entry) tabCache.delete(id); // finished loading: try the tab again
   if (cmp.shown && !cmp.busy && info.status === 'complete') loadSites();
 });
 chrome.tabs.onRemoved.addListener(() => {
   if (cmp.shown && !cmp.busy) loadSites();
 });
 
-ui.reload.addEventListener('click', loadSites);
+ui.reload.addEventListener('click', () => {
+  for (const [id, hit] of tabCache) if (!hit.entry) tabCache.delete(id); // retry the tabs that couldn't be read
+  loadSites();
+});
 ui.source.addEventListener('change', () => (clearScope(), updateRunButton(), loadScope()));
 ui.target.addEventListener('change', updateRunButton);
 ui.scopeLoad.addEventListener('click', loadScope);
 ui.scopeFilter.addEventListener('input', renderScope);
 ui.system.addEventListener('change', () => cmp.scope && renderScope());
 ui.scopeMaster.addEventListener('change', () => setPicked(ui.scopeMaster.checked));
+ui.onlyMode.addEventListener('change', () => {
+  ui.onlyPrefix.hidden = ui.onlyMode.value !== 'rename';
+  if (!cmp.result) return;
+  // renaming is ticked at first, deleting never: the user ticks what to delete
+  for (const k of [...cmp.send]) if (k.startsWith('O')) cmp.send.delete(k);
+  if (ui.onlyMode.value === 'rename') for (const { id } of changeItems(filterView(cmp.result.lists, { statuses: [...STATUSES], customOnly: false }), onlyOpts())) if (id.startsWith('O')) cmp.send.add(id);
+  renderLists();
+});
+ui.onlyPrefix.addEventListener('change', () => cmp.result && renderLists());
 ui.pickAll.addEventListener('change', () => setSendPicked(ui.pickAll.checked));
 ui.addSource.addEventListener('click', () => addActive(ui.source));
 ui.addTarget.addEventListener('click', () => addActive(ui.target));
@@ -526,4 +564,4 @@ ui.run.addEventListener('click', runCompare);
 ui.filter.addEventListener('input', () => cmp.result && renderLists());
 ui.custom.addEventListener('change', () => cmp.result && (renderCounts(), renderLists()));
 ui.download.addEventListener('click', download);
-ui.sendAll.addEventListener('click', () => send('the selected changes', allStages(currentView(), cmp.result.ctx, (id) => cmp.send.has(id))));
+ui.sendAll.addEventListener('click', () => send('the selected changes', allStages(currentView(), { ...cmp.result.ctx, only: onlyOpts() }, (id) => cmp.send.has(id))));

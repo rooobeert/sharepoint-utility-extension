@@ -6,6 +6,7 @@
 // stages run on whichever site the Batch Runner is set to; the Compare tab sets it to the target.
 
 import { buildProvisioning, batchText, op, cleanFieldXml, listEndpoint, MAX_OPS_PER_STAGE } from './provision.js';
+import { CULTURES, parseTranslationLabel } from './languages.js';
 
 const items = (v) => (Array.isArray(v) ? v : (v && (v.Items || v.results)) || []);
 const SP_LIST = { __metadata: { type: 'SP.List' } };
@@ -54,55 +55,123 @@ function stagesOf(name, ops) {
 
 // ---------------------------------------------------------------- operations
 
-/** MERGE of the changed list settings, with the source's values; null if none of them can be changed. */
-function settingsOp(list) {
-  if (!list.item || !list.item.list) return null;
+const escQuote = (s) => String(s).replace(/'/g, "''");
+const fieldEndpoint = (list, name) => `${listEndpoint(list.rel)}/fields/getByInternalNameOrTitle('${escQuote(name)}')`;
+
+/**
+ * Translated titles / descriptions: SetValueForUICulture for each, then one MERGE of the item to save them.
+ * `values` is [{ resource: 'TitleResource' | 'DescriptionResource', culture, value }].
+ */
+function translationOps(endpoint, type, values) {
+  if (!values.length) return [];
+  return [
+    ...values.map((v) => op('POST', `${endpoint}/${v.resource}/SetValueForUICulture`, { cultureName: v.culture, value: v.value ?? '' })),
+    op('MERGE', endpoint, { __metadata: { type } }, { merge: true }),
+  ];
+}
+
+/** The changed translated properties of a diff list: [{ resource, culture, value }] with the source's text. */
+function translationValues(diffs) {
+  const out = [];
+  for (const d of diffs || []) {
+    const t = parseTranslationLabel(d.prop);
+    if (t && !d.blocked) out.push({ resource: `${t.what}Resource`, culture: t.culture, value: d.source });
+  }
+  return out;
+}
+
+/** Every translated text a source item has: from { Title: { lcid: text }, Description: { ... } }. */
+function allTranslationValues(tr) {
+  const out = [];
+  for (const what of ['Title', 'Description']) {
+    for (const [id, text] of Object.entries((tr && tr[what]) || {})) if (text && CULTURES[id]) out.push({ resource: `${what}Resource`, culture: CULTURES[id], value: text });
+  }
+  return out;
+}
+
+/** MERGE of the changed list settings, with the source's values, and the changed translations; [] if none of them can be changed. */
+function settingsOps(list) {
+  if (!list.item || !list.item.list) return [];
   const body = { ...SP_LIST };
   for (const d of list.diffs) {
     if (d.blocked || !LIST_API[d.prop]) continue;
     const [name, value] = LIST_API[d.prop](list.item.list);
     if (value !== undefined) body[name] = value;
   }
-  return Object.keys(body).length < 2 ? null : op('MERGE', listEndpoint(list.rel), body, { merge: true });
+  const merge = Object.keys(body).length < 2 ? [] : [op('MERGE', listEndpoint(list.rel), body, { merge: true })];
+  return [...merge, ...translationOps(listEndpoint(list.rel), 'SP.List', translationValues(list.diffs))];
 }
 
-export const settingsTransferable = (list) => !!settingsOp(list);
+export const settingsTransferable = (list) => settingsOps(list).length > 0;
+
+const canChange = (d) => !d.blocked && (!!COLUMN_API[d.prop] || !!parseTranslationLabel(d.prop));
 
 export const columnTransferable = (col) => !!col.field && (col.status === 'missing'
   ? !/^TaxonomyFieldType/i.test(col.type || '') && !!col.field.SchemaXml
-  : col.status === 'changed' && col.diffs.some((d) => !d.blocked && COLUMN_API[d.prop]));
+  : col.status === 'changed' && col.diffs.some(canChange));
 
-/** CreateFieldAsXml for a missing column, MERGE of the changed properties for a changed one; null if there is nothing to send. */
-function columnOp(list, col, ctx) {
-  if (!columnTransferable(col)) return null;
+/** CreateFieldAsXml (and its translated titles) for a missing column, MERGE of the changed properties and translations for a changed one; [] if there is nothing to send. */
+function columnOps(list, col, ctx) {
+  if (!columnTransferable(col)) return [];
   const endpoint = listEndpoint(list.rel);
+  const type = FIELD_TYPES[col.field.TypeAsString] || 'SP.Field';
   if (col.status === 'missing') {
     const listsById = Object.fromEntries((ctx.allLists || []).map((l) => [l.id, { title: l.title, url: l.url }]));
     const { xml } = cleanFieldXml(col.field.SchemaXml, listsById, ctx.web.ServerRelativeUrl);
-    return op('POST', `${endpoint}/fields/CreateFieldAsXml`, {
-      parameters: { __metadata: { type: 'SP.XmlSchemaFieldCreationInformation' }, SchemaXml: xml, Options: 24 },
-    });
+    return [
+      op('POST', `${endpoint}/fields/CreateFieldAsXml`, {
+        parameters: { __metadata: { type: 'SP.XmlSchemaFieldCreationInformation' }, SchemaXml: xml, Options: 24 },
+      }),
+      ...translationOps(fieldEndpoint(list, col.name), type, allTranslationValues(col.translations ? { Title: col.translations.Title } : null)),
+    ];
   }
-  const body = { __metadata: { type: FIELD_TYPES[col.field.TypeAsString] || 'SP.Field' } };
+  const body = { __metadata: { type } };
   for (const d of col.diffs) {
     if (d.blocked || !COLUMN_API[d.prop]) continue;
     const [key, value] = COLUMN_API[d.prop](col.field);
     if (value !== undefined) body[key] = value;
   }
-  if (Object.keys(body).length < 2) return null;
-  return op('MERGE', `${endpoint}/fields/getByInternalNameOrTitle('${col.name.replace(/'/g, "''")}')`, body, { merge: true });
+  const merge = Object.keys(body).length < 2 ? [] : [op('MERGE', fieldEndpoint(list, col.name), body, { merge: true })];
+  return [...merge, ...translationOps(fieldEndpoint(list, col.name), type, translationValues(col.diffs))];
 }
+
+// ---------------------------------------------------------------- only in the target
+
+/** What to do with lists and columns that only the target has: 'rename' (prefix the title) or 'delete' (lists go to the recycle bin). */
+export const ONLY_MODES = ['leave', 'rename', 'delete'];
+export const DEFAULT_PREFIX = 'zz_';
+
+const prefixed = (title, prefix) => !prefix || String(title).startsWith(prefix);
+
+/** The operation for a list that only the target has, or null. */
+function onlyListOp(list, { mode, prefix }) {
+  if (list.status !== 'only') return null;
+  if (mode === 'delete') return op('POST', `${listEndpoint(list.rel)}/recycle`, null);
+  if (mode === 'rename' && prefix && !prefixed(list.title, prefix)) return op('MERGE', listEndpoint(list.rel), { ...SP_LIST, Title: prefix + list.title }, { merge: true });
+  return null;
+}
+
+/** The operation for a custom column that only the target has, or null. */
+function onlyColumnOp(list, col, { mode, prefix }) {
+  if (col.status !== 'only' || !col.custom) return null;
+  if (mode === 'delete') return op('DELETE', fieldEndpoint(list, col.name), null, { merge: true });
+  if (mode === 'rename' && prefix && !prefixed(col.title, prefix)) return op('MERGE', fieldEndpoint(list, col.name), { __metadata: { type: 'SP.Field' }, Title: prefix + col.title }, { merge: true });
+  return null;
+}
+
+export const onlyListTransferable = (list, only) => !!onlyListOp(list, only);
+export const onlyColumnTransferable = (list, col, only) => !!onlyColumnOp(list, col, only);
 
 // ---------------------------------------------------------------- stages
 
 export function settingsStage(list) {
-  const o = settingsOp(list);
-  return o ? stage(`${list.title}: list settings`, [o]) : null;
+  const ops = settingsOps(list);
+  return ops.length ? stage(`${list.title}: list settings`, ops) : null;
 }
 
 export function columnStage(list, col, ctx) {
-  const o = columnOp(list, col, ctx);
-  return o ? stage(`${list.title}: column "${col.title}"`, [o]) : null;
+  const ops = columnOps(list, col, ctx);
+  return ops.length ? stage(`${list.title}: column "${col.title}"`, ops) : null;
 }
 
 /** A list missing in the target: create it with its settings and columns (stages as in the architecture export). */
@@ -123,17 +192,27 @@ function provisionStages(lists, ctx, prefix = '') {
 export const listChangeId = (list) => `L:${list.key}`;
 export const settingsChangeId = (list) => `S:${list.key}`;
 export const columnChangeId = (list, col) => `C:${list.key}:${col.name}`;
+/** A list or column that only the target has (renamed or deleted, see ONLY_MODES). */
+export const onlyListId = (list) => `O:${list.key}`;
+export const onlyColumnId = (list, col) => `OC:${list.key}:${col.name}`;
 
-/** The changes of a view (filterView output) that can be sent: [{ id }]. */
-export function changeItems(view) {
+/** The changes of a view (filterView output) that can be sent: [{ id }]. `only` = { mode, prefix } for what only the target has. */
+export function changeItems(view, only = { mode: 'leave' }) {
   const out = [];
   for (const { list, columns, showSettings } of view) {
+    if (list.status === 'only') {
+      if (onlyListTransferable(list, only)) out.push({ id: onlyListId(list) });
+      continue;
+    }
     if (list.status === 'missing') {
       if (list.item && list.item.list) out.push({ id: listChangeId(list) });
       continue;
     }
     if (showSettings && settingsTransferable(list)) out.push({ id: settingsChangeId(list) });
-    for (const c of columns) if (columnTransferable(c)) out.push({ id: columnChangeId(list, c) });
+    for (const c of columns) {
+      if (columnTransferable(c)) out.push({ id: columnChangeId(list, c) });
+      else if (onlyColumnTransferable(list, c, only)) out.push({ id: onlyColumnId(list, c) });
+    }
   }
   return out;
 }
@@ -145,19 +224,39 @@ export function changeItems(view) {
  */
 export function allStages(view, ctx, pick = () => true) {
   const missing = view.filter((v) => v.list.status === 'missing' && pick(listChangeId(v.list))).map((v) => v.list);
+  const only = ctx.only || { mode: 'leave' };
   const settings = [];
   const columns = [];
-  for (const { list, columns: cols, showSettings } of view) {
-    if (list.status === 'missing') continue; // its columns come with the list
-    if (showSettings && pick(settingsChangeId(list))) {
-      const o = settingsOp(list);
-      if (o) settings.push(o);
-    }
-    for (const c of cols) {
-      if (!pick(columnChangeId(list, c))) continue;
-      const o = columnOp(list, c, ctx);
-      if (o) columns.push(o);
+  const names = [];
+  const leftovers = [];
+  // the translated titles of the missing lists and their columns (the lists are created first)
+  for (const list of missing) {
+    const tr = list.item && list.item.translations;
+    if (!tr) continue;
+    names.push(...translationOps(listEndpoint(list.rel), 'SP.List', allTranslationValues(tr.list)));
+    for (const [name, col] of Object.entries(tr.columns || {})) {
+      names.push(...translationOps(fieldEndpoint(list, name), 'SP.Field', allTranslationValues({ Title: col.Title })));
     }
   }
-  return [...provisionStages(missing, ctx), ...stagesOf('List settings', settings), ...stagesOf('Columns', columns)];
+  for (const { list, columns: cols, showSettings } of view) {
+    if (list.status === 'only') {
+      const o = pick(onlyListId(list)) ? onlyListOp(list, only) : null;
+      if (o) leftovers.push(o);
+      continue;
+    }
+    if (list.status === 'missing') continue; // its columns come with the list
+    if (showSettings && pick(settingsChangeId(list))) settings.push(...settingsOps(list));
+    for (const c of cols) {
+      if (pick(columnChangeId(list, c))) columns.push(...columnOps(list, c, ctx));
+      if (pick(onlyColumnId(list, c))) {
+        const o = onlyColumnOp(list, c, only);
+        if (o) leftovers.push(o);
+      }
+    }
+  }
+  const leftoverName = only.mode === 'delete' ? 'Delete what only the target has' : 'Rename what only the target has';
+  return [
+    ...provisionStages(missing, ctx), ...stagesOf('List settings', settings), ...stagesOf('Columns', columns),
+    ...stagesOf('Translated titles', names), ...stagesOf(leftoverName, leftovers),
+  ];
 }

@@ -23,7 +23,7 @@ const ui = {
   picked: $('perm-picked'),
   read: $('perm-read'),
   write: $('perm-write'),
-  itemsChip: $('perm-items-chip'),
+  applyAll: $('perm-apply-all'),
   add: $('perm-add'),
   addHint: $('perm-add-hint'),
   clear: $('perm-clear'),
@@ -52,18 +52,24 @@ const perm = {
   selected: new Set(), // list ids for the next "Add to plan"
   picked: new Map(), // principal key -> { principal, roleId }
   plan: new Map(), // entry key -> { listId, principal, roleId }
-  items: new Map(), // list id -> { read, write } item-level settings
+  settings: new Map(), // list id -> { mode: 'add' | 'replace', keep: Set of default group keys, read, write }: how the list is changed
   preview: null, // { key, plans, errorCount }
   log: '',
 };
 
-const options = () => ({
+/** The "Settings for lists you add next" box: what a list starts with. */
+const defaultSettings = () => ({
   mode: ui.modes.find((m) => m.checked).value,
-  keepGroups: perm.data ? ui.keep.filter((k) => k.checked).map((k) => perm.data.defaults[k.dataset.group]).filter((id) => id != null) : [],
+  keep: new Set(ui.keep.filter((k) => k.checked).map((k) => k.dataset.group)),
+  read: Number(ui.read.value) || null,
+  write: Number(ui.write.value) || null,
 });
-const planKey = () => JSON.stringify([[...perm.plan.keys()].sort(), [...perm.items.entries()].sort(), options()]);
-const itemLevel = () => ({ read: Number(ui.read.value) || null, write: Number(ui.write.value) || null });
-const planSize = () => perm.plan.size + perm.items.size;
+const copySettings = (s, list) => ({ mode: s.mode, keep: new Set(s.keep), read: list && isLibrary(list) ? null : s.read, write: list && isLibrary(list) ? null : s.write });
+const hasItems = (s) => !!(s.read || s.write);
+/** Options for planList: the ids of the default groups to keep come from the site. */
+const listOptions = (s) => ({ mode: s.mode, keepGroups: perm.data ? [...s.keep].map((g) => perm.data.defaults[g]).filter((id) => id != null) : [] });
+const planKey = () => JSON.stringify([[...perm.plan.keys()].sort(), [...perm.settings.entries()].map(([id, s]) => [id, s.mode, [...s.keep].sort(), s.read, s.write]).sort()]);
+const planSize = () => perm.plan.size + [...perm.settings.values()].filter(hasItems).length;
 const listById = (id) => perm.data.lists.find((l) => l.id === id);
 const roleById = (id) => perm.data.roles.find((r) => r.id === id);
 const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
@@ -73,7 +79,7 @@ const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 function setBusy(busy) {
   perm.busy = busy;
   for (const n of document.querySelectorAll('#view-perm input, #view-perm select, #view-perm button')) {
-    if (n !== ui.preview && n !== ui.apply && n !== ui.add && n !== ui.clear) n.disabled = busy;
+    if (n !== ui.preview && n !== ui.apply && n !== ui.add && n !== ui.clear && n !== ui.applyAll) n.disabled = busy;
   }
   if (!busy) syncKeep();
   updateButtons();
@@ -88,15 +94,13 @@ function updateButtons() {
   const ready = perm.loaded && !perm.busy;
   const lists = perm.selected.size;
   const who = perm.picked.size;
-  const il = itemLevel();
-  const items = !!(il.read || il.write);
-  ui.itemsChip.textContent = items ? 'set' : 'off';
-  ui.itemsChip.className = `chip ${items ? 'ok' : 'muted'}`;
+  const items = hasItems(defaultSettings());
   ui.add.disabled = !ready || !lists || !(who || items);
   ui.add.textContent = lists && who ? `Add to plan (${plural(lists, 'list')} × ${who})` : lists && items ? `Add to plan (${plural(lists, 'list')})` : 'Add to plan';
   ui.addHint.textContent = !perm.loaded ? '' : !lists && !who && !items ? 'Select lists above and add users or groups, or set item-level permissions.'
     : !lists ? 'Select at least one list above.' : !who && !items ? 'Add at least one user or group, or set item-level permissions.' : '';
   ui.clear.disabled = !ready || !planSize();
+  ui.applyAll.disabled = !ready || !perm.settings.size;
   ui.reloadRoles.disabled = !ready;
   ui.preview.disabled = !ready || !planSize();
 
@@ -123,7 +127,7 @@ function updateButtons() {
 
 /** Default-group checkboxes: named after the site's groups, only usable in replace mode. */
 function syncKeep() {
-  const replace = options().mode === 'replace';
+  const replace = defaultSettings().mode === 'replace';
   for (const k of ui.keep) {
     const id = perm.data && perm.data.defaults[k.dataset.group];
     const group = id != null && perm.data.groups.find((g) => g.id === id);
@@ -133,7 +137,7 @@ function syncKeep() {
   }
 }
 
-const keptNames = () => ui.keep.filter((k) => k.checked && !k.closest('label').hidden).map((k) => k.nextElementSibling.textContent).join(', ');
+const keptNames = (s) => defaultGroups().filter((g) => s.keep.has(g.key)).map((g) => g.title).join(', ');
 
 // ---------------------------------------------------------------- loading
 
@@ -144,7 +148,7 @@ async function load() {
   perm.selected.clear();
   perm.picked.clear();
   perm.plan.clear();
-  perm.items.clear();
+  perm.settings.clear();
   perm.preview = null;
   ui.output.hidden = ui.progress.hidden = true;
   renderAll();
@@ -369,18 +373,25 @@ function addToPlan() {
   const picks = [...perm.picked.values()];
   const added = addEntries(perm.plan, lists, picks);
   const dup = lists.length * picks.length - added;
-  const il = itemLevel();
+  const defaults = defaultSettings();
   const parts = [];
   if (picks.length) parts.push(`Added ${plural(added, 'permission')} to the plan.${dup ? ` ${dup} were already in it.` : ''}`);
-  if (il.read || il.write) {
-    const target = lists.map(listById).filter((l) => !isLibrary(l));
-    for (const l of target) {
-      const prev = perm.items.get(l.id) || {};
-      perm.items.set(l.id, { read: il.read || prev.read || null, write: il.write || prev.write || null });
+  if (picks.length || hasItems(defaults)) {
+    for (const id of lists) {
+      const list = listById(id);
+      const prev = perm.settings.get(id);
+      if (!prev) perm.settings.set(id, copySettings(defaults, list));
+      else if (list && !isLibrary(list)) {
+        // a list that is already in the plan keeps its settings; only item-level values that are set here are added
+        prev.read = defaults.read || prev.read;
+        prev.write = defaults.write || prev.write;
+      }
     }
+  }
+  if (hasItems(defaults)) {
+    const target = lists.map(listById).filter((l) => l && !isLibrary(l));
     const libs = lists.length - target.length;
     parts.push(`Item-level permissions planned for ${plural(target.length, 'list')}.${libs ? ` ${plural(libs, 'library', 'libraries')} skipped: libraries don't have this setting.` : ''}`);
-    ui.read.value = ui.write.value = '';
   }
   perm.selected.clear();
   perm.picked.clear();
@@ -390,23 +401,74 @@ function addToPlan() {
 
 // ---------------------------------------------------------------- 3. plan
 
-/** Plan entries grouped by list, in list title order. */
+/** Lists in the plan: those with planned users or groups, or with item-level settings. In list title order. */
 function planByList() {
   const groups = new Map();
   for (const e of perm.plan.values()) {
     if (!groups.has(e.listId)) groups.set(e.listId, []);
     groups.get(e.listId).push(e);
   }
-  for (const listId of perm.items.keys()) if (!groups.has(listId)) groups.set(listId, []);
+  for (const [listId, s] of perm.settings) if (hasItems(s) && !groups.has(listId)) groups.set(listId, []);
+  for (const id of [...perm.settings.keys()]) if (!groups.has(id)) perm.settings.delete(id); // a list that left the plan
+  for (const id of groups.keys()) if (!perm.settings.has(id)) perm.settings.set(id, copySettings(defaultSettings(), listById(id)));
   return [...groups.entries()]
-    .map(([listId, entries]) => ({ list: listById(listId), entries, itemLevel: perm.items.get(listId) || null }))
+    .map(([listId, entries]) => ({ list: listById(listId), entries, settings: perm.settings.get(listId) }))
     .filter((g) => g.list)
     .sort((a, b) => a.list.title.localeCompare(b.list.title, undefined, { sensitivity: 'base' }));
 }
 
+/** The default groups this site has: [{ key, title }] (owners, members, visitors). */
+function defaultGroups() {
+  return ui.keep.map((k) => {
+    const id = perm.data && perm.data.defaults[k.dataset.group];
+    const group = id != null && perm.data.groups.find((g) => g.id === id);
+    return group ? { key: k.dataset.group, title: group.title } : null;
+  }).filter(Boolean);
+}
+
+const openPlan = new Set(); // lists whose card is open, so a change doesn't collapse it
+
+/** The settings of one list: current permissions, default groups to keep, item-level. */
+function listSettings(list, s) {
+  const lib = isLibrary(list);
+  const name = `perm-mode-${list.id}`;
+  const mode = (value, text) => {
+    const r = el('input', { type: 'radio', name, value });
+    r.checked = s.mode === value;
+    r.disabled = perm.busy;
+    r.addEventListener('change', () => { s.mode = value; renderPlan(); });
+    return el('label', { class: 'check-label' }, r, ` ${text}`);
+  };
+  const keep = s.mode === 'replace' ? el('div', { class: 'perm-keep perm-indent' },
+    el('span', { class: 'perm-keep-label', text: 'Keep these default groups:' }),
+    ...defaultGroups().map((g) => {
+      const c = el('input', { type: 'checkbox' });
+      c.checked = s.keep.has(g.key);
+      c.disabled = perm.busy;
+      c.addEventListener('change', () => { if (c.checked) s.keep.add(g.key); else s.keep.delete(g.key); renderPlan(); });
+      return el('label', { class: 'check-label' }, c, ' ', el('span', { text: g.title }));
+    })) : null;
+  const item = (field, src, text) => {
+    const select = src.cloneNode(true);
+    select.removeAttribute('id');
+    select.value = s[field] ? String(s[field]) : '';
+    select.disabled = perm.busy;
+    select.addEventListener('change', () => { s[field] = Number(select.value) || null; renderPlan(); });
+    return el('label', { class: 'perm-field' }, text, select);
+  };
+  return el('div', { class: 'perm-list-settings' },
+    el('div', { class: 'perm-sub', text: 'This list: current permissions' }),
+    mode('add', 'Keep them and add the planned ones'),
+    mode('replace', 'Replace them with the planned ones'),
+    keep,
+    lib ? el('p', { class: 'hint', text: "Item-level permissions don't exist for libraries." }) : item('read', ui.read, 'Item-level read access'),
+    lib ? null : item('write', ui.write, 'Item-level create and edit access'));
+}
+
 function renderPlan() {
   const groups = perm.data ? planByList() : [];
-  ui.plan.replaceChildren(...groups.map(({ list, entries, itemLevel: il }) => {
+  const named = new Map(defaultGroups().map((g) => [g.key, g.title]));
+  ui.plan.replaceChildren(...groups.map(({ list, entries, settings: s }) => {
     const rows = entries.map((e) => {
       const remove = el('button', { type: 'button', class: 'icon danger', title: 'Remove from plan', 'aria-label': `Remove ${e.principal.title} from the plan`, text: '✕' });
       remove.disabled = perm.busy;
@@ -415,33 +477,31 @@ function renderPlan() {
         renderPlan();
       });
       return el('tr', {},
-        el('td', {}, el('span', { class: 'perm-name' }, e.principal.title, kindBadge(e.principal))),
+        el('td', {}, el('span', { class: 'perm-name', text: e.principal.title }, kindBadge(e.principal))),
         el('td', { class: 'perm-level', text: (roleById(e.roleId) || { name: e.roleId }).name }),
         el('td', { class: 'perm-x' }, remove));
     });
-    if (il) {
-      const remove = el('button', { type: 'button', class: 'icon danger', title: 'Remove from plan', 'aria-label': 'Remove the item-level permissions from the plan', text: '✕' });
-      remove.disabled = perm.busy;
-      remove.addEventListener('click', () => {
-        perm.items.delete(list.id);
-        renderPlan();
-      });
-      rows.unshift(el('tr', {},
-        el('td', {}, el('span', { class: 'perm-name', text: 'Item-level permissions' }), el('span', { class: 'perm-kind', text: itemLevelText(il) })),
-        el('td', { class: 'perm-level', text: '' }),
-        el('td', { class: 'perm-x' }, remove)));
-    }
     const removeList = el('button', { type: 'button', class: 'secondary small', text: 'Remove list from plan' });
     removeList.disabled = perm.busy;
     removeList.addEventListener('click', () => {
       for (const e of entries) perm.plan.forEach((v, k) => v === e && perm.plan.delete(k));
-      perm.items.delete(list.id);
+      perm.settings.delete(list.id);
       renderPlan();
     });
-    return el('details', { class: 'check' },
-      el('summary', {}, el('span', { class: 'chip muted', text: String(entries.length + (il ? 1 : 0)) }), list.title,
-        el('span', { class: 'summary-text', text: list.uniquePermissions ? 'unique' : 'inherits' })),
-      el('div', { class: 'check-body' }, el('table', { class: 'perm-table' }, el('tbody', {}, rows)), removeList));
+    const kept = [...s.keep].map((k) => named.get(k)).filter(Boolean).join(', ');
+    const chips = el('span', { class: 'perm-list-chips' },
+      entries.length ? el('span', { class: `chip ${s.mode === 'replace' ? 'warn' : 'muted'}`, text: s.mode === 'replace' ? `replace · keeps ${kept || 'none'}` : 'add' }) : null,
+      hasItems(s) ? el('span', { class: 'chip ok', title: itemLevelText(s), text: 'items: set' }) : null);
+    const d = el('details', { class: 'check' },
+      el('summary', {}, el('span', { class: 'chip muted', text: String(entries.length) }), list.title,
+        el('span', { class: 'summary-text', text: `${isLibrary(list) ? 'library · ' : ''}${list.uniquePermissions ? 'unique' : 'inherits'}` }), chips),
+      el('div', { class: 'check-body' },
+        rows.length ? el('table', { class: 'perm-table' }, el('tbody', {}, rows)) : null,
+        entries.length ? null : el('p', { class: 'hint', text: 'No users or groups planned for this list. Replace needs at least one.' }),
+        listSettings(list, s), removeList));
+    d.open = openPlan.has(list.id);
+    d.addEventListener('toggle', () => (d.open ? openPlan.add(list.id) : openPlan.delete(list.id)));
+    return d;
   }));
   ui.planEmpty.hidden = groups.length > 0;
   updateButtons();
@@ -453,18 +513,17 @@ async function runPreview() {
   if (perm.busy || !planSize()) return;
   setBusy(true);
   const key = planKey();
-  const opts = options();
   const groups = planByList();
   const plans = [];
   ui.bar.value = 0;
   try {
-    for (const [i, { list, entries, itemLevel: il }] of groups.entries()) {
+    for (const [i, { list, entries, settings: s }] of groups.entries()) {
       setStatus(`Reading the permissions of "${list.title}" (${i + 1} of ${groups.length})…`);
       ui.bar.value = i / groups.length;
       try {
         const current = await perm.client.readList(perm.site, list.id);
         list.uniquePermissions = current.unique;
-        plans.push(planList(list, current, entries, opts, perm.data, il));
+        plans.push(planList(list, current, entries, listOptions(s), perm.data, hasItems(s) && !isLibrary(list) ? { read: s.read, write: s.write } : null));
       } catch (e) {
         plans.push({ list, error: e.message, actions: [], warnings: [] });
       }
@@ -636,9 +695,11 @@ function renderResult(result) {
 }
 
 function logText(result) {
-  const lines = ['SharePoint permissions', `Site:     ${perm.site}`, `Finished: ${new Date().toISOString()}`, `Mode:     ${options().mode}${options().mode === 'replace' ? `, default groups kept: ${keptNames() || 'none'}` : ''}`];
+  const lines = ['SharePoint permissions', `Site:     ${perm.site}`, `Finished: ${new Date().toISOString()}`];
   for (const l of result.lists) {
+    const s = perm.settings.get(l.id);
     lines.push('', `== ${l.title}`);
+    if (s) lines.push(`Mode: ${s.mode}${s.mode === 'replace' ? `, default groups kept: ${keptNames(s) || 'none'}` : ''}`);
     for (const o of l.ops) {
       lines.push(`[${o.outcome === 'failed' ? 'FAIL' : 'OK  '}] ${o.status ?? '---'} ${o.label}`);
       if (o.outcome === 'failed' && o.errorMessage) lines.push(`        ${o.errorMessage}`);
@@ -684,20 +745,20 @@ ui.add.addEventListener('click', addToPlan);
 ui.clear.addEventListener('click', async () => {
   if (!(await ask({ title: 'Clear the plan?', body: `Everything planned (${plural(planSize(), 'entry', 'entries')}) is removed from the plan. Nothing changes in SharePoint.`, ok: 'Clear' }))) return;
   perm.plan.clear();
-  perm.items.clear();
+  perm.settings.clear();
   perm.preview = null;
   ui.output.hidden = true;
   renderPlan();
 });
-for (const m of ui.modes) {
-  m.addEventListener('change', () => {
-    syncKeep();
-    updateButtons();
-  });
-}
-for (const k of ui.keep) k.addEventListener('change', updateButtons);
-ui.read.addEventListener('change', updateButtons);
-ui.write.addEventListener('change', updateButtons);
+for (const m of ui.modes) m.addEventListener('change', syncKeep);
+for (const n of [...ui.modes, ...ui.keep, ui.read, ui.write]) n.addEventListener('change', updateButtons);
+ui.applyAll.addEventListener('click', () => {
+  const defaults = defaultSettings();
+  for (const [id, s] of perm.settings) perm.settings.set(id, copySettings(defaults, listById(id)));
+  perm.preview = null;
+  renderPlan();
+  setStatus(`Applied the settings to ${plural(perm.settings.size, 'list')} in the plan.`);
+});
 ui.preview.addEventListener('click', runPreview);
 ui.apply.addEventListener('click', runApply);
 ui.copy.addEventListener('click', () => navigator.clipboard.writeText(perm.log).then(

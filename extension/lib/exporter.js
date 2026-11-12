@@ -12,11 +12,13 @@ import {
   viewRows,
   contentTypeRows,
   errorRow,
+  isCustomField,
 } from './export.js';
+import { CULTURES } from './languages.js';
 
 export const MAX_RETRIES = 3;
 
-const WEB_SELECT = 'Title,Url,Id,ServerRelativeUrl,WebTemplate,Configuration,Language,Created,Description,HasUniqueRoleAssignments';
+const WEB_SELECT = 'Title,Url,Id,ServerRelativeUrl,WebTemplate,Configuration,Language,SupportedUILanguageIds,Created,Description,HasUniqueRoleAssignments';
 const PICKER_SELECT = 'Id,Title,BaseTemplate,BaseType,Hidden,IsCatalog,IsSystemList,ItemCount,HasUniqueRoleAssignments,RootFolder/ServerRelativeUrl';
 const LIST_SELECT = [
   'Id', 'Title', 'Description', 'BaseTemplate', 'BaseType', 'Hidden', 'ItemCount', 'EnableVersioning', 'MajorVersionLimit',
@@ -134,6 +136,54 @@ export function createExporter({ request, sleep = defaultSleep, onEvent = () => 
     return { sitePermissions, siteErrors, lists: out, problems };
   }
 
+  /** The text of one translatable property (TitleResource / DescriptionResource) in one language; null if it can't be read. */
+  async function translated(site, base, resource, lcid) {
+    try {
+      const json = await getJson(site, `${base}/${resource}/GetValueForUICulture('${CULTURES[lcid]}')`);
+      const v = json && (json.value !== undefined ? json.value : json.d && json.d.GetValueForUICulture);
+      return typeof v === 'string' ? v : null;
+    } catch (e) {
+      if (!(e instanceof ExportError)) throw e;
+      return null;
+    }
+  }
+
+  /**
+   * Read the translated titles and descriptions of the lists in `data.lists` (from collect) and of their custom
+   * columns, in the languages `langs` (language IDs). Sets `item.translations` = { list: { Title: { lcid: text }, Description },
+   * columns: { InternalName: { Title: { lcid: text } } } }. A text that can't be read is left out. Returns the number of requests' failures.
+   */
+  async function readTranslations(site, data, langs, { onProgress = () => {}, parallel = 6 } = {}) {
+    const tasks = [];
+    for (const item of data.lists) {
+      if (!item.list) continue;
+      const base = `/_api/web/lists(guid'${item.entry.id}')`;
+      const tr = { list: { Title: {}, Description: {} }, columns: {} };
+      item.translations = tr;
+      for (const id of langs) {
+        for (const what of ['Title', 'Description']) {
+          tasks.push(async () => { const v = await translated(site, base, `${what}Resource`, id); if (v != null) tr.list[what][id] = v; });
+        }
+      }
+      for (const f of (item.fields && (item.fields.value || (item.fields.d && item.fields.d.results))) || []) {
+        if (!isCustomField(f)) continue;
+        const col = { Title: {} };
+        tr.columns[f.InternalName] = col;
+        for (const id of langs) {
+          tasks.push(async () => { const v = await translated(site, `${base}/fields(guid'${String(f.Id).replace(/^\{|\}$/g, '')}')`, 'TitleResource', id); if (v != null) col.Title[id] = v; });
+        }
+      }
+    }
+    let done = 0;
+    const queue = [...tasks];
+    await Promise.all(Array.from({ length: Math.min(parallel, queue.length) }, async () => {
+      while (queue.length) {
+        await queue.shift()();
+        onProgress(++done, tasks.length);
+      }
+    }));
+  }
+
   /** Export the site and the selected lists as CSV rows. Returns { rows, problems }. */
   async function exportSite(site, loaded, selectedIds, { allColumns = false } = {}) {
     const { web, siteCollectionUrl, lists } = loaded;
@@ -159,5 +209,5 @@ export function createExporter({ request, sleep = defaultSleep, onEvent = () => 
     return { rows, problems: data.problems };
   }
 
-  return { loadLists, collect, exportSite };
+  return { loadLists, collect, readTranslations, exportSite };
 }

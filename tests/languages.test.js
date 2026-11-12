@@ -1,0 +1,74 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { compareLanguages, translationProps, bothSides, parseTranslationLabel } from '../extension/lib/languages.js';
+import { compareSites } from '../extension/lib/diff.js';
+import { settingsStage, columnStage, allStages, changeItems, onlyListId, onlyColumnId } from '../extension/lib/transfer.js';
+
+const ctx = { web: { ServerRelativeUrl: '/sites/dev' }, allLists: [] };
+
+test('compareLanguages: German and English always, plus the enabled ones', () => {
+  assert.deepEqual(compareLanguages({ Language: 1033 }, { Language: 1033 }), [1031, 1033]);
+  assert.deepEqual(compareLanguages({ SupportedUILanguageIds: [1033, 1036], Language: 1033 }, { SupportedUILanguageIds: [1040] }), [1031, 1033, 1036, 1040]);
+});
+
+test('translationProps: labels, default language skipped, columns have no description', () => {
+  const tr = { Title: { 1031: 'Anfragen', 1033: 'Requests' }, Description: { 1031: 'Text' } };
+  assert.deepEqual(translationProps('list', tr, new Set([1033])), { 'Title (de-DE)': 'Anfragen', 'Description (de-DE)': 'Text' });
+  assert.deepEqual(translationProps('column', tr), { 'Display name (de-DE)': 'Anfragen', 'Display name (en-US)': 'Requests' });
+  assert.deepEqual(parseTranslationLabel('Display name (de-DE)'), { what: 'Title', culture: 'de-DE' });
+  assert.equal(parseTranslationLabel('Required'), null);
+  const a = { 'Title (de-DE)': 'x', Required: 'No' }; const b = { Required: 'No' };
+  bothSides(a, b);
+  assert.deepEqual(a, { Required: 'No' });
+});
+
+const side = (lang, title, fields, translations) => ({
+  web: { ServerRelativeUrl: '/sites/dev', Language: lang }, allLists: [],
+  lists: [{ entry: { title: 'Req', url: '/sites/dev/Lists/Req' }, errors: {}, translations,
+    list: { Title: 'Req', BaseTemplate: 100, RootFolder: { ServerRelativeUrl: '/sites/dev/Lists/Req' } },
+    fields: { value: fields } }],
+});
+const field = (name, title) => ({ InternalName: name, Title: title, Id: name, TypeAsString: 'Text', SchemaXml: '<Field/>', CanBeDeleted: true, FromBaseType: false, Group: 'Custom' });
+
+test('compareSites finds differing translations, and the stage sets them in the target', () => {
+  const f = field('Foo', 'Foo');
+  const src = side(1033, 'Req', [f], { list: { Title: { 1031: 'Anfragen' }, Description: {} }, columns: { Foo: { Title: { 1031: 'Fu' } } } });
+  const tgt = side(1033, 'Req', [f], { list: { Title: { 1031: 'Alt' }, Description: {} }, columns: { Foo: { Title: { 1031: 'Fu' } } } });
+  const [list] = compareSites(src, tgt);
+  assert.equal(list.status, 'changed');
+  assert.deepEqual(list.diffs.map((d) => [d.prop, d.source, d.target]), [['Title (de-DE)', 'Anfragen', 'Alt']]);
+  list.item = src.lists[0];
+  const st = settingsStage(list);
+  assert.match(st.body, /POST .*getList\(.*\)\/TitleResource\/SetValueForUICulture/);
+  assert.match(st.body, /"cultureName":"de-DE","value":"Anfragen"/);
+  assert.match(st.body, /^MERGE /m);
+});
+
+test('a column translation is sent with the column', () => {
+  const col = { name: 'Foo', title: 'Foo', type: 'Text', status: 'changed', field: { TypeAsString: 'Text' }, diffs: [{ prop: 'Display name (de-DE)', source: 'Fu', target: 'Alt' }] };
+  const st = columnStage({ title: 'Req', rel: 'Lists/Req' }, col, ctx);
+  assert.match(st.body, /fields\/getByInternalNameOrTitle\('Foo'\)\/TitleResource\/SetValueForUICulture/);
+});
+
+const only = { title: 'Old', rel: 'Lists/Old', key: 'lists/old', status: 'only', diffs: [], columns: [] };
+const gone = { name: 'Gone', title: 'Gone', custom: true, type: 'Text', status: 'only' };
+const view = [{ list: only, columns: [], showSettings: false }, { list: { title: 'Req', rel: 'Lists/Req', key: 'lists/req', status: 'same', diffs: [] }, columns: [gone], showSettings: false }];
+
+test('only in the target: nothing is sent unless renaming or deleting is chosen', () => {
+  assert.deepEqual(changeItems(view), []);
+  assert.deepEqual(allStages(view, ctx), []);
+  assert.deepEqual(changeItems(view, { mode: 'rename', prefix: 'zz_' }).map((i) => i.id), [onlyListId(only), onlyColumnId(view[1].list, gone)]);
+});
+
+test('only in the target: rename adds the prefix once, delete recycles lists and deletes columns', () => {
+  const rename = allStages(view, { ...ctx, only: { mode: 'rename', prefix: 'zz_' } });
+  assert.deepEqual(rename.map((s) => s.name), ['Rename what only the target has']);
+  assert.match(rename[0].body, /"Title":"zz_Old"/);
+  assert.match(rename[0].body, /"Title":"zz_Gone"/);
+  const done = [{ list: { ...only, title: 'zz_Old' }, columns: [], showSettings: false }];
+  assert.deepEqual(allStages(done, { ...ctx, only: { mode: 'rename', prefix: 'zz_' } }), []);
+  const del = allStages(view, { ...ctx, only: { mode: 'delete', prefix: 'zz_' } });
+  assert.match(del[0].body, /POST \{\{WebUrl\}\}\/_api\/web\/getList\([^)]*\)\/recycle/);
+  assert.match(del[0].body, /DELETE .*fields\/getByInternalNameOrTitle\('Gone'\)/);
+  assert.deepEqual(allStages(view, { ...ctx, only: { mode: 'delete' } }, (id) => id === onlyListId(only)).length, 1);
+});

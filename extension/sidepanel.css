@@ -374,8 +374,11 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .perm-table tr.act-remove td.perm-act { color: var(--fail); }
 .perm-table tr.act-keep td, .perm-table tr.act-skip td { color: var(--muted); }
 .perm-table td .err { display: block; color: var(--fail); font-size: 11.5px; margin-top: 2px; }
-.perm-items { margin-top: 8px; }
-.perm-items .chip.muted { font-weight: 400; }
+.perm-defaults { margin: 8px 0; padding: 8px 10px; border: 1px dashed var(--border); border-radius: var(--radius); }
+.perm-defaults .block-head { margin-bottom: 2px; }
+.perm-list-settings { margin-top: 8px; padding: 8px 10px; background: var(--surface-1); border-radius: var(--radius); }
+.perm-list-settings .perm-sub { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.perm-list-chips { margin-left: auto; display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .perm-field { display: grid; gap: 2px; font-size: 12px; margin-top: 6px; }
 .perm-field select {
   font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--border);
@@ -416,6 +419,10 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .cmp-col .meta { flex: 0 1 auto; display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 11px; color: var(--muted); }
 .cmp-col label { cursor: pointer; }
 .cmp-pickbar { margin: 8px 0 4px; }
+.cmp-only { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+.cmp-only select, .cmp-only input[type="text"] { box-sizing: border-box; height: 28px; padding: 4px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font: inherit; }
+.cmp-only select { flex: 1 1 12em; min-width: 0; }
+.cmp-only input[type="text"] { width: 7em; }
 .cmp-master { margin: 6px 0 2px; }
 .cmp-col .iname { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); word-break: break-all; }
 .cmp-diff { list-style: none; margin: 2px 0 0; padding: 0; font-size: 11.5px; overflow-wrap: anywhere; }

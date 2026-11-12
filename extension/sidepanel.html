@@ -260,27 +260,6 @@
       </div>
       <p class="hint">Click the field to see the site's groups (SPO Group, without Owners, Members and Visitors). Typing filters them and also searches the tenant's users and Entra groups (security and Microsoft 365) with SharePoint's people picker.</p>
       <ul id="perm-picked" class="perm-picked"></ul>
-      <details id="perm-items" class="check perm-items">
-        <summary><span id="perm-items-chip" class="chip muted">off</span>Item-level permissions (lists only)</summary>
-        <div class="check-body">
-          <label class="perm-field">Read access
-            <select id="perm-read">
-              <option value="">Don't change</option>
-              <option value="1">Read all items</option>
-              <option value="2">Read items that were created by the user</option>
-            </select>
-          </label>
-          <label class="perm-field">Create and Edit access
-            <select id="perm-write">
-              <option value="">Don't change</option>
-              <option value="1">Create and edit all items</option>
-              <option value="2">Create items and edit items that were created by the user</option>
-              <option value="4">None</option>
-            </select>
-          </label>
-          <p class="hint">Set on the selected lists with Add to plan, with or without users and groups. Libraries don't have this setting and are skipped.</p>
-        </div>
-      </details>
       <button id="perm-add" type="button" class="primary perm-add" disabled>Add to plan</button>
       <p id="perm-add-hint" class="hint"></p>
     </section>
@@ -290,8 +269,12 @@
         <h2 id="perm-plan-h">3. Plan</h2>
         <button id="perm-clear" type="button" class="secondary small" disabled>Clear plan</button>
       </div>
-      <div id="perm-plan"></div>
-      <p id="perm-plan-empty" class="empty">Nothing planned yet. Pick lists and users or groups, then click Add to plan.</p>
+      <div class="perm-defaults">
+        <div class="block-head">
+          <strong>Settings for lists you add next</strong>
+          <button id="perm-apply-all" type="button" class="secondary small" title="Copy these settings onto every list in the plan" disabled>Apply to all lists in the plan</button>
+        </div>
+        <p class="hint">New lists start with these. Change a list below to override.</p>
       <fieldset class="perm-options">
         <legend>Current permissions of the lists</legend>
         <label class="check-label"><input type="radio" name="perm-mode" value="add" checked> Keep them and add the planned ones</label>
@@ -303,6 +286,24 @@
           <label class="check-label"><input type="checkbox" data-group="visitors" disabled> <span>Visitors</span></label>
         </div>
       </fieldset>
+          <label class="perm-field">Item-level read access (lists only)
+            <select id="perm-read">
+              <option value="">Don't change</option>
+              <option value="1">Read all items</option>
+              <option value="2">Read items that were created by the user</option>
+            </select>
+          </label>
+          <label class="perm-field">Item-level create and edit access (lists only)
+            <select id="perm-write">
+              <option value="">Don't change</option>
+              <option value="1">Create and edit all items</option>
+              <option value="2">Create items and edit items that were created by the user</option>
+              <option value="4">None</option>
+            </select>
+          </label>
+      </div>
+      <div id="perm-plan"></div>
+      <p id="perm-plan-empty" class="empty">Nothing planned yet. Pick lists and users or groups, then click Add to plan.</p>
       <p class="hint">Lists that inherit their permissions get unique permissions first, starting from a copy of the inherited ones. Users and groups who only have "Limited Access" are always kept.</p>
     </section>
 
@@ -387,6 +388,7 @@
 
     <section class="block">
       <label class="check-label"><input id="cmp-system" type="checkbox"> Include system lists</label>
+      <label class="check-label"><input id="cmp-lang" type="checkbox" checked> Compare translated titles (German, English and the site's other languages)</label>
       <details class="check" id="cmp-scope">
         <summary><span id="cmp-scope-sum" class="t">Lists: all</span></summary>
         <div class="check-body">
@@ -414,6 +416,15 @@
           <input id="cmp-filter" type="search" placeholder="Filter lists or columns" aria-label="Filter lists or columns" spellcheck="false">
         </div>
         <label class="check-label"><input id="cmp-custom" type="checkbox" checked> Custom columns only</label>
+        <div class="cmp-only">
+          <label for="cmp-only-mode">Lists and columns only in the target</label>
+          <select id="cmp-only-mode" aria-label="What to do with lists and columns that only the target has">
+            <option value="leave">Leave as they are</option>
+            <option value="rename">Rename (add a prefix)</option>
+            <option value="delete">Delete (lists go to the recycle bin)</option>
+          </select>
+          <input id="cmp-only-prefix" type="text" value="zz_" aria-label="Prefix for renamed titles" spellcheck="false" hidden>
+        </div>
         <div class="cmp-pickbar">
           <label class="check-label cmp-master"><input id="cmp-pick-all" type="checkbox"> <span id="cmp-pick-text">Changes to send</span></label>
         </div>
