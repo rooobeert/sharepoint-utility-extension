@@ -76,3 +76,9 @@ test('changeItems lists what can be sent; allStages honours the selection', () =
   assert.doesNotMatch(only[0].body, /Name=\\"A\\"/);
   assert.deepEqual(allStages(view, ctx, () => false), []);
 });
+
+test('a changed lookup column (shown column) can be sent', () => {
+  const col = { name: 'L', title: 'L', type: 'Lookup', status: 'changed', field: { TypeAsString: 'Lookup', LookupField: 'ID' }, diffs: [{ prop: 'Lookup column', source: 'ID', target: 'hrpPayGrade' }] };
+  assert.ok(columnTransferable(col));
+  assert.match(columnStage({ title: 'Req', rel: 'Lists/Req' }, col, ctx).body, /SP\.FieldLookup[\s\S]*"LookupField":"ID"/);
+});

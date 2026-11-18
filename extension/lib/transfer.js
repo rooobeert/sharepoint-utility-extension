@@ -40,9 +40,10 @@ const COLUMN_API = {
   Indexed: (f) => ['Indexed', !!f.Indexed],
   'Unique values': (f) => ['EnforceUniqueValues', !!f.EnforceUniqueValues],
   Formula: (f) => ['Formula', f.Formula],
+  'Lookup column': (f) => ['LookupField', f.LookupField], // the column shown from the looked-up list; the lookup list itself can't change
 };
 
-const FIELD_TYPES = { Text: 'SP.FieldText', Note: 'SP.FieldMultiLineText', Choice: 'SP.FieldChoice', MultiChoice: 'SP.FieldMultiChoice', Calculated: 'SP.FieldCalculated', Number: 'SP.FieldNumber' };
+const FIELD_TYPES = { Text: 'SP.FieldText', Note: 'SP.FieldMultiLineText', Choice: 'SP.FieldChoice', MultiChoice: 'SP.FieldMultiChoice', Calculated: 'SP.FieldCalculated', Number: 'SP.FieldNumber', Lookup: 'SP.FieldLookup', LookupMulti: 'SP.FieldLookup' };
 
 const stage = (name, ops) => ({ name, body: batchText(ops) + '\n' });
 

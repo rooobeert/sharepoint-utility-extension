@@ -40,9 +40,9 @@ const defaultSleep = (ms) => new Promise((r) => setTimeout(r, ms));
  */
 export function createExporter({ request, sleep = defaultSleep, onEvent = () => {} }) {
   /** GET JSON; waits and retries on 429/503. Throws ExportError on other failures. */
-  async function getJson(site, path) {
+  async function getJson(site, path, extraHeaders = {}) {
     for (let attempt = 0; ; attempt++) {
-      const res = await request({ url: site + path, method: 'GET', headers: { Accept: 'application/json;odata=nometadata' } });
+      const res = await request({ url: site + path, method: 'GET', headers: { Accept: 'application/json;odata=nometadata', ...extraHeaders } });
       if (res.phase === 'network') throw new ExportError(res.statusText);
       if (isThrottled(res.status) && attempt < MAX_RETRIES) {
         const ms = retryAfterMs(res.headers && res.headers['retry-after']);
@@ -136,52 +136,40 @@ export function createExporter({ request, sleep = defaultSleep, onEvent = () => 
     return { sitePermissions, siteErrors, lists: out, problems };
   }
 
-  /** The text of one translatable property (TitleResource / DescriptionResource) in one language; null if it can't be read. */
-  async function translated(site, base, resource, lcid) {
-    try {
-      const json = await getJson(site, `${base}/${resource}/GetValueForUICulture('${CULTURES[lcid]}')`);
-      const v = json && (json.value !== undefined ? json.value : json.d && json.d.GetValueForUICulture);
-      return typeof v === 'string' ? v : null;
-    } catch (e) {
-      if (!(e instanceof ExportError)) throw e;
-      return null;
-    }
-  }
-
   /**
-   * Read the translated titles and descriptions of the lists in `data.lists` (from collect) and of their custom
-   * columns, in the languages `langs` (language IDs). Sets `item.translations` = { list: { Title: { lcid: text }, Description },
-   * columns: { InternalName: { Title: { lcid: text } } } }. A text that can't be read is left out. Returns the number of requests' failures.
+   * Read the translated titles of the lists in `data.lists` (from collect) and of their custom columns, in the languages
+   * `langs` (language IDs). SharePoint returns texts in the language of the Accept-Language header, so this is two
+   * requests per list and language: the list (title, description) and its columns. Sets `item.translations` =
+   * { list: { Title: { lcid: text }, Description }, columns: { InternalName: { Title: { lcid: text } } } }.
+   * A language that can't be read is left out.
    */
-  async function readTranslations(site, data, langs, { onProgress = () => {}, parallel = 6 } = {}) {
-    const tasks = [];
-    for (const item of data.lists) {
-      if (!item.list) continue;
+  async function readTranslations(site, data, langs, { onProgress = () => {} } = {}) {
+    const items = data.lists.filter((i) => i.list);
+    const total = items.length * langs.length;
+    let done = 0;
+    for (const item of items) {
       const base = `/_api/web/lists(guid'${item.entry.id}')`;
       const tr = { list: { Title: {}, Description: {} }, columns: {} };
       item.translations = tr;
+      const custom = ((item.fields && (item.fields.value || (item.fields.d && item.fields.d.results))) || []).filter(isCustomField);
+      for (const f of custom) tr.columns[f.InternalName] = { Title: {} };
       for (const id of langs) {
-        for (const what of ['Title', 'Description']) {
-          tasks.push(async () => { const v = await translated(site, base, `${what}Resource`, id); if (v != null) tr.list[what][id] = v; });
+        const headers = { 'Accept-Language': CULTURES[id] };
+        try {
+          const list = await getJson(site, `${base}?$select=Title,Description`, headers);
+          const fields = await getJson(site, `${base}/fields?$select=InternalName,Title`, headers);
+          if (typeof list.Title === 'string') tr.list.Title[id] = list.Title;
+          if (typeof list.Description === 'string') tr.list.Description[id] = list.Description;
+          for (const f of fields.value || (fields.d && fields.d.results) || []) {
+            if (tr.columns[f.InternalName] && typeof f.Title === 'string') tr.columns[f.InternalName].Title[id] = f.Title;
+          }
+        } catch (e) {
+          if (!(e instanceof ExportError)) throw e;
+          // this language could not be read for this list: it is not compared
         }
-      }
-      for (const f of (item.fields && (item.fields.value || (item.fields.d && item.fields.d.results))) || []) {
-        if (!isCustomField(f)) continue;
-        const col = { Title: {} };
-        tr.columns[f.InternalName] = col;
-        for (const id of langs) {
-          tasks.push(async () => { const v = await translated(site, `${base}/fields(guid'${String(f.Id).replace(/^\{|\}$/g, '')}')`, 'TitleResource', id); if (v != null) col.Title[id] = v; });
-        }
+        onProgress(++done, total);
       }
     }
-    let done = 0;
-    const queue = [...tasks];
-    await Promise.all(Array.from({ length: Math.min(parallel, queue.length) }, async () => {
-      while (queue.length) {
-        await queue.shift()();
-        onProgress(++done, tasks.length);
-      }
-    }));
   }
 
   /** Export the site and the selected lists as CSV rows. Returns { rows, problems }. */

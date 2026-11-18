@@ -419,6 +419,8 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .cmp-col .meta { flex: 0 1 auto; display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 11px; color: var(--muted); }
 .cmp-col label { cursor: pointer; }
 .cmp-pickbar { margin: 8px 0 4px; }
+.cmp-langs { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px 22px; font-size: 12px; color: var(--muted); }
+.cmp-langs input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 4px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font: inherit; }
 .cmp-only { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 .cmp-only select, .cmp-only input[type="text"] { box-sizing: border-box; height: 28px; padding: 4px 6px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font: inherit; }
 .cmp-only select { flex: 1 1 12em; min-width: 0; }

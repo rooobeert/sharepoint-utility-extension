@@ -388,7 +388,8 @@
 
     <section class="block">
       <label class="check-label"><input id="cmp-system" type="checkbox"> Include system lists</label>
-      <label class="check-label"><input id="cmp-lang" type="checkbox" checked> Compare translated titles (German, English and the site's other languages)</label>
+      <label class="check-label"><input id="cmp-lang" type="checkbox" checked> Compare translated titles</label>
+      <label class="cmp-langs" for="cmp-langs">Languages <input id="cmp-langs" type="text" value="de-DE, en-US" spellcheck="false" autocomplete="off" aria-label="Languages to compare, as culture names"></label>
       <details class="check" id="cmp-scope">
         <summary><span id="cmp-scope-sum" class="t">Lists: all</span></summary>
         <div class="check-body">
@@ -476,6 +477,7 @@
       <h2 id="hdr-h">Request headers for SharePoint pages</h2>
       <label class="check-label"><input id="hdr-on" type="checkbox"> Send the headers below</label>
       <p class="hint">When on, the browser adds these headers whenever you open a SharePoint URL (<code>https://&lt;tenant&gt;.sharepoint.com/…</code>) in a tab whose path contains one of the path texts. It applies to all tabs of the browser. The default, <code>Accept: application/json</code>, returns JSON instead of XML. Add <code>Accept-Language</code> to read texts such as column names in another language. The Batch Runner is not affected: it sends the headers written in the batch.</p>
+      <p class="hint"><strong>The browser keeps this rule, not the extension.</strong> While the box is ticked, the headers are added to matching page loads in all tabs, also when this side panel is closed and after you restart the browser. Untick the box to stop it.</p>
       <h3 class="hdr-h3">Headers</h3>
       <ul id="hdr-headers" class="hdr-list"></ul>
       <div class="row">

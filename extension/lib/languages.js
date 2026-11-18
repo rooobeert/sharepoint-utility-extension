@@ -11,16 +11,25 @@ export const CULTURES = {
   2052: 'zh-CN', 2057: 'en-GB', 2070: 'pt-PT', 3082: 'es-ES', 2074: 'sr-Latn-CS', 1087: 'kk-KZ',
 };
 
-/** German and English are always compared, whatever the site has enabled. */
-export const MINIMUM_LANGUAGES = [1031, 1033];
+/** What is compared when nothing else is typed. */
+export const DEFAULT_LANGUAGES = 'de-DE, en-US';
 
-/** The languages to compare: the ones either site has enabled (and can be named), plus German and English. Sorted by culture name. */
-export function compareLanguages(...webs) {
-  const ids = new Set(MINIMUM_LANGUAGES);
-  for (const w of webs) {
-    for (const id of [...((w && w.SupportedUILanguageIds) || []), w && w.Language]) if (CULTURES[id]) ids.add(Number(id));
+/** "de-DE, en-US" -> { ids: [1031, 1033], unknown: [] }: language IDs of the culture names typed (any case, separated by comma, semicolon or space). */
+export function parseLanguages(text) {
+  const byName = new Map(Object.entries(CULTURES).map(([id, name]) => [name.toLowerCase(), Number(id)]));
+  const ids = [];
+  const unknown = [];
+  for (const word of String(text || '').split(/[\s,;]+/).filter(Boolean)) {
+    const id = byName.get(word.toLowerCase());
+    if (id == null) unknown.push(word);
+    else if (!ids.includes(id)) ids.push(id);
   }
-  return [...ids].sort((a, b) => CULTURES[a].localeCompare(CULTURES[b]));
+  return { ids, unknown };
+}
+
+/** The languages to read: the chosen ones, except a language that is the default language of both sites (that is the title itself). */
+export function compareLanguages(ids, ...webs) {
+  return ids.filter((id) => !webs.every((w) => w && w.Language === id));
 }
 
 /** Culture names in the labels "Display name (de-DE)": [{ culture, id }]. */

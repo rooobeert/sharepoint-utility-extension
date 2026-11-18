@@ -711,3 +711,15 @@ ui.save.addEventListener('click', saveAll);
 
 addRow();
 updateStatusText('Open any page of the site collection in the active tab.');
+
+// Preload once, when the side panel opens on a SharePoint page: the list columns and the mapping status of that site
+// are read in the background, so the Search Schema tab is ready when it is opened. Not repeated for other tabs or sites.
+(async () => {
+  try {
+    const tab = await activeTab();
+    if (!tab || !tab.url || !isSharePointUrl(tab.url)) return;
+    setTimeout(() => { if (!sch.site) loadSite().catch(() => {}); }, 1500); // after the tab that is shown has started its own reads
+  } catch {
+    /* nothing to preload */
+  }
+})();

@@ -10,7 +10,7 @@ import {
   compareSites, countStatuses, columnSummary, listStatus, filterView, diffRows, diffCsv, diffFileName, STATUSES, STATUS_LABELS,
 } from './lib/diff.js';
 import { settingsTransferable, columnTransferable, onlyListTransferable, onlyColumnTransferable, allStages, changeItems, listChangeId, settingsChangeId, columnChangeId, onlyListId, onlyColumnId, DEFAULT_PREFIX } from './lib/transfer.js';
-import { compareLanguages } from './lib/languages.js';
+import { compareLanguages, parseLanguages } from './lib/languages.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -23,6 +23,7 @@ const ui = {
   siteMsg: $('cmp-site-msg'),
   system: $('cmp-system'),
   lang: $('cmp-lang'),
+  langs: $('cmp-langs'),
   onlyMode: $('cmp-only-mode'),
   onlyPrefix: $('cmp-only-prefix'),
   run: $('cmp-run'),
@@ -66,7 +67,7 @@ const bare = (url) => url.replace(/^https:\/\//, '');
 
 function setBusy(busy) {
   cmp.busy = busy;
-  for (const n of [ui.scopeLoad, ui.reload, ui.source, ui.target, ui.addSource, ui.addTarget, ui.system, ui.lang]) n.disabled = busy;
+  for (const n of [ui.scopeLoad, ui.reload, ui.source, ui.target, ui.addSource, ui.addTarget, ui.system, ui.lang, ui.langs]) n.disabled = busy;
   updateRunButton();
 }
 
@@ -312,8 +313,11 @@ async function readSide(side, label, progress) {
 
 /** Read the translated titles of one side (German, English and the languages either site has enabled). */
 async function readTranslations(side, label, langs, progress) {
+  // only the languages the site has enabled: for any other, SharePoint would answer in the default language
+  const enabled = new Set((side.web && side.web.SupportedUILanguageIds) || []);
+  langs = langs.filter((id) => enabled.has(id));
   await side.exporter.readTranslations(side.site, { lists: side.lists }, langs, {
-    onProgress: (done, total) => progress(done / (total || 1), `Reading the translated titles of the ${label} (${done} of ${total})…`),
+    onProgress: (done, total) => progress(done / (total || 1), `Reading the translated titles of the ${label} (${done} of ${total} languages × lists)…`),
   });
 }
 
@@ -333,8 +337,10 @@ async function runCompare() {
     for (const side of [source, target]) if (side.tabId == null) throw new Error(`${side.title} is not open in a tab. Open it, then run again.`);
     const src = await readSide(source, 'source', (f, text) => { ui.bar.value = f / 2; setStatus(text); });
     const tgt = await readSide(target, 'target', (f, text) => { ui.bar.value = 0.5 + f / 2; setStatus(text); });
-    if (ui.lang.checked) {
-      const langs = compareLanguages(src.web, tgt.web);
+    const chosen = parseLanguages(ui.langs.value);
+    if (ui.lang.checked && chosen.unknown.length) throw new Error(`Unknown language: ${chosen.unknown.join(', ')}. Use culture names such as de-DE, en-US, fr-FR.`);
+    const langs = ui.lang.checked ? compareLanguages(chosen.ids, src.web, tgt.web) : [];
+    if (langs.length) {
       await readTranslations(src, 'source', langs, (f, text) => { ui.bar.value = f / 2; setStatus(text); });
       await readTranslations(tgt, 'target', langs, (f, text) => { ui.bar.value = 0.5 + f / 2; setStatus(text); });
     }
@@ -468,6 +474,7 @@ function listBody({ list, columns, showSettings }) {
         el('span', { class: 'iname', text: c.name }),
         c.diffs && c.diffs.length ? el('ul', { class: 'cmp-diff' }, c.diffs.map(diffItem)) : null,
         c.note ? el('ul', { class: 'cmp-diff' }, el('li', { text: c.note })) : null,
+        c.status === 'changed' && !columnTransferable(c) ? el('ul', { class: 'cmp-diff' }, el('li', { text: "Can't be sent: SharePoint doesn't change these properties in place." })) : null,
         onlyColumnTransferable(list, c, onlyOpts()) ? el('ul', { class: 'cmp-diff' }, el('li', { text: onlyOpts().mode === 'delete' ? 'Will be deleted in the target' : `Will be renamed to "${onlyOpts().prefix}${c.title}"` })) : null),
       el('div', { class: 'meta' }, el('span', { text: c.type }), el('span', { class: `chip ${CHIP[c.status]}`, text: SHORT[c.status] }))))));
   }

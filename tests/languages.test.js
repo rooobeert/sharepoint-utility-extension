@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compareLanguages, translationProps, bothSides, parseTranslationLabel } from '../extension/lib/languages.js';
+import { compareLanguages, parseLanguages, translationProps, bothSides, parseTranslationLabel } from '../extension/lib/languages.js';
 import { compareSites } from '../extension/lib/diff.js';
 import { settingsStage, columnStage, allStages, changeItems, onlyListId, onlyColumnId } from '../extension/lib/transfer.js';
 
 const ctx = { web: { ServerRelativeUrl: '/sites/dev' }, allLists: [] };
 
-test('compareLanguages: German and English always, plus the enabled ones', () => {
-  assert.deepEqual(compareLanguages({ Language: 1033 }, { Language: 1033 }), [1031, 1033]);
-  assert.deepEqual(compareLanguages({ SupportedUILanguageIds: [1033, 1036], Language: 1033 }, { SupportedUILanguageIds: [1040] }), [1031, 1033, 1036, 1040]);
+test('parseLanguages and compareLanguages: only the chosen languages, not the default language of both sites', () => {
+  assert.deepEqual(parseLanguages('de-DE, EN-us fr-XX'), { ids: [1031, 1033], unknown: ['fr-XX'] });
+  assert.deepEqual(compareLanguages([1031, 1033], { Language: 1033 }, { Language: 1033 }), [1031]);
+  assert.deepEqual(compareLanguages([1031, 1033], { Language: 1033 }, { Language: 1031 }), [1031, 1033]);
 });
 
 test('translationProps: labels, default language skipped, columns have no description', () => {
@@ -71,4 +72,31 @@ test('only in the target: rename adds the prefix once, delete recycles lists and
   assert.match(del[0].body, /POST \{\{WebUrl\}\}\/_api\/web\/getList\([^)]*\)\/recycle/);
   assert.match(del[0].body, /DELETE .*fields\/getByInternalNameOrTitle\('Gone'\)/);
   assert.deepEqual(allStages(view, { ...ctx, only: { mode: 'delete' } }, (id) => id === onlyListId(only)).length, 1);
+});
+
+import { createExporter } from '../extension/lib/exporter.js';
+
+test('readTranslations asks with an Accept-Language header: two requests per list and language (one when the list fails)', async () => {
+  const calls = [];
+  const request = async (req) => {
+    calls.push(req);
+    const lang = req.headers['Accept-Language'];
+    if (lang === 'fr-FR') return { status: 500, headers: {}, text: '{"error":{}}' };
+    const de = lang === 'de-DE';
+    const json = /\/fields\?/.test(req.url)
+      ? { value: [{ InternalName: 'c1', Title: de ? 'Spalte' : 'Column' }, { InternalName: 'sys', Title: 'System' }] }
+      : { Title: de ? 'Anfragen' : 'Requests', Description: de ? 'Beschreibung' : 'Description' };
+    return { status: 200, headers: {}, text: JSON.stringify(json) };
+  };
+  const fields = { value: [{ InternalName: 'c1', Id: 'a', Title: 'c1', FromBaseType: false }, { InternalName: 'sys', Id: 'b', Title: 'sys', FromBaseType: true }] };
+  const data = { lists: [{ entry: { id: 'L1' }, list: { Title: 'L' }, fields }] };
+  await createExporter({ request, sleep: async () => {} }).readTranslations('https://t.sharepoint.com/sites/x', data, [1031, 1033, 1036]);
+  assert.equal(calls.length, 5); // fr-FR fails on the list, so its columns are not asked
+  assert.ok(calls.every((c) => c.method === 'GET' && c.headers['Accept-Language']));
+  const tr = data.lists[0].translations;
+  assert.equal(tr.list.Title[1031], 'Anfragen');
+  assert.equal(tr.list.Description[1033], 'Description');
+  assert.equal(tr.list.Title[1036], undefined);
+  assert.equal(tr.columns.c1.Title[1031], 'Spalte');
+  assert.equal(tr.columns.sys, undefined);
 });
