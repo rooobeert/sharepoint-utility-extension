@@ -9,6 +9,10 @@
 //       a full URL                    {{ListId:https://tenant.sharepoint.com/sites/x/Lists/crRequests}}
 //   @{variables('<any name>')?['<reference>']}   Power Automate form, same references
 //
+// Tag placeholder, replaced with the tag the user types before anything else (it can be part of a
+// list reference, e.g. {{ListId:Lists/{{Tag}}Config}}). The tag is the prefix of the internal names:
+//   {{Tag}}                           -> e.g. "hr", so "{{Tag}}Config" becomes "hrConfig"
+//
 // URL placeholders, replaced with the target site before anything else:
 //   {{WebUrl}} {{WebServerRelativeUrl}} {{SiteUrl}} {{SiteServerRelativeUrl}}
 //   (no trailing slash; the server-relative forms are empty for a root site)
@@ -231,4 +235,21 @@ export function findCreator(operations, ref, before = operations.length) {
     if (title && (title.toLowerCase() === ref.toLowerCase() || title.toLowerCase() === last)) return op;
   }
   return null;
+}
+
+// ---------------------------------------------------------------- tag
+
+const TAG_RE = /\{\{\s*Tag\s*\}\}/gi;
+
+/** True if the text uses {{Tag}}. */
+export const usesTag = (text) => new RegExp(TAG_RE.source, 'i').test(String(text));
+
+/** A tag is a short prefix for internal names: a letter, then letters or digits (2 to 8 characters in all). It is used in lower case. */
+export const TAG_PATTERN = /^[A-Za-z][A-Za-z0-9]{1,7}$/;
+export const isValidTag = (tag) => TAG_PATTERN.test(String(tag || '').trim());
+
+/** Replace {{Tag}} with the tag, in lower case. Without a valid tag the text is left as it is. */
+export function applyTag(text, tag) {
+  const t = String(tag || '').trim();
+  return isValidTag(t) ? String(text).replace(TAG_RE, t.toLowerCase()) : String(text);
 }

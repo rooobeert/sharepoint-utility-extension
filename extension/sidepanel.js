@@ -7,7 +7,7 @@ import {
   targetSiteFromStages,
 } from './lib/batch.js';
 import { createRunner, pageReadContext } from './lib/runner.js';
-import { findPlaceholders, describePlaceholder } from './lib/placeholders.js';
+import { findPlaceholders, describePlaceholder, usesTag, applyTag, isValidTag } from './lib/placeholders.js';
 import { formatRunText, formatRunJson, shortUrl, stageSummaryText } from './lib/log.js';
 import { el, activeTab, tabRequester, ask } from './shared.js';
 import { splitStageFile } from './lib/provision.js';
@@ -18,6 +18,8 @@ const ui = {
   site: $('site'),
   detect: $('detect'),
   siteHint: $('site-hint'),
+  tagBlock: $('tag-block'),
+  tag: $('tag'),
   addStage: $('add-stage'),
   loadFolder: $('load-folder'),
   folderInput: $('folder-input'),
@@ -68,13 +70,15 @@ const stripTxt = (name) => name.replace(/\.txt$/i, '');
 const save = debounce(() => {
   chrome.storage.local.set({
     siteUrl: normalizeSiteUrl(ui.site.value),
+    tag: ui.tag.value.trim(),
     stages: state.stages.map(({ name, body }) => ({ name, body })),
   });
 }, 400);
 
 async function load() {
-  const stored = await chrome.storage.local.get(['siteUrl', 'stages']);
+  const stored = await chrome.storage.local.get(['siteUrl', 'stages', 'tag']);
   if (stored.siteUrl) ui.site.value = stored.siteUrl;
+  if (stored.tag) ui.tag.value = String(stored.tag).toLowerCase();
   for (const s of stored.stages || []) state.stages.push({ id: nextId++, name: s.name, body: s.body });
   renderStages();
   if (!ui.site.readOnly) await detectSite({ auto: true });
@@ -95,6 +99,27 @@ function safeParse(body) {
     return { operations: [] };
   }
 }
+
+// ---------------------------------------------------------------- tag
+
+const stageUsesTag = () => state.stages.some((s) => usesTag(s.body));
+
+/** The tag box is only shown when a batch uses {{Tag}}. */
+function updateTagUi() {
+  ui.tagBlock.hidden = !stageUsesTag();
+  ui.tag.classList.toggle('invalid', !ui.tagBlock.hidden && !isValidTag(ui.tag.value));
+}
+
+/** Why the tag can't be used yet, or null. */
+function tagProblem() {
+  if (!stageUsesTag() || isValidTag(ui.tag.value)) return null;
+  return ui.tag.value.trim()
+    ? `The tag "${ui.tag.value.trim()}" is not valid. Use letters and digits, starting with a letter, 2 to 8 characters (usually two or three).`
+    : 'The batches use {{Tag}}. Enter the tag (the prefix of the list and column names) first.';
+}
+
+/** A stage with {{Tag}} replaced by the tag, as it is previewed and run. Line numbers don't change. */
+const tagged = (stage) => ({ ...stage, body: applyTag(stage.body, ui.tag.value) });
 
 /** One line per site when stages disagree: which stages use it and how often. */
 function conflictLines(sites) {
@@ -191,6 +216,7 @@ function renderStages() {
     const recount = debounce(() => {
       updateCount(node, stage.body);
       updateSiteFromStages();
+      updateTagUi();
     }, 250);
     name.addEventListener('input', () => {
       stage.name = name.value;
@@ -249,6 +275,7 @@ function renderStages() {
   });
   ui.noStages.hidden = state.stages.length > 0;
   updateSiteFromStages();
+  updateTagUi();
   setBusy(state.running);
 }
 
@@ -540,6 +567,7 @@ function setBusy(busy) {
   state.running = busy;
   for (const b of [ui.detect, ui.addStage, ui.loadFolder, ui.loadFile, ui.pasteStages, ui.preview, ui.run, ui.copyLog, ui.exportJson]) b.disabled = busy;
   ui.site.disabled = busy;
+  ui.tag.disabled = busy;
   for (const n of ui.stageList.querySelectorAll('input, textarea, button')) n.disabled = busy;
   if (!busy) {
     // first stage can't move up, last can't move down
@@ -554,7 +582,7 @@ function setBusy(busy) {
 
 /** What Preview was run on: the site and the stage bodies. Any change invalidates it. */
 function previewKey() {
-  return JSON.stringify([normalizeSiteUrl(ui.site.value), state.stages.map((s) => s.body)]);
+  return JSON.stringify([normalizeSiteUrl(ui.site.value), stageUsesTag() ? ui.tag.value.trim() : '', state.stages.map((s) => s.body)]);
 }
 
 /** Run needs a Preview of the current stages without errors. Warnings don't block. */
@@ -725,6 +753,12 @@ async function previewStage(runner, site, stage) {
 
 async function runPreview() {
   if (!state.stages.length || state.running) return;
+  const problem = tagProblem();
+  if (problem) {
+    setStatus(problem);
+    ui.tag.focus();
+    return;
+  }
   const key = previewKey();
   setBusy(true);
   ui.progress.hidden = false;
@@ -736,7 +770,7 @@ async function runPreview() {
     setStatus('Preview: parsing stages and looking up placeholders (nothing is sent)…');
     const previews = [];
     for (const [i, stage] of state.stages.entries()) {
-      previews.push({ ...(await previewStage(runner, siteCheck.site, stage)), stageId: stage.id });
+      previews.push({ ...(await previewStage(runner, siteCheck.site, tagged(stage))), stageId: stage.id });
       ui.progressBar.value = (i + 1) / state.stages.length;
     }
     const errorCount = siteCheck.problems.length + previews.reduce((n, p) => n + p.errors.length, 0);
@@ -755,6 +789,8 @@ async function runPreview() {
 
 async function runAll() {
   if (ui.run.disabled || state.running) return;
+  const problem = tagProblem();
+  if (problem) return block('The tag is missing', [problem]);
   setBusy(true); // no second click while checking and confirming
   // The tab may have changed since Preview, so the site is checked again.
   setStatus('Checking the site with SharePoint…');
@@ -770,7 +806,7 @@ async function runAll() {
     setBusy(false);
     return block('The site check failed', t.problems);
   }
-  const parsed = state.stages.map((s) => parseBatch(s.body));
+  const parsed = state.stages.map((s) => parseBatch(tagged(s).body));
   const total = parsed.reduce((n, p) => n + p.operations.length, 0);
   const warnings = parsed.flatMap((p, i) => [...p.warnings, ...analyseBatch(p)].map((w) => `Stage ${i + 1}: ${w}`));
   const confirmed = await ask({
@@ -794,7 +830,7 @@ async function runAll() {
   setBusy(true);
   ui.progress.hidden = false;
   ui.progressBar.value = 0;
-  const stages = state.stages.map(({ name, body }) => ({ name, body }));
+  const stages = state.stages.map((s) => ({ name: s.name, body: tagged(s).body }));
   state.lastRunIds = state.stages.map((s) => s.id); // for "go to line" in the results
   state.lastRun = { site: t.site, startedAt: new Date().toISOString(), stages: [] };
   const showProgress = onRunnerEvent(stages.length);
@@ -1099,6 +1135,7 @@ ui.folderInput.addEventListener('change', async () => {
   ui.folderInput.value = '';
 });
 ui.preview.addEventListener('click', runPreview);
+ui.tag.addEventListener('input', () => { ui.tag.value = ui.tag.value.toLowerCase(); updateTagUi(); updateRunState(); save(); });
 ui.run.addEventListener('click', runAll);
 ui.copyLog.addEventListener('click', copyLog);
 ui.exportJson.addEventListener('click', exportJson);

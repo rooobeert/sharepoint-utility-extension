@@ -10,6 +10,9 @@ import {
   findUrlPlaceholders,
   applyUrlPlaceholders,
   urlPlaceholderValues,
+  usesTag,
+  applyTag,
+  isValidTag,
   LISTS_PATH,
   WEB_PATH,
 } from '../extension/lib/placeholders.js';
@@ -210,4 +213,19 @@ test('samples: lookup columns use the Power Automate alias and all of them are f
   }
   const crLists = findPlaceholders(readSample('Batch2.txt')).map((p) => p.ref);
   assert.ok(crLists.includes('/sites/rd-hub-projects/Lists/crRequests'));
+});
+
+test('{{Tag}}: found, validated and replaced everywhere, also inside other placeholders', () => {
+  const text = 'POST {{WebUrl}}/_api/web/lists\n{"Title":"{{Tag}}ErrorLog"}\nList="{{ListId:Lists/{{ tag }}Config}}"';
+  assert.ok(usesTag(text));
+  assert.ok(!usesTag('{{WebUrl}}'));
+  assert.deepEqual(['hr', 'Hr2', 'abcdefgh'].map(isValidTag), [true, true, true]);
+  assert.deepEqual(['', 'h', '1hr', 'h r', 'abcdefghi', 'h-r'].map(isValidTag), [false, false, false, false, false, false]);
+  const out = applyTag(text, ' hr ');
+  assert.match(out, /"Title":"hrErrorLog"/);
+  assert.match(out, /\{\{ListId:Lists\/hrConfig\}\}/);
+  assert.equal(out.split('\n').length, text.split('\n').length); // line numbers stay the same
+  assert.match(applyTag(text, 'HR'), /"Title":"hrErrorLog"/); // always lower case
+  assert.equal(applyTag(text, ''), text); // no valid tag: left as it is
+  assert.equal(applyTag(text, 'h r'), text);
 });

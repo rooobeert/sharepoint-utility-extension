@@ -44,6 +44,14 @@
       <p id="site-hint" class="hint">Open any page of the site in the active tab, then click Detect.</p>
     </section>
 
+    <section id="tag-block" class="block" aria-labelledby="tag-h" hidden>
+      <h2 id="tag-h">Tag</h2>
+      <div class="row">
+        <input id="tag" type="text" maxlength="8" spellcheck="false" autocomplete="off" placeholder="e.g. hr" aria-label="Tag, the prefix of the list and column names" aria-describedby="tag-hint">
+      </div>
+      <p id="tag-hint" class="hint">These batches use <code>{{Tag}}</code>, the prefix of all list and column internal names (usually two or three characters, e.g. <code>hr</code> makes <code>{{Tag}}Config</code> into <code>hrConfig</code>). Letters and digits, starting with a letter; it is always used in lower case.</p>
+    </section>
+
     <section class="block" aria-labelledby="stages-h">
       <div class="block-head">
         <h2 id="stages-h">Stages</h2>
@@ -65,6 +73,7 @@
             <dt><code>{{WebServerRelativeUrl}}</code></dt><dd>The same without the host: <code>/sites/hr</code> (empty for a root site).</dd>
             <dt><code>{{SiteUrl}}</code></dt><dd>URL of the site collection (differs from <code>{{WebUrl}}</code> on a subsite).</dd>
             <dt><code>{{SiteServerRelativeUrl}}</code></dt><dd>The site collection without the host.</dd>
+            <dt><code>{{Tag}}</code></dt><dd>A prefix you type in the <b>Tag</b> box that appears when a batch uses it (usually two or three characters). Use it in the names of lists and columns, so one batch works for any solution, e.g. <code>"Title": "{{Tag}}ErrorLog"</code>. It is also replaced inside <code>{{ListId:…}}</code>.</dd>
             <dt><code>{{WebId}}</code></dt><dd>GUID of the target web, read from SharePoint when the batch runs.</dd>
             <dt><code>{{ListId:Lists/crRequests}}</code></dt><dd>GUID of a list on the target site, without braces. Use it for lookup columns and anywhere a list ID is needed. After <code>ListId:</code> you can give the list title, its URL name (<code>crDocumentVault</code>), the URL relative to the site (<code>Lists/crRequests</code>), or a server-relative or full URL.</dd>
             <dt><code>@{variables('x')?['Lists/crRequests']}</code></dt><dd>The Power Automate form of <code>{{ListId:…}}</code>, so existing flow bodies keep working.</dd>

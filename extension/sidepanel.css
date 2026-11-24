@@ -492,3 +492,6 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .list-ctx-id { border: 0; background: none; padding: 0; font: 11px var(--mono); color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
 
 .cmp-foot { margin-top: 10px; flex-wrap: wrap; }
+
+#tag { width: 8em; }
+#tag.invalid { border-color: var(--fail); }
