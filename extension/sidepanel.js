@@ -7,7 +7,7 @@ import {
   targetSiteFromStages,
 } from './lib/batch.js';
 import { createRunner, pageReadContext } from './lib/runner.js';
-import { findPlaceholders, describePlaceholder, usesTag, applyTag, isValidTag } from './lib/placeholders.js';
+import { findPlaceholders, findUrlPlaceholders, describePlaceholder, usesTag, applyTag, isValidTag } from './lib/placeholders.js';
 import { formatRunText, formatRunJson, shortUrl, stageSummaryText } from './lib/log.js';
 import { el, activeTab, tabRequester, ask } from './shared.js';
 import { splitStageFile } from './lib/provision.js';
@@ -740,7 +740,10 @@ async function previewStage(runner, site, stage) {
       operations: parsed.operations,
       errors: parsed.errors,
       warnings: [...parsed.warnings, ...analyseBatch(parsed)],
-      placeholders: findPlaceholders(stage.body).map((p) => ({
+      placeholders: [
+        ...findUrlPlaceholders(stage.body).map((n) => ({ label: `{{${n}}}`, id: null, error: 'Not looked up because the site check failed.' })),
+        ...findPlaceholders(stage.body),
+      ].map((p) => (p.label ? p : {
         label: describePlaceholder(p),
         id: null,
         error: 'Not looked up because the site check failed.',
@@ -770,7 +773,10 @@ async function runPreview() {
     setStatus('Preview: parsing stages and looking up placeholders (nothing is sent)…');
     const previews = [];
     for (const [i, stage] of state.stages.entries()) {
-      previews.push({ ...(await previewStage(runner, siteCheck.site, tagged(stage))), stageId: stage.id });
+      const pv = await previewStage(runner, siteCheck.site, tagged(stage));
+      // {{Tag}} is replaced before parsing, so it is added to the placeholder list here.
+      if (usesTag(stage.body)) pv.placeholders = [{ label: '{{Tag}}', id: ui.tag.value.trim().toLowerCase(), error: null }, ...pv.placeholders];
+      previews.push({ ...pv, stageId: stage.id });
       ui.progressBar.value = (i + 1) / state.stages.length;
     }
     const errorCount = siteCheck.problems.length + previews.reduce((n, p) => n + p.errors.length, 0);
