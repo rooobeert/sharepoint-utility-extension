@@ -142,10 +142,12 @@ function updateSiteFromStages() {
     if (normalizeSiteUrl(ui.site.value) !== normalizeSiteUrl(sites.site)) {
       ui.site.value = normalizeSiteUrl(sites.site);
       save();
+      updateRunState();
     }
     setHint('Taken from the batch bodies: every operation targets this site. It is checked with SharePoint before Preview and Run.');
   } else if (!sites.relativeOnly) {
     ui.site.value = '';
+    updateRunState();
     setHint(['The stages target different sites. All stages must target one site:', el('ul', {}, conflictLines(sites).map((l) => el('li', { text: l })))], true);
   } else if (wasLocked) {
     setHint('The batches don\'t name a site (relative URLs or {{WebUrl}}). Detect the site from the active tab or enter it.');
@@ -175,6 +177,7 @@ async function detectSite({ auto = false } = {}) {
   ui.site.value = normalizeSiteUrl(detected);
   setHint(`Detected from ${source}. You can override it.`);
   save();
+  updateRunState();
 }
 
 // ---------------------------------------------------------------- stages
@@ -381,6 +384,7 @@ document.addEventListener('sp-utility:load-stages', async (e) => {
     ui.site.value = normalizeSiteUrl(e.detail.site);
     setHint(`Set by Compare: the stages are meant for this site (the target). Preview checks it with SharePoint.`);
     save();
+    updateRunState();
   }
 });
 
@@ -795,6 +799,10 @@ async function runPreview() {
 
 async function runAll() {
   if (ui.run.disabled || state.running) return;
+  if (!state.preview || state.preview.key !== previewKey()) {
+    updateRunState();
+    return setStatus('The site or the stages changed since the last Preview. Run Preview again.');
+  }
   const problem = tagProblem();
   if (problem) return block('The tag is missing', [problem]);
   setBusy(true); // no second click while checking and confirming
@@ -1110,6 +1118,7 @@ ui.site.addEventListener('input', () => {
 ui.site.addEventListener('change', () => {
   ui.site.value = normalizeSiteUrl(ui.site.value);
   save();
+  updateRunState();
 });
 ui.addStage.addEventListener('click', () => {
   addStage();
