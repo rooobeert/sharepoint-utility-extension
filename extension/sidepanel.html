@@ -244,14 +244,12 @@
         <summary><span class="t">Where is a group or person used?</span></summary>
         <div class="check-body">
           <p class="hint">Crawls every site (web) of the site collection and its lists and libraries, and shows where a group or person has permissions of its own. For an Entra group or a person it also shows what they get as a member of SharePoint groups (marked "via"; those rows can't be changed here). Items, folders, columns, sharing links, alerts and flows are not checked. Nothing is changed.</p>
-          <div class="perm-field">
-            <label for="usage-group">Group or person</label>
-            <div class="perm-search">
-              <input id="usage-group" type="search" placeholder="Click for the site's groups; type to search people and groups" spellcheck="false" autocomplete="off" disabled
-                     role="combobox" aria-expanded="false" aria-controls="usage-results" aria-autocomplete="list">
-              <ul id="usage-results" class="perm-results" role="listbox" hidden></ul>
-            </div>
+          <div class="perm-search">
+            <input id="usage-group" type="search" placeholder="Search people, groups or site groups" spellcheck="false" autocomplete="off" disabled
+                   role="combobox" aria-expanded="false" aria-controls="usage-results" aria-autocomplete="list" aria-label="Group or person to look for">
+            <ul id="usage-results" class="perm-results" role="listbox" hidden></ul>
           </div>
+          <p class="hint">Click the field to see the site's groups (SPO Group, with Owners, Members and Visitors). Typing filters them and also searches the tenant's users and Entra groups (security and Microsoft 365) with SharePoint's people picker.</p>
           <div class="actions">
             <button id="usage-run" type="button" class="primary" disabled>Scan site collection</button>
             <button id="usage-stop" type="button" class="secondary" hidden>Stop</button>
@@ -261,15 +259,12 @@
           <div id="usage-actions" hidden>
             <p class="hint">Tick lists and libraries of <em>this</em> site to change them. Other sites and the site's own permissions can't be changed from here yet. Changes go into the plan (section 3); nothing is sent until you run Preview and Apply.</p>
             <div class="actions">
-              <button id="usage-remove" type="button" class="secondary" disabled>Remove group from selected</button>
+              <button id="usage-remove" type="button" class="secondary" disabled>Remove from selected</button>
             </div>
-            <div class="perm-field">
-              <label for="usage-with">Or replace it with</label>
-              <div class="perm-search">
-                <input id="usage-with" type="search" placeholder="Click for the site's groups; type to search people and groups" spellcheck="false" autocomplete="off"
-                       role="combobox" aria-expanded="false" aria-controls="usage-with-results" aria-autocomplete="list">
-                <ul id="usage-with-results" class="perm-results" role="listbox" hidden></ul>
-              </div>
+            <div class="perm-search">
+              <input id="usage-with" type="search" placeholder="Replace it with: search people, groups or site groups" spellcheck="false" autocomplete="off"
+                     role="combobox" aria-expanded="false" aria-controls="usage-with-results" aria-autocomplete="list" aria-label="Replace it with">
+              <ul id="usage-with-results" class="perm-results" role="listbox" hidden></ul>
             </div>
             <div class="actions">
               <button id="usage-replace" type="button" class="secondary" disabled>Replace in selected</button>

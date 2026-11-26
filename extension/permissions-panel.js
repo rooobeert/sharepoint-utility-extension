@@ -807,7 +807,7 @@ function updateUsage() {
   ui.usageStop.hidden = !usage.running;
   const n = usage.selected.size;
   ui.usageRemove.disabled = !ready || perm.busy || !n;
-  ui.usageRemove.textContent = n ? `Remove group from ${plural(n, 'selected list')}` : 'Remove group from selected';
+  ui.usageRemove.textContent = n ? `Remove from ${plural(n, 'selected list')}` : 'Remove from selected';
   ui.usageReplace.disabled = !ready || perm.busy || !n || !usage.with;
   ui.usageReplace.textContent = n ? `Replace in ${plural(n, 'selected list')}` : 'Replace in selected';
 }

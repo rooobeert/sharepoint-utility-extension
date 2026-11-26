@@ -16,7 +16,7 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 
 Problems and ideas: use the **?** button in the side panel header, or open an issue at <https://github.com/rooobeert/sharepoint-utility-extension/issues>.
 
-The header shows the extension's version (currently 1.32.0).
+The header shows the extension's version (currently 1.32.1).
 
 ## Batch Runner
 
