@@ -13,7 +13,7 @@ export function groupRoles(json, groupId) {
   const roles = [];
   for (const ra of results(json)) {
     if (ra.PrincipalId !== groupId) continue;
-    for (const r of results({ value: ra.RoleDefinitionBindings })) roles.push({ name: r.Name, hidden: !!r.Hidden });
+    for (const r of results({ value: ra.RoleDefinitionBindings })) roles.push({ id: r.Id, name: r.Name, hidden: !!r.Hidden });
   }
   return roles;
 }
@@ -43,7 +43,7 @@ async function pool(items, n, fn) {
  * Crawl `rootUrl` (the site collection's root web) and all its subwebs.
  *
  * Returns { webs, lists, places, errors, stopped }:
- *   places: [{ type: 'web' | 'list' | 'library', title, url, webTitle, webUrl, roles: [name], limited }]
+ *   places: [{ type: 'web' | 'list' | 'library', id (lists), title, url, webTitle, webUrl, roles: [name], roleList: [{ id, name, hidden }], limited }]
  *   errors: [{ where, message }]  parts that could not be read; the crawl goes on
  *   webs, lists: how many were looked at
  * Only objects that define their own permissions can name the group; the ones
@@ -83,7 +83,7 @@ export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () 
     if (web.HasUniqueRoleAssignments) {
       try {
         const roles = groupRoles(await get(url, `/_api/web${RA_PATH}`), groupId);
-        if (roles.length) out.places.push({ type: 'web', title: here.webTitle, url, ...here, roles: roles.map((r) => r.name), limited: limitedOnly(roles) });
+        if (roles.length) out.places.push({ type: 'web', title: here.webTitle, url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles) });
       } catch (e) {
         fail(`${here.webTitle} (web permissions)`, e);
       }
@@ -111,7 +111,7 @@ export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () 
         if (!roles.length) return null;
         const lib = l.BaseType === 1;
         const path = (l.RootFolder && l.RootFolder.ServerRelativeUrl) || '';
-        return { type: lib ? 'library' : 'list', title: l.Title, url: path ? new URL(path, url).href : url, ...here, roles: roles.map((r) => r.name), limited: limitedOnly(roles), hidden: !!l.Hidden || !!l.IsSystemList };
+        return { type: lib ? 'library' : 'list', id: l.Id, title: l.Title, url: path ? new URL(path, url).href : url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles), hidden: !!l.Hidden || !!l.IsSystemList };
       } catch (e) {
         fail(`${here.webTitle} / ${l.Title}`, e);
         return null;

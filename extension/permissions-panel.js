@@ -42,7 +42,11 @@ const ui = {
   outputBody: $('perm-output-body'),
   copy: $('perm-copy'),
   usageGroup: $('usage-group'),
-  usageSearch: $('usage-search'),
+  usageWith: $('usage-with'),
+  usageActions: $('usage-actions'),
+  usageRemove: $('usage-remove'),
+  usageReplace: $('usage-replace'),
+  usagePlanHint: $('usage-plan-hint'),
   usageRun: $('usage-run'),
   usageStop: $('usage-stop'),
   usageStatus: $('usage-status'),
@@ -58,6 +62,7 @@ const perm = {
   selected: new Set(), // list ids for the next "Add to plan"
   picked: new Map(), // principal key -> { principal, roleId }
   plan: new Map(), // entry key -> { listId, principal, roleId }
+  removals: new Map(), // `${listId}|${principalId}` -> { listId, principalId, title }: a principal whose permissions on the list are removed
   settings: new Map(), // list id -> { mode: 'add' | 'replace', keep: Set of default group keys, read, write }: how the list is changed
   preview: null, // { key, plans, errorCount }
   log: '',
@@ -74,8 +79,9 @@ const copySettings = (s, list) => ({ mode: s.mode, keep: new Set(s.keep), read: 
 const hasItems = (s) => !!(s.read || s.write);
 /** Options for planList: the ids of the default groups to keep come from the site. */
 const listOptions = (s) => ({ mode: s.mode, keepGroups: perm.data ? [...s.keep].map((g) => perm.data.defaults[g]).filter((id) => id != null) : [] });
-const planKey = () => JSON.stringify([[...perm.plan.keys()].sort(), [...perm.settings.entries()].map(([id, s]) => [id, s.mode, [...s.keep].sort(), s.read, s.write]).sort()]);
-const planSize = () => perm.plan.size + [...perm.settings.values()].filter(hasItems).length;
+const planKey = () => JSON.stringify([[...perm.plan.keys()].sort(), [...perm.removals.keys()].sort(), [...perm.settings.entries()].map(([id, s]) => [id, s.mode, [...s.keep].sort(), s.read, s.write]).sort()]);
+const planSize = () => perm.plan.size + perm.removals.size + [...perm.settings.values()].filter(hasItems).length;
+const removalsOf = (listId) => [...perm.removals.values()].filter((r) => r.listId === listId);
 const listById = (id) => perm.data.lists.find((l) => l.id === id);
 const roleById = (id) => perm.data.roles.find((r) => r.id === id);
 const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
@@ -85,7 +91,7 @@ const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 function setBusy(busy) {
   perm.busy = busy;
   for (const n of document.querySelectorAll('#view-perm input, #view-perm select, #view-perm button')) {
-    if (![ui.preview, ui.apply, ui.add, ui.clear, ui.applyAll, ui.usageGroup, ui.usageSearch, ui.usageRun, ui.usageStop].includes(n)) n.disabled = busy;
+    if (![ui.preview, ui.apply, ui.add, ui.clear, ui.applyAll, ui.usageGroup, ui.usageWith, ui.usageRun, ui.usageStop, ui.usageRemove, ui.usageReplace].includes(n)) n.disabled = busy;
   }
   if (!busy) syncKeep();
   updateButtons();
@@ -155,6 +161,7 @@ async function load() {
   perm.selected.clear();
   perm.picked.clear();
   perm.plan.clear();
+  perm.removals.clear();
   perm.settings.clear();
   perm.preview = null;
   ui.output.hidden = ui.progress.hidden = true;
@@ -416,6 +423,7 @@ function planByList() {
     if (!groups.has(e.listId)) groups.set(e.listId, []);
     groups.get(e.listId).push(e);
   }
+  for (const r of perm.removals.values()) if (!groups.has(r.listId)) groups.set(r.listId, []);
   for (const [listId, s] of perm.settings) if (hasItems(s) && !groups.has(listId)) groups.set(listId, []);
   for (const id of [...perm.settings.keys()]) if (!groups.has(id)) perm.settings.delete(id); // a list that left the plan
   for (const id of groups.keys()) if (!perm.settings.has(id)) perm.settings.set(id, copySettings(defaultSettings(), listById(id)));
@@ -489,23 +497,34 @@ function renderPlan() {
         el('td', { class: 'perm-level', text: (roleById(e.roleId) || { name: e.roleId }).name }),
         el('td', { class: 'perm-x' }, remove));
     });
+    const gone = removalsOf(list.id).map((r) => {
+      const undo = el('button', { type: 'button', class: 'icon danger', title: 'Keep its permissions (remove from plan)', 'aria-label': `Keep ${r.title} on ${list.title}`, text: '✕' });
+      undo.disabled = perm.busy;
+      undo.addEventListener('click', () => { perm.removals.delete(`${r.listId}|${r.principalId}`); renderPlan(); });
+      return el('tr', {},
+        el('td', {}, el('span', { class: 'perm-name', text: r.title })),
+        el('td', { class: 'perm-level', text: 'Remove all' }),
+        el('td', { class: 'perm-x' }, undo));
+    });
     const removeList = el('button', { type: 'button', class: 'secondary small', text: 'Remove list from plan' });
     removeList.disabled = perm.busy;
     removeList.addEventListener('click', () => {
       for (const e of entries) perm.plan.forEach((v, k) => v === e && perm.plan.delete(k));
+      for (const r of removalsOf(list.id)) perm.removals.delete(`${r.listId}|${r.principalId}`);
       perm.settings.delete(list.id);
       renderPlan();
     });
     const kept = [...s.keep].map((k) => named.get(k)).filter(Boolean).join(', ');
     const chips = el('span', { class: 'perm-list-chips' },
+      gone.length ? el('span', { class: 'chip warn', text: `remove ${gone.length}` }) : null,
       entries.length ? el('span', { class: `chip ${s.mode === 'replace' ? 'warn' : 'muted'}`, text: s.mode === 'replace' ? `replace · keeps ${kept || 'none'}` : 'add' }) : null,
       hasItems(s) ? el('span', { class: 'chip ok', title: itemLevelText(s), text: 'items: set' }) : null);
     const d = el('details', { class: 'check' },
-      el('summary', {}, el('span', { class: 'chip muted', text: String(entries.length) }), list.title,
+      el('summary', {}, el('span', { class: 'chip muted', text: String(entries.length + gone.length) }), list.title,
         el('span', { class: 'summary-text', text: `${isLibrary(list) ? 'library · ' : ''}${list.uniquePermissions ? 'unique' : 'inherits'}` }), chips),
       el('div', { class: 'check-body' },
-        rows.length ? el('table', { class: 'perm-table' }, el('tbody', {}, rows)) : null,
-        entries.length ? null : el('p', { class: 'hint', text: 'No users or groups planned for this list. Replace needs at least one.' }),
+        rows.length || gone.length ? el('table', { class: 'perm-table' }, el('tbody', {}, gone, rows)) : null,
+        entries.length || gone.length ? null : el('p', { class: 'hint', text: 'No users or groups planned for this list. Replace needs at least one.' }),
         listSettings(list, s), removeList));
     d.open = openPlan.has(list.id);
     d.addEventListener('toggle', () => (d.open ? openPlan.add(list.id) : openPlan.delete(list.id)));
@@ -531,7 +550,7 @@ async function runPreview() {
       try {
         const current = await perm.client.readList(perm.site, list.id);
         list.uniquePermissions = current.unique;
-        plans.push(planList(list, current, entries, listOptions(s), perm.data, hasItems(s) && !isLibrary(list) ? { read: s.read, write: s.write } : null));
+        plans.push(planList(list, current, entries, { ...listOptions(s), removals: removalsOf(list.id) }, perm.data, hasItems(s) && !isLibrary(list) ? { read: s.read, write: s.write } : null));
       } catch (e) {
         plans.push({ list, error: e.message, actions: [], warnings: [] });
       }
@@ -718,51 +737,213 @@ function logText(result) {
 
 // ---------------------------------------------------------------- where is a group used?
 
-const usage = { running: false, stop: false };
+const usage = {
+  running: false,
+  stop: false,
+  target: null, // principal to look for
+  with: null, // principal that replaces it
+  last: null, // { target, principalId, res } of the last scan
+  selected: new Set(), // list ids ticked in the result
+};
+
+/**
+ * A search field with a result list, like the one of step 2: a click shows the
+ * site's SharePoint groups, typing filters them and searches the tenant.
+ * `chosen()` is the current pick (a click then shows all groups again).
+ */
+function combo({ input, list, groupsOnly = false, chosen, onPick }) {
+  let seq = 0;
+  let timer;
+  let shown = [];
+  let active = -1;
+  const close = () => {
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    active = -1;
+  };
+  const show = (items, note) => {
+    shown = items;
+    active = -1;
+    list.replaceChildren(
+      ...items.map((p, i) => {
+        const li = el('li', { role: 'option', id: `${list.id}-${i}` },
+          el('span', { class: 'perm-name' }, p.title, kindBadge(p)),
+          p.email || p.detail ? el('span', { class: 'perm-kind', text: p.email || p.detail }) : null);
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          close();
+          input.value = p.title;
+          onPick(p);
+        });
+        return li;
+      }),
+      ...(note ? [el('li', { class: 'perm-note', text: note })] : [])
+    );
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  };
+  const run = () => {
+    if (!perm.loaded) return;
+    const c = chosen();
+    const q = c && input.value === c.title ? '' : input.value.trim();
+    const mine = ++seq;
+    clearTimeout(timer);
+    const s = q.toLowerCase();
+    const local = perm.data.groups.filter((g) => !s || g.title.toLowerCase().includes(s));
+    if (q.length < 2) {
+      show(local, q ? 'Type at least 2 characters to search the tenant.' : null);
+      return;
+    }
+    show(local, 'Searching the tenant…');
+    timer = setTimeout(async () => {
+      let found = [];
+      let note = null;
+      try {
+        found = (await perm.client.search(perm.site, q)).filter((p) => !groupsOnly || p.kind === ENTRA_GROUP);
+      } catch (e) {
+        note = `Search failed: ${e.message}`;
+      }
+      if (mine !== seq) return;
+      const all = [...local, ...found];
+      show(all, note || (all.length ? null : 'No matches.'));
+    }, 300);
+  };
+  const move = (d) => {
+    if (list.hidden || !shown.length) return;
+    active = (active + d + shown.length) % shown.length;
+    list.querySelectorAll('[role="option"]').forEach((n, i) => n.classList.toggle('active', i === active));
+    const node = document.getElementById(`${list.id}-${active}`);
+    input.setAttribute('aria-activedescendant', node.id);
+    node.scrollIntoView({ block: 'nearest' });
+  };
+  input.addEventListener('input', run);
+  input.addEventListener('focus', () => { input.select(); run(); });
+  input.addEventListener('blur', () => setTimeout(close, 100));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') move(1);
+    else if (e.key === 'ArrowUp') move(-1);
+    else if (e.key === 'Enter' && active >= 0) {
+      const p = shown[active];
+      close();
+      input.value = p.title;
+      onPick(p);
+    } else if (e.key === 'Escape' && !list.hidden) close();
+    else return;
+    e.preventDefault();
+  });
+}
+
+combo({
+  input: ui.usageGroup,
+  list: $('usage-results'),
+  groupsOnly: true,
+  chosen: () => usage.target,
+  onPick: (p) => { usage.target = p; clearUsageResult(); updateUsage(); },
+});
+ui.usageGroup.addEventListener('input', () => { usage.target = null; clearUsageResult(); updateUsage(); });
+combo({
+  input: ui.usageWith,
+  list: $('usage-with-results'),
+  chosen: () => usage.with,
+  onPick: (p) => { usage.with = p; updateUsage(); },
+});
+ui.usageWith.addEventListener('input', () => { usage.with = null; updateUsage(); });
+
+function clearUsageResult() {
+  usage.last = null;
+  usage.selected.clear();
+  ui.usageResult.replaceChildren();
+  ui.usageActions.hidden = true;
+  ui.usageStatus.textContent = '';
+}
+
+const sameUrl = (a, b) => String(a).replace(/\/+$/, '').toLowerCase() === String(b).replace(/\/+$/, '').toLowerCase();
+
+/** Can this result row be changed here? Lists and libraries of the open site that hold more than Limited Access. */
+const changeable = (p) => !!usage.last && (p.type === 'list' || p.type === 'library') && !p.limited && sameUrl(p.webUrl, perm.data.web.Url) && !!listById(p.id);
 
 function updateUsage() {
-  ui.usageRun.disabled = !perm.loaded || perm.busy || usage.running || !ui.usageGroup.value;
-  ui.usageGroup.disabled = ui.usageSearch.disabled = !perm.loaded || usage.running;
+  const ready = perm.loaded && !usage.running;
+  ui.usageRun.disabled = !ready || perm.busy || !usage.target;
+  ui.usageGroup.disabled = ui.usageWith.disabled = !ready;
   ui.usageStop.hidden = !usage.running;
+  const n = usage.selected.size;
+  ui.usageRemove.disabled = !ready || perm.busy || !n;
+  ui.usageRemove.textContent = n ? `Remove group from ${plural(n, 'selected list')}` : 'Remove group from selected';
+  ui.usageReplace.disabled = !ready || perm.busy || !n || !usage.with;
+  ui.usageReplace.textContent = n ? `Replace in ${plural(n, 'selected list')}` : 'Replace in selected';
 }
 
 function renderUsageGroups() {
-  const groups = perm.data ? perm.data.groups : [];
-  ui.usageGroup.replaceChildren(...groups.map((g) => el('option', { value: String(g.id), text: g.title })));
-  ui.usageResult.replaceChildren();
-  ui.usageStatus.textContent = '';
-  ui.usageSearch.value = '';
+  usage.target = usage.with = null;
+  ui.usageGroup.value = ui.usageWith.value = '';
+  ui.usagePlanHint.textContent = '';
+  clearUsageResult();
 }
 
 const TYPE_LABEL = { web: 'Site', list: 'List', library: 'Library' };
 
 function usageTable(places) {
-  const rows = places.map((p) => el('tr', {},
-    el('td', { class: 'kind', text: TYPE_LABEL[p.type] }),
-    el('td', {},
-      el('span', { class: 'exp-title', text: p.title }),
-      el('span', { class: 'exp-url', text: p.url }),
-      p.type !== 'web' && p.webUrl !== p.url ? el('span', { class: 'exp-url', text: `in ${p.webTitle}` }) : null),
-    el('td', {}, ...[...p.roles.map((r) => el('span', { class: 'chip muted', text: r })), p.limited ? el('span', { class: 'chip warn', title: 'SharePoint adds Limited Access itself so that a person can reach the item below; it is not a permission that was granted.', text: 'only Limited Access' }) : null].filter(Boolean))));
+  const rows = places.map((p) => {
+    let box = null;
+    if (changeable(p)) {
+      box = el('input', { type: 'checkbox', 'aria-label': `Select ${p.title}` });
+      box.checked = usage.selected.has(p.id);
+      box.addEventListener('change', () => {
+        if (box.checked) usage.selected.add(p.id);
+        else usage.selected.delete(p.id);
+        syncUsageToggle();
+        updateUsage();
+      });
+    }
+    const row = el('tr', { class: box ? null : 'system' },
+      el('td', { class: 'sel' }, box),
+      el('td', { class: 'kind', text: TYPE_LABEL[p.type] }),
+      el('td', {},
+        el('span', { class: 'exp-title', text: p.title }),
+        el('span', { class: 'exp-url', text: p.url }),
+        p.type !== 'web' && !sameUrl(p.webUrl, p.url) ? el('span', { class: 'exp-url', text: `in ${p.webTitle}` }) : null),
+      el('td', {}, ...[...p.roles.map((r) => el('span', { class: 'chip muted', text: r })), p.limited ? el('span', { class: 'chip warn', title: 'SharePoint adds Limited Access itself so that a person can reach the item below; it is not a permission that was granted.', text: 'only Limited Access' }) : null].filter(Boolean)));
+    if (box) row.addEventListener('click', (e) => { if (e.target !== box) box.click(); });
+    return row;
+  });
+  const toggle = el('input', { type: 'checkbox', id: 'usage-toggle', 'aria-label': 'Select all lists and libraries of this site' });
+  toggle.addEventListener('change', () => {
+    for (const p of places.filter(changeable)) toggle.checked ? usage.selected.add(p.id) : usage.selected.delete(p.id);
+    ui.usageResult.replaceChildren(usageTable(places), ...[...ui.usageResult.children].slice(1));
+    syncUsageToggle();
+    updateUsage();
+  });
   return el('div', { class: 'exp-table-wrap' },
     el('table', { class: 'exp-table' },
-      el('thead', {}, el('tr', {}, el('th', { class: 'kind', text: 'Type' }), el('th', { text: 'Where' }), el('th', { text: 'Permission levels' }))),
+      el('thead', {}, el('tr', {}, el('th', { class: 'sel' }, toggle), el('th', { class: 'kind', text: 'Type' }), el('th', { text: 'Where' }), el('th', { text: 'Permission levels' }))),
       el('tbody', {}, ...rows)));
 }
 
+function syncUsageToggle() {
+  const t = $('usage-toggle');
+  if (!t || !usage.last) return;
+  const all = usage.last.res.places.filter(changeable);
+  const n = all.filter((p) => usage.selected.has(p.id)).length;
+  t.checked = all.length > 0 && n === all.length;
+  t.indeterminate = n > 0 && n < all.length;
+}
+
 async function runUsage() {
-  if (usage.running || !perm.loaded) return;
-  const picked = ui.usageGroup.value;
-  const id = picked.startsWith('login:') ? { login: picked.slice(6) } : Number(picked);
-  const name = ui.usageGroup.selectedOptions[0].textContent;
+  if (usage.running || !perm.loaded || !usage.target) return;
+  const t = usage.target;
+  const who = t.id != null ? t.id : { login: t.login };
+  const name = t.title;
   usage.running = true;
   usage.stop = false;
-  ui.usageResult.replaceChildren();
+  clearUsageResult();
+  ui.usagePlanHint.textContent = '';
   updateButtons();
   ui.usageStatus.classList.remove('error');
   ui.usageStatus.textContent = 'Reading the site collection…';
   try {
-    const res = await perm.client.findGroupUsage(perm.site, id, {
+    const res = await perm.client.findGroupUsage(perm.site, who, {
       shouldStop: () => usage.stop,
       onProgress: (e) => {
         if (e.type === 'web') ui.usageStatus.textContent = `Looking at ${e.url} (${plural(e.webs, 'site')} done, ${e.queued} waiting)…`;
@@ -772,6 +953,7 @@ async function runUsage() {
       ui.usageStatus.textContent = `"${name}" has no permissions in this site collection: it is not one of its users, so nothing was crawled.`;
       return;
     }
+    usage.last = { target: t, principalId: res.principalId, res };
     const real = res.places.filter((p) => !p.limited);
     const limited = res.places.length - real.length;
     ui.usageStatus.textContent = `${res.stopped ? 'Stopped. ' : ''}"${name}": ${real.length ? `permissions in ${plural(real.length, 'place')}` : 'no permissions found'}`
@@ -781,6 +963,7 @@ async function runUsage() {
       el('p', { class: 'hint', text: 'Sites, lists and libraries that inherit their permissions are not listed: the group shows at the parent that defines them. A group with no result can still be used on items or columns, in sharing links, alerts or flows.' }),
       ...(res.errors.length ? [el('p', { class: 'hint error', text: `${plural(res.errors.length, 'part')} could not be read (missing access?):` }), el('ul', { class: 'hint' }, ...res.errors.map((x) => el('li', { text: `${x.where}: ${x.message}` })))] : [])
     );
+    ui.usageActions.hidden = !res.places.some(changeable);
   } catch (e) {
     ui.usageStatus.textContent = `Could not scan: ${e.message}`;
     ui.usageStatus.classList.add('error');
@@ -790,42 +973,43 @@ async function runUsage() {
   }
 }
 
+/**
+ * Put the group's removal (and the replacement with the same permission levels)
+ * for the ticked lists into the plan. Lists new to the plan start in "add"
+ * mode without item-level changes, whatever the settings box says, so nothing
+ * but the group is touched.
+ */
+function planUsage(replace) {
+  const { principalId, res } = usage.last;
+  const w = replace ? usage.with : null;
+  const rows = res.places.filter((p) => changeable(p) && usage.selected.has(p.id));
+  let skipped = 0;
+  for (const p of rows) {
+    perm.removals.set(`${p.id}|${principalId}`, { listId: p.id, principalId, title: usage.last.target.title });
+    if (w) {
+      const roleIds = p.roleList.filter((r) => !r.hidden && roleById(r.id)).map((r) => r.id);
+      if (roleIds.length < p.roleList.filter((r) => !r.hidden).length) skipped++;
+      addEntries(perm.plan, [p.id], roleIds.map((roleId) => ({ principal: w, roleId })));
+    }
+    if (!perm.settings.has(p.id)) perm.settings.set(p.id, { mode: 'add', keep: new Set(), read: null, write: null });
+  }
+  perm.preview = null;
+  ui.output.hidden = true;
+  usage.selected.clear();
+  ui.usageResult.replaceChildren(usageTable(res.places), ...[...ui.usageResult.children].slice(1));
+  syncUsageToggle();
+  renderPlan();
+  updateUsage();
+  ui.usagePlanHint.textContent = `${replace ? 'Replacing' : 'Removing'} "${usage.last.target.title}"${w ? ` with "${w.title}"` : ''} is in the plan for ${plural(rows.length, 'list')}. Run Preview in section 3 to check it.`
+    + (skipped ? ` ${plural(skipped, 'list')} had a permission level that no longer exists; it was not copied.` : '');
+}
+
 // ---------------------------------------------------------------- events
 
 ui.usageRun.addEventListener('click', runUsage);
 ui.usageStop.addEventListener('click', () => { usage.stop = true; ui.usageStatus.textContent = 'Stopping…'; });
-let usageSeq = 0;
-let usageTimer;
-/** Entra groups matching the search text are listed in the Group dropdown under their own heading; the pick is kept. */
-ui.usageSearch.addEventListener('input', () => {
-  clearTimeout(usageTimer);
-  const q = ui.usageSearch.value.trim();
-  const seq = ++usageSeq;
-  const old = ui.usageGroup.querySelector('optgroup');
-  const keep = ui.usageGroup.value.startsWith('login:') ? ui.usageGroup.value : null;
-  if (q.length < 2) {
-    if (old && !keep) old.remove();
-    return;
-  }
-  ui.usageStatus.textContent = 'Searching the tenant…';
-  usageTimer = setTimeout(async () => {
-    try {
-      const found = (await perm.client.search(perm.site, q)).filter((p) => p.kind === ENTRA_GROUP);
-      if (seq !== usageSeq) return;
-      ui.usageGroup.querySelector('optgroup')?.remove();
-      if (found.length) {
-        ui.usageGroup.append(el('optgroup', { label: 'Entra groups (search results)' },
-          ...found.map((p) => el('option', { value: `login:${p.login}`, text: `${p.title}${p.detail ? ` (${p.detail})` : ''}` }))));
-        ui.usageGroup.value = `login:${found[0].login}`;
-      }
-      ui.usageStatus.textContent = found.length ? `${plural(found.length, 'Entra group')} found; the first one is selected.` : 'No Entra groups found.';
-      updateUsage();
-    } catch (e) {
-      if (seq === usageSeq) ui.usageStatus.textContent = `Search failed: ${e.message}`;
-    }
-  }, 300);
-});
-ui.usageGroup.addEventListener('change', () => { ui.usageResult.replaceChildren(); ui.usageStatus.textContent = ''; updateUsage(); });
+ui.usageRemove.addEventListener('click', () => planUsage(false));
+ui.usageReplace.addEventListener('click', () => planUsage(true));
 
 document.addEventListener('sp-utility:tab-shown', (e) => {
   if (e.detail.id === 'perm' && !perm.loaded && !perm.busy) load();
@@ -862,6 +1046,7 @@ ui.add.addEventListener('click', addToPlan);
 ui.clear.addEventListener('click', async () => {
   if (!(await ask({ title: 'Clear the plan?', body: `Everything planned (${plural(planSize(), 'entry', 'entries')}) is removed from the plan. Nothing changes in SharePoint.`, ok: 'Clear' }))) return;
   perm.plan.clear();
+  perm.removals.clear();
   perm.settings.clear();
   perm.preview = null;
   ui.output.hidden = true;

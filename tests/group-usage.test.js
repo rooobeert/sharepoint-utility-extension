@@ -74,6 +74,13 @@ test('scan: finds the group on webs, lists and libraries of all subsites', async
   assert.equal(res.places[3].webTitle, 'HR');
 });
 
+test('scan: places carry the list id and the role ids for remove / replace', async () => {
+  const res = await scanGroupUsage({ get: fake(TREE).get }, ROOT, 7);
+  const docs = res.places.find((p) => p.title === 'Docs');
+  assert.equal(docs.id, 'l1');
+  assert.deepEqual(docs.roleList, [{ id: undefined, name: 'Read', hidden: false }]);
+});
+
 test('scan: objects that inherit are not asked for their assignments', async () => {
   const { get, calls } = fake(TREE);
   await scanGroupUsage({ get }, ROOT, 7);
@@ -153,6 +160,7 @@ test('client: an Entra group is looked up by login name in the site users, then 
   const login = "c:0t.c|tenant|abc-123";
   const res = await client.findGroupUsage(ROOT, { login });
   assert.equal(res.places.length, 4);
+  assert.equal(res.principalId, 7);
   const lookup = seen.find((u) => u.includes('getbyloginname'));
   assert.ok(lookup.startsWith(`${ROOT}/_api/web/siteusers/getbyloginname(@v)?@v='c%3A0t.c%7Ctenant%7Cabc-123'`));
 });

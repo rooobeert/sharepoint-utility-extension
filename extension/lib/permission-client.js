@@ -212,10 +212,10 @@ export function createPermissionClient({ request, sleep = defaultSleep, onEvent 
         id = user.Id;
       } catch (e) {
         if (!/HTTP 404/.test(e.message)) throw e;
-        return { webs: 0, lists: 0, places: [], errors: [], stopped: false, notInSite: true };
+        return { webs: 0, lists: 0, places: [], errors: [], stopped: false, notInSite: true, principalId: null };
       }
     }
-    return scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, id);
+    return { ...(await scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, id)), principalId: id };
   }
 
   return { loadSite, loadRoles, search, readList, ensure, apply, findGroupUsage };

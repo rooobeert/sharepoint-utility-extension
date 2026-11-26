@@ -276,3 +276,44 @@ test('loadRoles reads only the permission levels', async () => {
   assert.deepEqual(urls, [`${SITE}/_api/web/roledefinitions?$select=Id,Name,Description,Hidden,RoleTypeKind,Order`]);
   assert.deepEqual(roles.map((r) => r.name), ['Approve']);
 });
+
+// ---------------------------------------------------------------- removing a group (from "Where is a group used?")
+
+const proj = { principalId: 12, title: 'Project Group' };
+
+test('planList: remove a group only; the others stay, even if the list mode says replace', () => {
+  const plan = planList(LIST, { unique: true, assignments: inherited }, [], { mode: 'replace', keepGroups: [], removals: [proj] }, SITE_DATA);
+  assert.deepEqual(types(plan), ['remove Project Group Edit']);
+  assert.equal(plan.breaks, false);
+  assert.deepEqual(plan.warnings, []);
+});
+
+test('planList: removing on an inheriting list breaks inheritance first', () => {
+  const plan = planList(LIST, { unique: false, assignments: inherited }, [], { mode: 'add', removals: [proj] }, SITE_DATA);
+  assert.equal(plan.breaks, true);
+  assert.equal(hasChanges(plan), true);
+});
+
+test('planList: replace a group with another, same level, in add mode', () => {
+  const plan = planList(LIST, { unique: true, assignments: inherited }, [entry(ben, EDIT)], { mode: 'add', removals: [proj] }, SITE_DATA);
+  assert.deepEqual(types(plan), ['remove Project Group Edit', 'add Ben Edit']);
+});
+
+test('planList: a group that is not on the list any more is skipped, not an error', () => {
+  const plan = planList(LIST, { unique: true, assignments: inherited }, [], { mode: 'add', removals: [{ principalId: 999, title: 'Gone' }] }, SITE_DATA);
+  assert.deepEqual(types(plan), ['skip Gone']);
+  assert.equal(hasChanges(plan), false);
+});
+
+test('planList: removing the Owners group warns; removing the last Full Control warns', () => {
+  const plan = planList(LIST, { unique: true, assignments: inherited }, [], { mode: 'add', removals: [{ principalId: 3, title: 'Demo Owners' }] }, SITE_DATA);
+  assert.match(plan.warnings.join(' '), /Owners/);
+  assert.match(plan.warnings.join(' '), /Full Control/);
+});
+
+test('planList: removal operations use removeroleassignment with the group id', () => {
+  const plan = planList(LIST, { unique: true, assignments: inherited }, [], { mode: 'add', removals: [proj] }, SITE_DATA);
+  const ops = listOperations(SITE, plan);
+  assert.equal(ops.length, 1);
+  assert.match(ops[0].url, /roleassignments\/removeroleassignment\(principalid=12,roledefid=1073741827\)$/);
+});

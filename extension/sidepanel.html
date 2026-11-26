@@ -244,18 +244,38 @@
         <summary><span class="t">Where is a group used?</span></summary>
         <div class="check-body">
           <p class="hint">Crawls every site (web) of the site collection and its lists and libraries, and shows where the SharePoint group has permissions of its own. Items, folders, columns, sharing links, alerts and flows are not checked. Nothing is changed.</p>
-          <label class="perm-field">Group
-            <select id="usage-group" disabled></select>
-          </label>
-          <label class="perm-field">Or search an Entra group (security or Microsoft 365)
-            <input id="usage-search" type="search" placeholder="Type at least 2 characters; matches appear in the list above" spellcheck="false" autocomplete="off" disabled>
-          </label>
+          <div class="perm-field">
+            <label for="usage-group">Group</label>
+            <div class="perm-search">
+              <input id="usage-group" type="search" placeholder="Click for the site's groups, type to filter or to search Entra groups" spellcheck="false" autocomplete="off" disabled
+                     role="combobox" aria-expanded="false" aria-controls="usage-results" aria-autocomplete="list">
+              <ul id="usage-results" class="perm-results" role="listbox" hidden></ul>
+            </div>
+          </div>
           <div class="actions">
             <button id="usage-run" type="button" class="primary" disabled>Scan site collection</button>
             <button id="usage-stop" type="button" class="secondary" hidden>Stop</button>
           </div>
           <p id="usage-status" class="hint" role="status" aria-live="polite"></p>
           <div id="usage-result"></div>
+          <div id="usage-actions" hidden>
+            <p class="hint">Tick lists and libraries of <em>this</em> site to change them. Other sites and the site's own permissions can't be changed from here yet. Changes go into the plan (section 3); nothing is sent until you run Preview and Apply.</p>
+            <div class="actions">
+              <button id="usage-remove" type="button" class="secondary" disabled>Remove group from selected</button>
+            </div>
+            <div class="perm-field">
+              <label for="usage-with">Or replace it with</label>
+              <div class="perm-search">
+                <input id="usage-with" type="search" placeholder="A site group, Entra group or person" spellcheck="false" autocomplete="off"
+                       role="combobox" aria-expanded="false" aria-controls="usage-with-results" aria-autocomplete="list">
+                <ul id="usage-with-results" class="perm-results" role="listbox" hidden></ul>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="usage-replace" type="button" class="secondary" disabled>Replace in selected</button>
+            </div>
+            <p id="usage-plan-hint" class="hint" role="status" aria-live="polite"></p>
+          </div>
         </div>
       </details>
     </section>

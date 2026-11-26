@@ -197,7 +197,8 @@ export function matches(p, a) {
  *   current:   { unique, assignments, readSecurity, writeSecurity } as read by Preview
  *   entries:   plan entries of this list (none: its permissions are left alone,
  *              also in replace mode)
- *   options:   { mode: 'add' | 'replace', keepGroups: ids of default groups kept in replace mode }
+ *   options:   { mode: 'add' | 'replace', keepGroups: ids of default groups kept in replace mode,
+ *                removals: [{ principalId, title }] principals whose permissions on the list are removed }
  *   site:      { roles, defaults: { ids, owners } }
  *   itemLevel: { read, write } or null
  *
@@ -210,9 +211,10 @@ export function matches(p, a) {
  */
 export function planList(list, current, entries, options, site, itemLevel = null) {
   const settings = itemLevelSettings(current, itemLevel);
-  if (!entries.length) return { list, breaks: false, actions: [], warnings: [], settings };
+  const removals = options.removals || [];
+  if (!entries.length && !removals.length) return { list, breaks: false, actions: [], warnings: [], settings };
   const roleById = new Map(site.roles.map((r) => [r.id, r]));
-  const replace = options.mode === 'replace';
+  const replace = options.mode === 'replace' && entries.length > 0;
   const actions = [];
   const warnings = [];
   const roleName = (id) => (roleById.get(id) || { name: `role ${id}` }).name;
@@ -228,8 +230,16 @@ export function planList(list, current, entries, options, site, itemLevel = null
   const handled = new Set(); // desired principals matched to an existing assignment
   const finalRoles = []; // [{ title, kinds }] what the list ends up with, for the Full Control check
 
+  const removed = new Set();
   for (const a of current.assignments) {
     const visible = a.roles.filter((r) => !r.hidden);
+    if (removals.some((r) => r.principalId === a.principalId)) {
+      removed.add(a.principalId);
+      for (const r of visible) actions.push({ type: 'remove', assignment: a, role: r, title: a.title });
+      if (!visible.length) actions.push({ type: 'skip', title: a.title, roles: a.roles.map((r) => r.name), why: 'only Limited Access, managed by SharePoint' });
+      if (a.principalId === site.defaults.owners) warnings.push(`The site's Owners group "${a.title}" loses its access to this list.`);
+      continue;
+    }
     const want = [...desired.values()].find((d) => matches(d.principal, a));
     const has = (id) => visible.some((r) => r.id === id);
     if (want) {
@@ -272,8 +282,12 @@ export function planList(list, current, entries, options, site, itemLevel = null
     finalRoles.push({ title: d.principal.title, kinds: d.roleIds.map((id) => (roleById.get(id) || {}).kind) });
   }
 
+  for (const r of removals) {
+    if (!removed.has(r.principalId)) actions.push({ type: 'skip', title: r.title, roles: [], why: 'has no permissions on this list (any more)' });
+  }
+
   const changes = actions.some((x) => x.type === 'add' || x.type === 'remove');
-  if (replace && changes && !finalRoles.some((f) => f.kinds.includes(FULL_CONTROL))) {
+  if ((replace || removals.length) && changes && !finalRoles.some((f) => f.kinds.includes(FULL_CONTROL))) {
     warnings.push('Afterwards nobody has Full Control on this list. Only site collection administrators can then change its permissions.');
   }
   return { list, breaks: changes && !current.unique, actions, warnings, settings };
