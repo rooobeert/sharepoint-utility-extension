@@ -5,6 +5,7 @@
 import { extractError, isThrottled, retryAfterMs } from './response.js';
 import { createExporter } from './exporter.js';
 import { createRunner } from './runner.js';
+import { scanGroupUsage } from './group-usage.js';
 import {
   roleLevels,
   siteGroups,
@@ -195,5 +196,14 @@ export function createPermissionClient({ request, sleep = defaultSleep, onEvent 
     return { lists: [...byList.values()], unresolved, batches: stages.length };
   }
 
-  return { loadSite, loadRoles, search, readList, ensure, apply };
+  /**
+   * Where a SharePoint group holds permissions in the whole site collection of
+   * `site`: its webs and their lists and libraries (see scanGroupUsage).
+   */
+  async function findGroupUsage(site, groupId, { shouldStop, onProgress } = {}) {
+    const sc = await get(site, '/_api/site?$select=Url');
+    return scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, groupId);
+  }
+
+  return { loadSite, loadRoles, search, readList, ensure, apply, findGroupUsage };
 }

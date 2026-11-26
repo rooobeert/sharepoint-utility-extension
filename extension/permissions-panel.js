@@ -41,6 +41,11 @@ const ui = {
   outputHead: $('perm-output-h'),
   outputBody: $('perm-output-body'),
   copy: $('perm-copy'),
+  usageGroup: $('usage-group'),
+  usageRun: $('usage-run'),
+  usageStop: $('usage-stop'),
+  usageStatus: $('usage-status'),
+  usageResult: $('usage-result'),
 };
 
 const perm = {
@@ -79,7 +84,7 @@ const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 function setBusy(busy) {
   perm.busy = busy;
   for (const n of document.querySelectorAll('#view-perm input, #view-perm select, #view-perm button')) {
-    if (n !== ui.preview && n !== ui.apply && n !== ui.add && n !== ui.clear && n !== ui.applyAll) n.disabled = busy;
+    if (![ui.preview, ui.apply, ui.add, ui.clear, ui.applyAll, ui.usageGroup, ui.usageRun, ui.usageStop].includes(n)) n.disabled = busy;
   }
   if (!busy) syncKeep();
   updateButtons();
@@ -103,6 +108,7 @@ function updateButtons() {
   ui.applyAll.disabled = !ready || !perm.settings.size;
   ui.reloadRoles.disabled = !ready;
   ui.preview.disabled = !ready || !planSize();
+  updateUsage();
 
   let text;
   let cls = '';
@@ -177,6 +183,7 @@ async function load() {
 }
 
 function renderAll() {
+  renderUsageGroups();
   renderLists();
   renderPicked();
   renderPlan();
@@ -708,7 +715,79 @@ function logText(result) {
   return lines.join('\n') + '\n';
 }
 
+// ---------------------------------------------------------------- where is a group used?
+
+const usage = { running: false, stop: false };
+
+function updateUsage() {
+  ui.usageRun.disabled = !perm.loaded || perm.busy || usage.running || !ui.usageGroup.value;
+  ui.usageGroup.disabled = !perm.loaded || usage.running;
+  ui.usageStop.hidden = !usage.running;
+}
+
+function renderUsageGroups() {
+  const groups = perm.data ? perm.data.groups : [];
+  ui.usageGroup.replaceChildren(...groups.map((g) => el('option', { value: String(g.id), text: g.title })));
+  ui.usageResult.replaceChildren();
+  ui.usageStatus.textContent = '';
+}
+
+const TYPE_LABEL = { web: 'Site', list: 'List', library: 'Library' };
+
+function usageTable(places) {
+  const rows = places.map((p) => el('tr', {},
+    el('td', { class: 'kind', text: TYPE_LABEL[p.type] }),
+    el('td', {},
+      el('span', { class: 'exp-title', text: p.title }),
+      el('span', { class: 'exp-url', text: p.url }),
+      p.type !== 'web' && p.webUrl !== p.url ? el('span', { class: 'exp-url', text: `in ${p.webTitle}` }) : null),
+    el('td', {}, ...[...p.roles.map((r) => el('span', { class: 'chip muted', text: r })), p.limited ? el('span', { class: 'chip warn', title: 'SharePoint adds Limited Access itself so that a person can reach the item below; it is not a permission that was granted.', text: 'only Limited Access' }) : null].filter(Boolean))));
+  return el('div', { class: 'exp-table-wrap' },
+    el('table', { class: 'exp-table' },
+      el('thead', {}, el('tr', {}, el('th', { class: 'kind', text: 'Type' }), el('th', { text: 'Where' }), el('th', { text: 'Permission levels' }))),
+      el('tbody', {}, ...rows)));
+}
+
+async function runUsage() {
+  if (usage.running || !perm.loaded) return;
+  const id = Number(ui.usageGroup.value);
+  const name = ui.usageGroup.selectedOptions[0].textContent;
+  usage.running = true;
+  usage.stop = false;
+  ui.usageResult.replaceChildren();
+  updateButtons();
+  ui.usageStatus.classList.remove('error');
+  ui.usageStatus.textContent = 'Reading the site collection…';
+  try {
+    const res = await perm.client.findGroupUsage(perm.site, id, {
+      shouldStop: () => usage.stop,
+      onProgress: (e) => {
+        if (e.type === 'web') ui.usageStatus.textContent = `Looking at ${e.url} (${plural(e.webs, 'site')} done, ${e.queued} waiting)…`;
+      },
+    });
+    const real = res.places.filter((p) => !p.limited);
+    const limited = res.places.length - real.length;
+    ui.usageStatus.textContent = `${res.stopped ? 'Stopped. ' : ''}"${name}": ${real.length ? `permissions in ${plural(real.length, 'place')}` : 'no permissions found'}`
+      + `${limited ? `, ${limited} more with only Limited Access` : ''}. Looked at ${plural(res.webs, 'site')} and ${plural(res.lists, 'list')}${res.stopped ? ' so far' : ''}.`;
+    ui.usageResult.replaceChildren(
+      ...(res.places.length ? [usageTable(res.places)] : []),
+      el('p', { class: 'hint', text: 'Sites, lists and libraries that inherit their permissions are not listed: the group shows at the parent that defines them. A group with no result can still be used on items or columns, in sharing links, alerts or flows.' }),
+      ...(res.errors.length ? [el('p', { class: 'hint error', text: `${plural(res.errors.length, 'part')} could not be read (missing access?):` }), el('ul', { class: 'hint' }, ...res.errors.map((x) => el('li', { text: `${x.where}: ${x.message}` })))] : [])
+    );
+  } catch (e) {
+    ui.usageStatus.textContent = `Could not scan: ${e.message}`;
+    ui.usageStatus.classList.add('error');
+  } finally {
+    usage.running = false;
+    updateButtons();
+  }
+}
+
 // ---------------------------------------------------------------- events
+
+ui.usageRun.addEventListener('click', runUsage);
+ui.usageStop.addEventListener('click', () => { usage.stop = true; ui.usageStatus.textContent = 'Stopping…'; });
+ui.usageGroup.addEventListener('change', () => { ui.usageResult.replaceChildren(); ui.usageStatus.textContent = ''; updateUsage(); });
 
 document.addEventListener('sp-utility:tab-shown', (e) => {
   if (e.detail.id === 'perm' && !perm.loaded && !perm.busy) load();

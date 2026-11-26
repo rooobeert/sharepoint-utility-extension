@@ -29,6 +29,8 @@
         <button type="button" role="tab" id="tab-sch" aria-controls="view-sch" aria-selected="false" tabindex="-1">Search Schema</button>
         <button type="button" role="tab" id="tab-hdr" aria-controls="view-hdr" aria-selected="false" tabindex="-1">Headers</button>
       </nav>
+      <a class="help-link" href="https://github.com/rooobeert/sharepoint-utility-extension/issues" target="_blank" rel="noopener noreferrer"
+         title="Report a problem or suggest something (GitHub issues)" aria-label="Help and feedback: open the GitHub issues in a new tab">?</a>
       <span id="version" class="version"></span>
     </div>
   </header>
@@ -235,6 +237,24 @@
         </div>
       </div>
       <p id="perm-site" class="exp-site">Open any page of the site in the active tab.</p>
+    </section>
+
+    <section class="block">
+      <details class="check" id="perm-usage">
+        <summary><span class="t">Where is a group used?</span></summary>
+        <div class="check-body">
+          <p class="hint">Crawls every site (web) of the site collection and its lists and libraries, and shows where the SharePoint group has permissions of its own. Items, folders, columns, sharing links, alerts and flows are not checked. Nothing is changed.</p>
+          <label class="perm-field">Group
+            <select id="usage-group" disabled></select>
+          </label>
+          <div class="actions">
+            <button id="usage-run" type="button" class="primary" disabled>Scan site collection</button>
+            <button id="usage-stop" type="button" class="secondary" hidden>Stop</button>
+          </div>
+          <p id="usage-status" class="hint" role="status" aria-live="polite"></p>
+          <div id="usage-result"></div>
+        </div>
+      </details>
     </section>
 
     <section class="block" aria-labelledby="perm-lists-h">

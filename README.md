@@ -9,12 +9,14 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 - **Batch Runner** sends SharePoint REST `$batch` requests that create lists, libraries and columns.
 - **Export Architecture** exports a site's lists, columns, views, content types and permissions to a CSV file, or as ready-made batches that rebuild the lists on another site.
 - **Navigation** builds the site's Quick Launch, top navigation or hub navigation from its lists, grouped by solution tag, with drag and drop. It can copy a navigation to another site and restore the one a site had before a save.
-- **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests.
+- **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests. A collapsed section, *Where is a group used?*, crawls the site collection's sites, lists and libraries and shows where a SharePoint group has permissions of its own (not items or columns).
 - **Compare** shows the differences in lists and columns between two sites, e.g. dev and prod, and can send the chosen differences to the Batch Runner. Comparing only reads.
 - **Search Schema** maps crawled properties (list columns) to `Refinable*` managed properties on the site collection, many at once.
 - **Headers** adds request headers (default `Accept: application/json`, optionally `Accept-Language`) when you open SharePoint URLs such as `/_api/` in a browser tab. This uses the `declarativeNetRequest` permission and only changes page loads, not the extension's own requests.
 
-The header shows the extension's version (currently 1.23.0).
+Problems and ideas: use the **?** button in the side panel header, or open an issue at <https://github.com/rooobeert/sharepoint-utility-extension/issues>.
+
+The header shows the extension's version (currently 1.28.1).
 
 ## Batch Runner
 
@@ -48,6 +50,7 @@ extension/              the extension (this folder is what you load or zip)
   lib/navigation.js     list grouping by solution tag, navigation tree, save plan
   lib/navigator.js      reads and writes the Quick Launch / top navigation
   lib/permissions.js    people picker results, permission plan per list, batch bodies
+  lib/group-usage.js    crawl of webs, lists and libraries: where a group holds permissions
   lib/permission-client.js  reads lists, levels, groups and role assignments; search; apply
   lib/diff.js           compares the lists and columns of two sites; the diff CSV
   lib/schema.js         search schema: row checks, pending changes, the classic page parsers and postback
