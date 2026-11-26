@@ -140,7 +140,7 @@ test('client: starts at the site collection root, not the web in the tab', async
   assert.equal(res.webs, 3);
 });
 
-function entraClient(user) {
+function entraClient(user, groupsOfUser = []) {
   const f = fake(TREE);
   const seen = [];
   const request = async (req) => {
@@ -148,6 +148,9 @@ function entraClient(user) {
     if (req.url.endsWith('/_api/site?$select=Url')) return { status: 200, text: JSON.stringify({ Url: ROOT }), headers: {} };
     if (req.url.includes('/siteusers/getbyloginname')) {
       return user ? { status: 200, text: JSON.stringify({ Id: user }), headers: {} } : { status: 404, text: '{}', headers: {} };
+    }
+    if (req.url.includes('/siteusers/getbyid(')) {
+      return groupsOfUser ? { status: 200, text: JSON.stringify({ value: groupsOfUser }), headers: {} } : { status: 403, text: '{}', headers: {} };
     }
     const url = Object.keys(TREE).sort((a, b) => b.length - a.length).find((u) => req.url.startsWith(u + '/_api'));
     return { status: 200, text: JSON.stringify(await f.get(url, req.url.slice(url.length))), headers: {} };
@@ -171,4 +174,25 @@ test('client: an Entra group that is not a site user has no permissions and noth
   assert.equal(res.notInSite, true);
   assert.deepEqual(res.places, []);
   assert.ok(!seen.some((u) => u.includes('/_api/web/lists')));
+});
+
+test('scan: several principals, the ones found through a SharePoint group say which', async () => {
+  const res = await scanGroupUsage({ get: fake(TREE).get }, ROOT, [{ id: 7, via: null }, { id: 9, via: 'Project Group' }]);
+  const rows = res.places.map((p) => `${p.title}:${p.via || '-'}:${p.roles.join('+')}`);
+  assert.deepEqual(rows, ['Root:-:Contribute', 'Docs:-:Read', 'Docs:Project Group:Edit', 'Other:Project Group:Edit', 'HR:-:Limited Access', 'Staff:-:Full Control']);
+});
+
+test('client: an Entra group is also searched for through the SharePoint groups it belongs to', async () => {
+  const { client, seen } = entraClient(7, [{ Id: 9, Title: 'Project Group' }]);
+  const res = await client.findGroupUsage(ROOT, { login: 'c:0t.c|tenant|abc' });
+  assert.deepEqual(res.viaGroups, ['Project Group']);
+  assert.equal(res.places.filter((p) => p.via === 'Project Group').length, 2);
+  assert.ok(seen.some((u) => u === `${ROOT}/_api/web/siteusers/getbyid(7)/groups?$select=Id,Title`));
+});
+
+test('client: if the SharePoint groups of an Entra group cannot be read, the direct result is still returned with the error', async () => {
+  const { client } = entraClient(7, null);
+  const res = await client.findGroupUsage(ROOT, { login: 'c:0t.c|tenant|abc' });
+  assert.equal(res.places.length, 4);
+  assert.match(res.errors[0].where, /SharePoint groups of the Entra group/);
 });

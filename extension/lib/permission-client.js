@@ -212,10 +212,22 @@ export function createPermissionClient({ request, sleep = defaultSleep, onEvent 
         id = user.Id;
       } catch (e) {
         if (!/HTTP 404/.test(e.message)) throw e;
-        return { webs: 0, lists: 0, places: [], errors: [], stopped: false, notInSite: true, principalId: null };
+        return { webs: 0, lists: 0, places: [], errors: [], stopped: false, notInSite: true, principalId: null, viaGroups: [] };
       }
     }
-    return { ...(await scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, id)), principalId: id };
+    const targets = [{ id, via: null }];
+    const viaErrors = [];
+    if (typeof who === 'object') {
+      // An Entra group usually gets its access as a member of SharePoint groups (Owners, Members, ...).
+      try {
+        const groups = (await get(sc.Url, `/_api/web/siteusers/getbyid(${id})/groups?$select=Id,Title`)).value || [];
+        for (const g of groups) targets.push({ id: g.Id, via: g.Title });
+      } catch (e) {
+        viaErrors.push({ where: 'SharePoint groups of the Entra group', message: e.message });
+      }
+    }
+    const res = await scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, targets);
+    return { ...res, errors: [...viaErrors, ...res.errors], principalId: id, viaGroups: targets.slice(1).map((t) => t.via) };
   }
 
   return { loadSite, loadRoles, search, readList, ensure, apply, findGroupUsage };

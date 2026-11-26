@@ -43,7 +43,7 @@ async function pool(items, n, fn) {
  * Crawl `rootUrl` (the site collection's root web) and all its subwebs.
  *
  * Returns { webs, lists, places, errors, stopped }:
- *   places: [{ type: 'web' | 'list' | 'library', id (lists), title, url, webTitle, webUrl, roles: [name], roleList: [{ id, name, hidden }], limited }]
+ *   places: [{ via (null, or the title of the SharePoint group that has the permissions), type: 'web' | 'list' | 'library', id (lists), title, url, webTitle, webUrl, roles: [name], roleList: [{ id, name, hidden }], limited }]
  *   errors: [{ where, message }]  parts that could not be read; the crawl goes on
  *   webs, lists: how many were looked at
  * Only objects that define their own permissions can name the group; the ones
@@ -54,7 +54,9 @@ async function pool(items, n, fn) {
  * @param {(event: object) => void} [deps.onEvent]  { type: 'web', url, webs } before each web
  * @param {() => boolean} [deps.shouldStop]
  */
-export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () => false }, rootUrl, groupId, { concurrency = 4 } = {}) {
+export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () => false }, rootUrl, who, { concurrency = 4 } = {}) {
+  // The group itself, and the SharePoint groups it is a member of (`via`: their title), whose permissions it gets too.
+  const targets = Array.isArray(who) ? who : [{ id: who, via: null }];
   const out = { webs: 0, lists: 0, places: [], errors: [], stopped: false };
   const fail = (where, e) => out.errors.push({ where, message: (e && e.message) || String(e) });
   const queue = [rootUrl.replace(/\/+$/, '')];
@@ -82,8 +84,11 @@ export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () 
 
     if (web.HasUniqueRoleAssignments) {
       try {
-        const roles = groupRoles(await get(url, `/_api/web${RA_PATH}`), groupId);
-        if (roles.length) out.places.push({ type: 'web', title: here.webTitle, url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles) });
+        const json = await get(url, `/_api/web${RA_PATH}`);
+        for (const t of targets) {
+          const roles = groupRoles(json, t.id);
+          if (roles.length) out.places.push({ type: 'web', title: here.webTitle, url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles), via: t.via });
+        }
       } catch (e) {
         fail(`${here.webTitle} (web permissions)`, e);
       }
@@ -105,19 +110,23 @@ export async function scanGroupUsage({ get, onEvent = () => {}, shouldStop = () 
     out.lists += lists.length;
     const unique = lists.filter((l) => l.HasUniqueRoleAssignments);
     const found = await pool(unique, concurrency, async (l) => {
-      if (shouldStop()) return null;
+      if (shouldStop()) return [];
       try {
-        const roles = groupRoles(await get(url, `/_api/web/lists(guid'${l.Id}')${RA_PATH}`), groupId);
-        if (!roles.length) return null;
+        const json = await get(url, `/_api/web/lists(guid'${l.Id}')${RA_PATH}`);
         const lib = l.BaseType === 1;
         const path = (l.RootFolder && l.RootFolder.ServerRelativeUrl) || '';
-        return { type: lib ? 'library' : 'list', id: l.Id, title: l.Title, url: path ? new URL(path, url).href : url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles), hidden: !!l.Hidden || !!l.IsSystemList };
+        const places = [];
+        for (const t of targets) {
+          const roles = groupRoles(json, t.id);
+          if (roles.length) places.push({ type: lib ? 'library' : 'list', id: l.Id, title: l.Title, url: path ? new URL(path, url).href : url, ...here, roles: roles.map((r) => r.name), roleList: roles, limited: limitedOnly(roles), hidden: !!l.Hidden || !!l.IsSystemList, via: t.via });
+        }
+        return places;
       } catch (e) {
         fail(`${here.webTitle} / ${l.Title}`, e);
-        return null;
+        return [];
       }
     });
-    out.places.push(...found.filter(Boolean));
+    out.places.push(...found.flat());
   }
   return out;
 }

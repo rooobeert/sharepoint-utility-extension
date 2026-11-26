@@ -860,8 +860,8 @@ function clearUsageResult() {
 
 const sameUrl = (a, b) => String(a).replace(/\/+$/, '').toLowerCase() === String(b).replace(/\/+$/, '').toLowerCase();
 
-/** Can this result row be changed here? Lists and libraries of the open site that hold more than Limited Access. */
-const changeable = (p) => !!usage.last && (p.type === 'list' || p.type === 'library') && !p.limited && sameUrl(p.webUrl, perm.data.web.Url) && !!listById(p.id);
+/** Can this result row be changed here? Lists and libraries of the open site where the group itself (not one of its SharePoint groups) holds more than Limited Access. */
+const changeable = (p) => !!usage.last && !p.via && (p.type === 'list' || p.type === 'library') && !p.limited && sameUrl(p.webUrl, perm.data.web.Url) && !!listById(p.id);
 
 function updateUsage() {
   const ready = perm.loaded && !usage.running;
@@ -904,7 +904,7 @@ function usageTable(places) {
         el('span', { class: 'exp-title', text: p.title }),
         el('span', { class: 'exp-url', text: p.url }),
         p.type !== 'web' && !sameUrl(p.webUrl, p.url) ? el('span', { class: 'exp-url', text: `in ${p.webTitle}` }) : null),
-      el('td', {}, ...[...p.roles.map((r) => el('span', { class: 'chip muted', text: r })), p.limited ? el('span', { class: 'chip warn', title: 'SharePoint adds Limited Access itself so that a person can reach the item below; it is not a permission that was granted.', text: 'only Limited Access' }) : null].filter(Boolean)));
+      el('td', {}, ...[p.via ? el('span', { class: 'chip ok', title: `Not given to the group itself: it is a member of the SharePoint group "${p.via}", which has these permissions. Change that group's permissions or its members instead.`, text: `via ${p.via}` }) : null, ...p.roles.map((r) => el('span', { class: 'chip muted', text: r })), p.limited ? el('span', { class: 'chip warn', title: 'SharePoint adds Limited Access itself so that a person can reach the item below; it is not a permission that was granted.', text: 'only Limited Access' }) : null].filter(Boolean)));
     if (box) row.addEventListener('click', (e) => { if (e.target !== box) box.click(); });
     return row;
   });
@@ -956,8 +956,9 @@ async function runUsage() {
     usage.last = { target: t, principalId: res.principalId, res };
     const real = res.places.filter((p) => !p.limited);
     const limited = res.places.length - real.length;
+    const viaCount = real.filter((p) => p.via).length;
     ui.usageStatus.textContent = `${res.stopped ? 'Stopped. ' : ''}"${name}": ${real.length ? `permissions in ${plural(real.length, 'place')}` : 'no permissions found'}`
-      + `${limited ? `, ${limited} more with only Limited Access` : ''}. Looked at ${plural(res.webs, 'site')} and ${plural(res.lists, 'list')}${res.stopped ? ' so far' : ''}.`;
+      + `${viaCount ? ` (${viaCount} via ${res.viaGroups.length === 1 ? 'a SharePoint group' : 'its SharePoint groups'})` : ''}${limited ? `, ${limited} more with only Limited Access` : ''}. Looked at ${plural(res.webs, 'site')} and ${plural(res.lists, 'list')}${res.stopped ? ' so far' : ''}.`;
     ui.usageResult.replaceChildren(
       ...(res.places.length ? [usageTable(res.places)] : []),
       el('p', { class: 'hint', text: 'Sites, lists and libraries that inherit their permissions are not listed: the group shows at the parent that defines them. A group with no result can still be used on items or columns, in sharing links, alerts or flows.' }),
