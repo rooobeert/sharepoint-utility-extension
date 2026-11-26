@@ -341,8 +341,8 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .perm-lists-wrap { max-height: 32vh; }
 .perm-search { position: relative; }
 .perm-search input[type="search"] {
-  width: 100%; font: inherit; color: inherit; background: var(--bg);
-  border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 8px;
+  box-sizing: border-box; height: 30px; width: 100%; font: inherit; color: inherit; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 8px;
 }
 .perm-results {
   position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 5;
@@ -381,7 +381,7 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 .perm-list-settings { margin-top: 8px; padding: 8px 10px; background: var(--surface-1); border-radius: var(--radius); }
 .perm-list-settings .perm-sub { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
 .perm-list-chips { margin-left: auto; display: inline-flex; gap: 4px; flex-wrap: wrap; }
-.perm-field { display: grid; gap: 2px; font-size: 12px; margin-top: 6px; }
+.perm-field { display: grid; gap: 4px; font-size: 12px; margin-top: 6px; }
 .perm-field select {
   font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 3px 4px; width: 100%;
@@ -497,3 +497,9 @@ button.link-button { padding: 0; margin-top: 4px; border: 0; background: none; c
 
 #tag { width: 8em; }
 #tag.invalid { border-color: var(--fail); }
+
+/* Where is a group used? */
+#perm-usage > .check-body { display: grid; gap: 10px; padding: 8px 10px 10px; }
+#perm-usage > .check-body > * { margin: 0; }
+#perm-usage .hint { margin: 0; }
+#perm-usage .actions button { height: 30px; padding-block: 0; }
