@@ -199,8 +199,8 @@ export function createPermissionClient({ request, sleep = defaultSleep, onEvent 
   /**
    * Where a group holds permissions in the whole site collection of `site`:
    * its webs and their lists and libraries (see scanGroupUsage). `who` is the
-   * id of a SharePoint group, or { login } of an Entra group (claims login
-   * name). An Entra group that is not a user of the site collection has no
+   * id of a SharePoint group, or { login } of an Entra group or a person
+   * (claims login name). A principal that is not a user of the site collection has no
    * permissions in it; the result then has `notInSite: true` and no crawl runs.
    */
   async function findGroupUsage(site, who, { shouldStop, onProgress } = {}) {
@@ -218,12 +218,12 @@ export function createPermissionClient({ request, sleep = defaultSleep, onEvent 
     const targets = [{ id, via: null }];
     const viaErrors = [];
     if (typeof who === 'object') {
-      // An Entra group usually gets its access as a member of SharePoint groups (Owners, Members, ...).
+      // An Entra group or a person usually gets access as a member of SharePoint groups (Owners, Members, ...).
       try {
         const groups = (await get(sc.Url, `/_api/web/siteusers/getbyid(${id})/groups?$select=Id,Title`)).value || [];
         for (const g of groups) targets.push({ id: g.Id, via: g.Title });
       } catch (e) {
-        viaErrors.push({ where: 'SharePoint groups of the Entra group', message: e.message });
+        viaErrors.push({ where: 'SharePoint groups it belongs to', message: e.message });
       }
     }
     const res = await scanGroupUsage({ get, onEvent: onProgress, shouldStop }, sc.Url, targets);

@@ -194,5 +194,12 @@ test('client: if the SharePoint groups of an Entra group cannot be read, the dir
   const { client } = entraClient(7, null);
   const res = await client.findGroupUsage(ROOT, { login: 'c:0t.c|tenant|abc' });
   assert.equal(res.places.length, 4);
-  assert.match(res.errors[0].where, /SharePoint groups of the Entra group/);
+  assert.match(res.errors[0].where, /SharePoint groups it belongs to/);
+});
+
+test('client: a person is looked up and searched through their SharePoint groups like an Entra group', async () => {
+  const { client, seen } = entraClient(7, [{ Id: 9, Title: 'Project Group' }]);
+  const res = await client.findGroupUsage(ROOT, { login: 'i:0#.f|membership|anna@contoso.com' });
+  assert.ok(seen.some((u) => u.includes("getbyloginname(@v)?@v='i%3A0%23.f%7Cmembership%7Canna%40contoso.com'")));
+  assert.deepEqual(res.viaGroups, ['Project Group']);
 });

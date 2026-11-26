@@ -276,89 +276,113 @@ function syncToggle() {
 
 // ---------------------------------------------------------------- 2. users and groups
 
-let searchSeq = 0;
-let searchTimer;
-let options_ = []; // principals currently shown in the result list
-let active = -1;
-
-function closeResults() {
-  ui.results.hidden = true;
-  ui.search.setAttribute('aria-expanded', 'false');
-  ui.search.removeAttribute('aria-activedescendant');
-  active = -1;
-}
-
-function showResults(principals, note) {
-  options_ = principals;
-  active = -1;
-  ui.results.replaceChildren(
-    ...principals.map((p, i) => {
-      const li = el('li', { role: 'option', id: `perm-opt-${i}`, class: perm.picked.has(p.key) ? 'picked' : null },
-        el('span', { class: 'perm-name' }, p.title, kindBadge(p)),
-        p.email || p.detail ? el('span', { class: 'perm-kind', text: p.email || p.detail }) : null);
-      li.addEventListener('mousedown', (e) => {
-        e.preventDefault(); // keep focus in the search field
-        pick(p);
-      });
-      return li;
-    }),
-    ...(note ? [el('li', { class: 'perm-note', text: note })] : [])
-  );
-  ui.results.hidden = false;
-  ui.search.setAttribute('aria-expanded', 'true');
-}
-
 /** "SPO Group" / "Entra Group" / "User" label next to a name. */
 function kindBadge(p) {
   const cls = p.kind === SPO_GROUP ? 'spo' : p.kind === ENTRA_GROUP ? 'entra' : 'other';
   return el('span', { class: `perm-badge ${cls}`, text: p.kind });
 }
 
-/** The site's SharePoint groups matching `q`, without the default groups (those are handled by "Keep these default groups"). */
-function siteGroups(q) {
-  const s = q.toLowerCase();
-  return perm.data.groups.filter((g) => !g.isDefault && (!s || g.title.toLowerCase().includes(s)));
+/**
+ * A search field with a result list, used by step 2 and by "Where is a group
+ * used?": a click shows the site's SharePoint groups, typing filters them and
+ * also searches the tenant's people and Entra groups with SharePoint's people
+ * picker.
+ *   local(q):  the site's groups to offer for the text `q`
+ *   chosen():  the current pick; a click then shows all groups again
+ *   isPicked(p): marks results that are taken already
+ *   clearOnPick: empty the field after a pick (step 2 collects several)
+ *   emptyNote: shown when there are no site groups and nothing typed
+ */
+function combo({ input, list, local, chosen = () => null, isPicked = () => false, clearOnPick = false, emptyNote = null, onPick }) {
+  let seq = 0;
+  let timer;
+  let shown = [];
+  let active = -1;
+  const close = () => {
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    active = -1;
+  };
+  const choose = (p) => {
+    close();
+    input.value = clearOnPick ? '' : p.title;
+    onPick(p);
+  };
+  const show = (items, note) => {
+    shown = items;
+    active = -1;
+    list.replaceChildren(
+      ...items.map((p, i) => {
+        const li = el('li', { role: 'option', id: `${list.id}-${i}`, class: isPicked(p) ? 'picked' : null },
+          el('span', { class: 'perm-name' }, p.title, kindBadge(p)),
+          p.email || p.detail ? el('span', { class: 'perm-kind', text: p.email || p.detail }) : null);
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault(); // keep focus in the field
+          choose(p);
+        });
+        return li;
+      }),
+      ...(note ? [el('li', { class: 'perm-note', text: note })] : [])
+    );
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  };
+  const run = () => {
+    if (!perm.loaded) return;
+    const c = chosen();
+    const q = c && input.value === c.title ? '' : input.value.trim();
+    const mine = ++seq;
+    clearTimeout(timer);
+    const mineGroups = local(q);
+    if (q.length < 2) {
+      show(mineGroups, q ? 'Type at least 2 characters to search the tenant.' : mineGroups.length ? null : emptyNote);
+      return;
+    }
+    show(mineGroups, 'Searching the tenant…');
+    timer = setTimeout(async () => {
+      let found = [];
+      let note = null;
+      try {
+        found = await perm.client.search(perm.site, q);
+      } catch (e) {
+        note = `Search failed: ${e.message}`;
+      }
+      if (mine !== seq) return;
+      const all = [...mineGroups, ...found];
+      show(all, note || (all.length ? null : 'No matches.'));
+    }, 300);
+  };
+  const move = (d) => {
+    if (list.hidden || !shown.length) return;
+    active = (active + d + shown.length) % shown.length;
+    list.querySelectorAll('[role="option"]').forEach((n, i) => n.classList.toggle('active', i === active));
+    const node = document.getElementById(`${list.id}-${active}`);
+    input.setAttribute('aria-activedescendant', node.id);
+    node.scrollIntoView({ block: 'nearest' });
+  };
+  input.addEventListener('input', run);
+  input.addEventListener('focus', () => { input.select(); run(); });
+  input.addEventListener('blur', () => setTimeout(close, 100));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') move(1);
+    else if (e.key === 'ArrowUp') move(-1);
+    else if (e.key === 'Enter' && active >= 0) choose(shown[active]);
+    else if (e.key === 'Escape' && !list.hidden) close();
+    else return;
+    e.preventDefault();
+  });
 }
 
-function runSearch() {
-  if (!perm.loaded) return;
-  const q = ui.search.value.trim();
-  const seq = ++searchSeq;
-  clearTimeout(searchTimer);
-  const local = siteGroups(q);
-  if (q.length < 2) {
-    showResults(local, q ? 'Type at least 2 characters to search the tenant.' : local.length ? null : 'No site groups besides the default groups. Type to search the tenant.');
-    return;
-  }
-  showResults(local, 'Searching the tenant…');
-  searchTimer = setTimeout(async () => {
-    let found = [];
-    let note = null;
-    try {
-      found = await perm.client.search(perm.site, q);
-    } catch (e) {
-      note = `Search failed: ${e.message}`;
-    }
-    if (seq !== searchSeq) return;
-    const all = [...local, ...found];
-    showResults(all, note || (all.length ? null : 'No matches.'));
-  }, 300);
+/** The site's groups matching `q`; default groups only if `withDefaults` (step 2 handles those with "Keep these default groups"). */
+function groupsMatching(q, withDefaults) {
+  const s = q.toLowerCase();
+  return perm.data.groups.filter((g) => (withDefaults || !g.isDefault) && (!s || g.title.toLowerCase().includes(s)));
 }
 
 function pick(p) {
   if (!perm.picked.has(p.key)) perm.picked.set(p.key, { principal: p, roleId: defaultRoleId(perm.data.roles) });
-  ui.search.value = '';
-  closeResults();
   renderPicked();
-}
-
-function moveActive(delta) {
-  if (ui.results.hidden || !options_.length) return;
-  active = (active + delta + options_.length) % options_.length;
-  ui.results.querySelectorAll('[role="option"]').forEach((n, i) => n.classList.toggle('active', i === active));
-  const node = $(`perm-opt-${active}`);
-  ui.search.setAttribute('aria-activedescendant', node.id);
-  node.scrollIntoView({ block: 'nearest' });
 }
 
 function renderPicked() {
@@ -746,98 +770,10 @@ const usage = {
   selected: new Set(), // list ids ticked in the result
 };
 
-/**
- * A search field with a result list, like the one of step 2: a click shows the
- * site's SharePoint groups, typing filters them and searches the tenant.
- * `chosen()` is the current pick (a click then shows all groups again).
- */
-function combo({ input, list, groupsOnly = false, chosen, onPick }) {
-  let seq = 0;
-  let timer;
-  let shown = [];
-  let active = -1;
-  const close = () => {
-    list.hidden = true;
-    input.setAttribute('aria-expanded', 'false');
-    input.removeAttribute('aria-activedescendant');
-    active = -1;
-  };
-  const show = (items, note) => {
-    shown = items;
-    active = -1;
-    list.replaceChildren(
-      ...items.map((p, i) => {
-        const li = el('li', { role: 'option', id: `${list.id}-${i}` },
-          el('span', { class: 'perm-name' }, p.title, kindBadge(p)),
-          p.email || p.detail ? el('span', { class: 'perm-kind', text: p.email || p.detail }) : null);
-        li.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          close();
-          input.value = p.title;
-          onPick(p);
-        });
-        return li;
-      }),
-      ...(note ? [el('li', { class: 'perm-note', text: note })] : [])
-    );
-    list.hidden = false;
-    input.setAttribute('aria-expanded', 'true');
-  };
-  const run = () => {
-    if (!perm.loaded) return;
-    const c = chosen();
-    const q = c && input.value === c.title ? '' : input.value.trim();
-    const mine = ++seq;
-    clearTimeout(timer);
-    const s = q.toLowerCase();
-    const local = perm.data.groups.filter((g) => !s || g.title.toLowerCase().includes(s));
-    if (q.length < 2) {
-      show(local, q ? 'Type at least 2 characters to search the tenant.' : null);
-      return;
-    }
-    show(local, 'Searching the tenant…');
-    timer = setTimeout(async () => {
-      let found = [];
-      let note = null;
-      try {
-        found = (await perm.client.search(perm.site, q)).filter((p) => !groupsOnly || p.kind === ENTRA_GROUP);
-      } catch (e) {
-        note = `Search failed: ${e.message}`;
-      }
-      if (mine !== seq) return;
-      const all = [...local, ...found];
-      show(all, note || (all.length ? null : 'No matches.'));
-    }, 300);
-  };
-  const move = (d) => {
-    if (list.hidden || !shown.length) return;
-    active = (active + d + shown.length) % shown.length;
-    list.querySelectorAll('[role="option"]').forEach((n, i) => n.classList.toggle('active', i === active));
-    const node = document.getElementById(`${list.id}-${active}`);
-    input.setAttribute('aria-activedescendant', node.id);
-    node.scrollIntoView({ block: 'nearest' });
-  };
-  input.addEventListener('input', run);
-  input.addEventListener('focus', () => { input.select(); run(); });
-  input.addEventListener('blur', () => setTimeout(close, 100));
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown') move(1);
-    else if (e.key === 'ArrowUp') move(-1);
-    else if (e.key === 'Enter' && active >= 0) {
-      const p = shown[active];
-      close();
-      input.value = p.title;
-      onPick(p);
-    } else if (e.key === 'Escape' && !list.hidden) close();
-    else return;
-    e.preventDefault();
-  });
-}
-
 combo({
   input: ui.usageGroup,
   list: $('usage-results'),
-  groupsOnly: true,
+  local: (q) => groupsMatching(q, true),
   chosen: () => usage.target,
   onPick: (p) => { usage.target = p; clearUsageResult(); updateUsage(); },
 });
@@ -845,6 +781,7 @@ ui.usageGroup.addEventListener('input', () => { usage.target = null; clearUsageR
 combo({
   input: ui.usageWith,
   list: $('usage-with-results'),
+  local: (q) => groupsMatching(q, true),
   chosen: () => usage.with,
   onPick: (p) => { usage.with = p; updateUsage(); },
 });
@@ -950,7 +887,7 @@ async function runUsage() {
       },
     });
     if (res.notInSite) {
-      ui.usageStatus.textContent = `"${name}" has no permissions in this site collection: it is not one of its users, so nothing was crawled.`;
+      ui.usageStatus.textContent = `"${name}" has no permissions in this site collection: it is not one of its users or groups, so nothing was crawled.`;
       return;
     }
     usage.last = { target: t, principalId: res.principalId, res };
@@ -1031,16 +968,14 @@ ui.toggle.addEventListener('change', () => {
   renderLists();
 });
 
-ui.search.addEventListener('input', runSearch);
-ui.search.addEventListener('focus', runSearch);
-ui.search.addEventListener('blur', () => setTimeout(closeResults, 100));
-ui.search.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown') moveActive(1);
-  else if (e.key === 'ArrowUp') moveActive(-1);
-  else if (e.key === 'Enter' && active >= 0) pick(options_[active]);
-  else if (e.key === 'Escape' && !ui.results.hidden) closeResults();
-  else return;
-  e.preventDefault();
+combo({
+  input: ui.search,
+  list: ui.results,
+  local: (q) => groupsMatching(q, false),
+  isPicked: (p) => perm.picked.has(p.key),
+  clearOnPick: true,
+  emptyNote: 'No site groups besides the default groups. Type to search the tenant.',
+  onPick: pick,
 });
 
 ui.add.addEventListener('click', addToPlan);

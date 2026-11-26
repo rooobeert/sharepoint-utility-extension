@@ -241,13 +241,13 @@
 
     <section class="block">
       <details class="check" id="perm-usage">
-        <summary><span class="t">Where is a group used?</span></summary>
+        <summary><span class="t">Where is a group or person used?</span></summary>
         <div class="check-body">
-          <p class="hint">Crawls every site (web) of the site collection and its lists and libraries, and shows where the group has permissions of its own. For an Entra group it also shows what it gets as a member of SharePoint groups (marked "via"; those rows can't be changed here). Items, folders, columns, sharing links, alerts and flows are not checked. Nothing is changed.</p>
+          <p class="hint">Crawls every site (web) of the site collection and its lists and libraries, and shows where a group or person has permissions of its own. For an Entra group or a person it also shows what they get as a member of SharePoint groups (marked "via"; those rows can't be changed here). Items, folders, columns, sharing links, alerts and flows are not checked. Nothing is changed.</p>
           <div class="perm-field">
-            <label for="usage-group">Group</label>
+            <label for="usage-group">Group or person</label>
             <div class="perm-search">
-              <input id="usage-group" type="search" placeholder="Click for the site's groups, type to filter or to search Entra groups" spellcheck="false" autocomplete="off" disabled
+              <input id="usage-group" type="search" placeholder="Click for the site's groups; type to search people and groups" spellcheck="false" autocomplete="off" disabled
                      role="combobox" aria-expanded="false" aria-controls="usage-results" aria-autocomplete="list">
               <ul id="usage-results" class="perm-results" role="listbox" hidden></ul>
             </div>
@@ -266,7 +266,7 @@
             <div class="perm-field">
               <label for="usage-with">Or replace it with</label>
               <div class="perm-search">
-                <input id="usage-with" type="search" placeholder="A site group, Entra group or person" spellcheck="false" autocomplete="off"
+                <input id="usage-with" type="search" placeholder="Click for the site's groups; type to search people and groups" spellcheck="false" autocomplete="off"
                        role="combobox" aria-expanded="false" aria-controls="usage-with-results" aria-autocomplete="list">
                 <ul id="usage-with-results" class="perm-results" role="listbox" hidden></ul>
               </div>
