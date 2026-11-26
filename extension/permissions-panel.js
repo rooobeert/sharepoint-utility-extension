@@ -42,6 +42,7 @@ const ui = {
   outputBody: $('perm-output-body'),
   copy: $('perm-copy'),
   usageGroup: $('usage-group'),
+  usageSearch: $('usage-search'),
   usageRun: $('usage-run'),
   usageStop: $('usage-stop'),
   usageStatus: $('usage-status'),
@@ -84,7 +85,7 @@ const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
 function setBusy(busy) {
   perm.busy = busy;
   for (const n of document.querySelectorAll('#view-perm input, #view-perm select, #view-perm button')) {
-    if (![ui.preview, ui.apply, ui.add, ui.clear, ui.applyAll, ui.usageGroup, ui.usageRun, ui.usageStop].includes(n)) n.disabled = busy;
+    if (![ui.preview, ui.apply, ui.add, ui.clear, ui.applyAll, ui.usageGroup, ui.usageSearch, ui.usageRun, ui.usageStop].includes(n)) n.disabled = busy;
   }
   if (!busy) syncKeep();
   updateButtons();
@@ -721,7 +722,7 @@ const usage = { running: false, stop: false };
 
 function updateUsage() {
   ui.usageRun.disabled = !perm.loaded || perm.busy || usage.running || !ui.usageGroup.value;
-  ui.usageGroup.disabled = !perm.loaded || usage.running;
+  ui.usageGroup.disabled = ui.usageSearch.disabled = !perm.loaded || usage.running;
   ui.usageStop.hidden = !usage.running;
 }
 
@@ -730,6 +731,7 @@ function renderUsageGroups() {
   ui.usageGroup.replaceChildren(...groups.map((g) => el('option', { value: String(g.id), text: g.title })));
   ui.usageResult.replaceChildren();
   ui.usageStatus.textContent = '';
+  ui.usageSearch.value = '';
 }
 
 const TYPE_LABEL = { web: 'Site', list: 'List', library: 'Library' };
@@ -750,7 +752,8 @@ function usageTable(places) {
 
 async function runUsage() {
   if (usage.running || !perm.loaded) return;
-  const id = Number(ui.usageGroup.value);
+  const picked = ui.usageGroup.value;
+  const id = picked.startsWith('login:') ? { login: picked.slice(6) } : Number(picked);
   const name = ui.usageGroup.selectedOptions[0].textContent;
   usage.running = true;
   usage.stop = false;
@@ -765,6 +768,10 @@ async function runUsage() {
         if (e.type === 'web') ui.usageStatus.textContent = `Looking at ${e.url} (${plural(e.webs, 'site')} done, ${e.queued} waiting)…`;
       },
     });
+    if (res.notInSite) {
+      ui.usageStatus.textContent = `"${name}" has no permissions in this site collection: it is not one of its users, so nothing was crawled.`;
+      return;
+    }
     const real = res.places.filter((p) => !p.limited);
     const limited = res.places.length - real.length;
     ui.usageStatus.textContent = `${res.stopped ? 'Stopped. ' : ''}"${name}": ${real.length ? `permissions in ${plural(real.length, 'place')}` : 'no permissions found'}`
@@ -787,6 +794,37 @@ async function runUsage() {
 
 ui.usageRun.addEventListener('click', runUsage);
 ui.usageStop.addEventListener('click', () => { usage.stop = true; ui.usageStatus.textContent = 'Stopping…'; });
+let usageSeq = 0;
+let usageTimer;
+/** Entra groups matching the search text are listed in the Group dropdown under their own heading; the pick is kept. */
+ui.usageSearch.addEventListener('input', () => {
+  clearTimeout(usageTimer);
+  const q = ui.usageSearch.value.trim();
+  const seq = ++usageSeq;
+  const old = ui.usageGroup.querySelector('optgroup');
+  const keep = ui.usageGroup.value.startsWith('login:') ? ui.usageGroup.value : null;
+  if (q.length < 2) {
+    if (old && !keep) old.remove();
+    return;
+  }
+  ui.usageStatus.textContent = 'Searching the tenant…';
+  usageTimer = setTimeout(async () => {
+    try {
+      const found = (await perm.client.search(perm.site, q)).filter((p) => p.kind === ENTRA_GROUP);
+      if (seq !== usageSeq) return;
+      ui.usageGroup.querySelector('optgroup')?.remove();
+      if (found.length) {
+        ui.usageGroup.append(el('optgroup', { label: 'Entra groups (search results)' },
+          ...found.map((p) => el('option', { value: `login:${p.login}`, text: `${p.title}${p.detail ? ` (${p.detail})` : ''}` }))));
+        ui.usageGroup.value = `login:${found[0].login}`;
+      }
+      ui.usageStatus.textContent = found.length ? `${plural(found.length, 'Entra group')} found; the first one is selected.` : 'No Entra groups found.';
+      updateUsage();
+    } catch (e) {
+      if (seq === usageSeq) ui.usageStatus.textContent = `Search failed: ${e.message}`;
+    }
+  }, 300);
+});
 ui.usageGroup.addEventListener('change', () => { ui.usageResult.replaceChildren(); ui.usageStatus.textContent = ''; updateUsage(); });
 
 document.addEventListener('sp-utility:tab-shown', (e) => {

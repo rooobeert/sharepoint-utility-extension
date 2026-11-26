@@ -9,14 +9,14 @@ A Manifest V3 extension for Chrome and Edge with SharePoint tools for site owner
 - **Batch Runner** sends SharePoint REST `$batch` requests that create lists, libraries and columns.
 - **Export Architecture** exports a site's lists, columns, views, content types and permissions to a CSV file, or as ready-made batches that rebuild the lists on another site.
 - **Navigation** builds the site's Quick Launch, top navigation or hub navigation from its lists, grouped by solution tag, with drag and drop. It can copy a navigation to another site and restore the one a site had before a save.
-- **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests. A collapsed section, *Where is a group used?*, crawls the site collection's sites, lists and libraries and shows where a SharePoint group has permissions of its own (not items or columns).
+- **Permissions** gives several users and groups permission levels on several lists at once, in `$batch` requests. A collapsed section, *Where is a group used?*, crawls the site collection's sites, lists and libraries and shows where a SharePoint group or an Entra group has permissions of its own (not items or columns).
 - **Compare** shows the differences in lists and columns between two sites, e.g. dev and prod, and can send the chosen differences to the Batch Runner. Comparing only reads.
 - **Search Schema** maps crawled properties (list columns) to `Refinable*` managed properties on the site collection, many at once.
 - **Headers** adds request headers (default `Accept: application/json`, optionally `Accept-Language`) when you open SharePoint URLs such as `/_api/` in a browser tab. This uses the `declarativeNetRequest` permission and only changes page loads, not the extension's own requests.
 
 Problems and ideas: use the **?** button in the side panel header, or open an issue at <https://github.com/rooobeert/sharepoint-utility-extension/issues>.
 
-The header shows the extension's version (currently 1.28.1).
+The header shows the extension's version (currently 1.29.0).
 
 ## Batch Runner
 

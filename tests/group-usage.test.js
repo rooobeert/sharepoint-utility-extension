@@ -132,3 +132,35 @@ test('client: starts at the site collection root, not the web in the tab', async
   const res = await client.findGroupUsage(`${ROOT}/hr`, 7);
   assert.equal(res.webs, 3);
 });
+
+function entraClient(user) {
+  const f = fake(TREE);
+  const seen = [];
+  const request = async (req) => {
+    seen.push(req.url);
+    if (req.url.endsWith('/_api/site?$select=Url')) return { status: 200, text: JSON.stringify({ Url: ROOT }), headers: {} };
+    if (req.url.includes('/siteusers/getbyloginname')) {
+      return user ? { status: 200, text: JSON.stringify({ Id: user }), headers: {} } : { status: 404, text: '{}', headers: {} };
+    }
+    const url = Object.keys(TREE).sort((a, b) => b.length - a.length).find((u) => req.url.startsWith(u + '/_api'));
+    return { status: 200, text: JSON.stringify(await f.get(url, req.url.slice(url.length))), headers: {} };
+  };
+  return { client: createPermissionClient({ request }), seen };
+}
+
+test('client: an Entra group is looked up by login name in the site users, then crawled', async () => {
+  const { client, seen } = entraClient(7);
+  const login = "c:0t.c|tenant|abc-123";
+  const res = await client.findGroupUsage(ROOT, { login });
+  assert.equal(res.places.length, 4);
+  const lookup = seen.find((u) => u.includes('getbyloginname'));
+  assert.ok(lookup.startsWith(`${ROOT}/_api/web/siteusers/getbyloginname(@v)?@v='c%3A0t.c%7Ctenant%7Cabc-123'`));
+});
+
+test('client: an Entra group that is not a site user has no permissions and nothing is crawled', async () => {
+  const { client, seen } = entraClient(null);
+  const res = await client.findGroupUsage(ROOT, { login: 'c:0t.c|tenant|zzz' });
+  assert.equal(res.notInSite, true);
+  assert.deepEqual(res.places, []);
+  assert.ok(!seen.some((u) => u.includes('/_api/web/lists')));
+});
